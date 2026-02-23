@@ -744,7 +744,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                     Sobre o casal
                   </div>
 
-                  <div className="absolute inset-x-3 bottom-4 z-20 rounded-3xl border border-zinc-700 bg-linear-to-b from-[#1d1d1d]/96 to-[#131313]/96 px-4 pb-4 pt-3 shadow-[0_20px_45px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+                  <div className="absolute inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 rounded-3xl border border-zinc-700 bg-linear-to-b from-[#1d1d1d]/96 to-[#131313]/96 px-4 pb-4 pt-3 shadow-[0_20px_45px_rgba(0,0,0,0.55)] backdrop-blur-sm sm:bottom-4">
                     <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#1DB954]/60 to-transparent" />
                     <h3 className="text-[1.6rem] leading-tight font-black text-white sm:text-[2rem]">{loveData.nomePessoa || 'Nosso amor'}</h3>
                     <p className="text-base font-semibold text-zinc-300">{loveData.apelido || 'Uma história especial'}</p>
@@ -821,7 +821,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.55, delay: 0.15 }}
-                    className={`story-content absolute ${current.type === 'memory_even' ? 'bottom-8 left-6 right-auto items-start text-left' : 'bottom-10 right-6 left-auto items-end text-right'} z-20 max-w-[75%]`}
+                    className={`story-content absolute ${current.type === 'memory_even' ? 'bottom-[max(4.5rem,calc(env(safe-area-inset-bottom)+3.6rem))] left-6 right-auto items-start text-left sm:bottom-8' : 'bottom-[max(4.5rem,calc(env(safe-area-inset-bottom)+3.8rem))] right-6 left-auto items-end text-right sm:bottom-10'} z-20 max-w-[75%]`}
                   >
                     <p className="story-label">Retrospectiva</p>
                     <h3 className="story-title">{current.title}</h3>
@@ -839,7 +839,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.55, delay: 0.2 }}
-                    className={`story-content absolute inset-0 z-20 flex justify-center px-8 ${chapterAlignClass}`}
+                    className={`story-content absolute inset-x-0 bottom-[max(4.5rem,calc(env(safe-area-inset-bottom)+3.6rem))] z-20 flex justify-center px-8 sm:bottom-0 ${chapterAlignClass}`}
                   >
                     <p className="story-label">Momento Favorito</p>
                     <h2 className="story-title">{current.title}</h2>
