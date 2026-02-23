@@ -180,6 +180,19 @@ function getSinceLabel(startDate: string) {
   return `Juntos desde ${parsed.getFullYear()}`
 }
 
+function getRelationshipDays(data: LoveData) {
+  if (data.startDate) {
+    const startRaw = data.startDate.includes('T') ? data.startDate : `${data.startDate}T00:00:00`
+    const start = new Date(startRaw)
+    if (!Number.isNaN(start.getTime())) {
+      const diff = Date.now() - start.getTime()
+      return Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)))
+    }
+  }
+
+  return Math.max(1, data.anos * 365 + data.meses * 30 + data.dias)
+}
+
 function IntroScreen({ onStart }: { onStart: () => void }) {
   return (
     <div className="min-h-screen w-full bg-linear-to-b from-black via-black to-green-950/30 px-6 text-white">
@@ -364,10 +377,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
   const current = stories[step]
   const currentDuration = getSlideDuration(current)
 
-  const relationDays = useMemo(
-    () => Math.max(1, loveData.anos * 365 + loveData.meses * 30 + loveData.dias),
-    [loveData.anos, loveData.dias, loveData.meses],
-  )
+  const relationDays = useMemo(() => getRelationshipDays(loveData), [loveData.startDate, loveData.anos, loveData.meses, loveData.dias])
   const relationshipBaseSeconds = useMemo(
     () => Math.max(1, relationDays) * 24 * 60 * 60,
     [relationDays],
@@ -623,11 +633,11 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                     </p>
 
                     <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/60 shadow-2xl">
-                      <img src={current.image} alt="Capa do casal" className="h-72 w-full object-cover" />
+                      <img src={current.image} alt="Capa do casal" className="h-56 w-full object-cover sm:h-72" />
                     </div>
 
                     <div className="mt-4">
-                      <p className="text-3xl font-black leading-tight text-white">{loveData.musicaNome?.trim() || 'Nossa música especial'}</p>
+                      <p className="text-2xl font-black leading-tight text-white sm:text-3xl">{loveData.musicaNome?.trim() || 'Nossa música especial'}</p>
                       <p className="mt-1 text-sm text-zinc-300">{loveData.nomePessoa || 'Meu amor'}</p>
                     </div>
 
@@ -647,21 +657,23 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                       </div>
                     )}
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (isNavigationLocked()) {
-                          return
-                        }
-                        lockNavigation()
-                        setStarted(true)
-                        setStep(1)
-                        setProgress(0)
-                      }}
-                      className="mt-6 w-full rounded-full bg-[#1DB954] py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black"
-                    >
-                      Iniciar experiência
-                    </button>
+                    <div className="sticky bottom-0 mt-4 bg-linear-to-t from-black via-black/92 to-transparent pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isNavigationLocked()) {
+                            return
+                          }
+                          lockNavigation()
+                          setStarted(true)
+                          setStep(1)
+                          setProgress(0)
+                        }}
+                        className="w-full rounded-full bg-[#1DB954] py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black"
+                      >
+                        Iniciar experiência
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -734,33 +746,33 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
 
                   <div className="absolute inset-x-3 bottom-4 z-20 rounded-3xl border border-zinc-700 bg-linear-to-b from-[#1d1d1d]/96 to-[#131313]/96 px-4 pb-4 pt-3 shadow-[0_20px_45px_rgba(0,0,0,0.55)] backdrop-blur-sm">
                     <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#1DB954]/60 to-transparent" />
-                    <h3 className="text-[2rem] leading-tight font-black text-white">{loveData.nomePessoa || 'Nosso amor'}</h3>
+                    <h3 className="text-[1.6rem] leading-tight font-black text-white sm:text-[2rem]">{loveData.nomePessoa || 'Nosso amor'}</h3>
                     <p className="text-base font-semibold text-zinc-300">{loveData.apelido || 'Uma história especial'}</p>
                     <p className="mt-0.5 text-xs uppercase tracking-[0.12em] text-zinc-400">{sinceLabel}</p>
 
                     <div className="mt-3 grid grid-cols-3 gap-2">
                       <div className="rounded-xl border border-zinc-700 bg-[#101010] px-2 py-3 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                        <p className="text-3xl font-black">{relationshipClock.years}</p>
+                        <p className="text-2xl font-black sm:text-3xl">{relationshipClock.years}</p>
                         <p className="text-[11px] uppercase tracking-[0.08em] text-zinc-400">Anos</p>
                       </div>
                       <div className="rounded-xl border border-zinc-700 bg-[#101010] px-2 py-3 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                        <p className="text-3xl font-black">{relationshipClock.months}</p>
+                        <p className="text-2xl font-black sm:text-3xl">{relationshipClock.months}</p>
                         <p className="text-[11px] uppercase tracking-[0.08em] text-zinc-400">Meses</p>
                       </div>
                       <div className="rounded-xl border border-zinc-700 bg-[#101010] px-2 py-3 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                        <p className="text-3xl font-black">{relationshipClock.days}</p>
+                        <p className="text-2xl font-black sm:text-3xl">{relationshipClock.days}</p>
                         <p className="text-[11px] uppercase tracking-[0.08em] text-zinc-400">Dias</p>
                       </div>
                       <div className="rounded-xl border border-zinc-700 bg-[#101010] px-2 py-3 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                        <p className="text-3xl font-black">{relationshipClock.hours}</p>
+                        <p className="text-2xl font-black sm:text-3xl">{relationshipClock.hours}</p>
                         <p className="text-[11px] uppercase tracking-[0.08em] text-zinc-400">Horas</p>
                       </div>
                       <div className="rounded-xl border border-zinc-700 bg-[#101010] px-2 py-3 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                        <p className="text-3xl font-black">{relationshipClock.minutes}</p>
+                        <p className="text-2xl font-black sm:text-3xl">{relationshipClock.minutes}</p>
                         <p className="text-[11px] uppercase tracking-[0.08em] text-zinc-400">Minutos</p>
                       </div>
                       <div className="rounded-xl border border-zinc-700 bg-[#101010] px-2 py-3 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                        <p className="text-3xl font-black">{relationshipClock.seconds}</p>
+                        <p className="text-2xl font-black sm:text-3xl">{relationshipClock.seconds}</p>
                         <p className="text-[11px] uppercase tracking-[0.08em] text-zinc-400">Segundos</p>
                       </div>
                     </div>
@@ -779,11 +791,11 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                     style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}
                   >
                     <p className="text-xs uppercase tracking-[0.2em] text-[#1DB954]">Estatísticas Reais</p>
-                    <p className="mt-5 text-[64px] font-black leading-none text-[#1DB954]">{meetups.toLocaleString('pt-BR')}</p>
+                    <p className="mt-5 text-[clamp(2.1rem,10vw,4rem)] font-black leading-none text-[#1DB954]">{meetups.toLocaleString('pt-BR')}</p>
                     <p className="text-zinc-200">encontros estimados ao longo da relação</p>
-                    <p className="mt-6 text-[60px] font-black leading-none text-[#1DB954]">{moments}</p>
+                    <p className="mt-6 text-[clamp(2rem,9.5vw,3.75rem)] font-black leading-none text-[#1DB954]">{moments}</p>
                     <p className="text-zinc-200">fotos especiais na retrospectiva</p>
-                    <p className="mt-6 text-[60px] font-black leading-none text-[#1DB954]">{days}</p>
+                    <p className="mt-6 text-[clamp(2rem,9.5vw,3.75rem)] font-black leading-none text-[#1DB954]">{days}</p>
                     <p className="text-zinc-200">dias de história compartilhada</p>
                   </motion.div>
                 </div>
@@ -795,7 +807,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                   <motion.img
                     src={current.image}
                     alt={current.subtitle}
-                    className="relative z-10 mx-4 mt-14 h-[78%] w-[calc(100%-2rem)] rounded-3xl border border-white/10 object-cover shadow-2xl"
+                    className="relative z-10 mx-4 mt-12 h-[66%] w-[calc(100%-2rem)] rounded-3xl border border-white/10 object-cover shadow-2xl sm:mt-14 sm:h-[78%]"
                     animate={
                       current.type === 'memory_even'
                         ? { x: [8, 0, -8, 0], scale: [1.02, 1.06, 1.02] }
@@ -821,7 +833,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
               {current.type === 'favorite' && (
                 <div className="story-safe relative min-h-full w-full">
                   <StoryBlurBackground image={current.image} />
-                  <img src={current.image} alt="Momento favorito" className="relative z-10 mx-4 mt-14 h-[78%] w-[calc(100%-2rem)] rounded-3xl border border-white/10 object-cover shadow-2xl" />
+                  <img src={current.image} alt="Momento favorito" className="relative z-10 mx-4 mt-12 h-[66%] w-[calc(100%-2rem)] rounded-3xl border border-white/10 object-cover shadow-2xl sm:mt-14 sm:h-[78%]" />
                   <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/45 to-black/20" />
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
@@ -841,7 +853,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_30%,rgba(29,185,84,0.2),transparent_42%),#060606]" />
                   <div className="relative z-10">
                     <p className="text-xs uppercase tracking-[0.2em] text-[#1DB954]">O que mais amo em você</p>
-                    <p className="mt-5 min-h-28 text-3xl font-black leading-tight text-white">{typedLoveText}</p>
+                    <p className="mt-5 min-h-24 text-2xl font-black leading-tight text-white sm:min-h-28 sm:text-3xl">{typedLoveText}</p>
                     <span className="text-xl text-[#1DB954]">|</span>
                   </div>
                 </div>
@@ -865,7 +877,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                       <img src={current.image} alt="Casal" className="h-full w-full object-cover" />
                     </div>
 
-                    <h2 className="mt-5 text-center text-4xl font-black">{current.title}</h2>
+                    <h2 className="mt-5 text-center text-3xl font-black sm:text-4xl">{current.title}</h2>
                     <p className="mt-1 text-center text-sm font-semibold text-zinc-200">{current.subtitle}</p>
 
                     <div className="mt-5 rounded-xl border border-zinc-700 bg-zinc-900/80 p-3">
