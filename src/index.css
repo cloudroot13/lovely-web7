@@ -109,7 +109,7 @@ select {
 }
 
 .story-shell {
-  height: 90dvh;
+  height: min(90dvh, calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
   min-height: 100%;
   backface-visibility: hidden;
   perspective: 1000px;
@@ -122,13 +122,14 @@ select {
   justify-content: center;
   min-height: 100%;
   box-sizing: border-box;
-  padding: 40px 24px 80px;
+  padding: 40px 24px calc(80px + env(safe-area-inset-bottom));
   backface-visibility: hidden;
   transform: translateZ(0);
 }
 
 @supports (-webkit-touch-callout: none) {
   .story-shell {
-    height: -webkit-fill-available;
+    height: min(90dvh, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+    min-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
