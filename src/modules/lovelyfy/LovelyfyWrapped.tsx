@@ -3,6 +3,7 @@ import { memo } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { LovelyfyCinematicIntro } from './LovelyfyCinematicIntro'
 import { spotifyAssets as lovelyfyAssets } from '../../assets/themes/themeAssets'
+import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
 import type { LoveData } from '../../types/types'
 
 interface LovelyfyWrappedProps {
@@ -112,16 +113,8 @@ function formatDate(dateString: string) {
   })
 }
 
-function getSlideDuration(story: StoryItem) {
-  if (story.type === 'final') {
-    return 14000
-  }
-
-  if (story.image && story.type !== 'player') {
-    return 12000
-  }
-
-  return 10000
+function getSlideDuration(_story: StoryItem) {
+  return WRAPPED_STORY_DURATION_MS
 }
 
 function useAnimatedCounter(target: number, enabled: boolean) {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { netflixAssets as lovelyflixAssets } from '../../assets/themes/themeAssets'
+import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
 import { useAppContext } from '../../context/appStore'
 import type { LoveData } from '../../types/types'
 
@@ -41,8 +42,6 @@ interface FinalLoveParticle {
   color: string
   heart: boolean
 }
-
-const STORY_DURATION_MS = 7000
 
 function firstLine(value: string, fallback: string) {
   const clean = value.trim()
@@ -308,10 +307,10 @@ export default function LovelyflixExperience() {
     const startedAt = Date.now()
     const interval = window.setInterval(() => {
       const elapsed = Date.now() - startedAt
-      const progress = Math.min(100, (elapsed / STORY_DURATION_MS) * 100)
+      const progress = Math.min(100, (elapsed / WRAPPED_STORY_DURATION_MS) * 100)
       setStoryProgress(progress)
 
-      if (elapsed >= STORY_DURATION_MS) {
+      if (elapsed >= WRAPPED_STORY_DURATION_MS) {
         window.clearInterval(interval)
         if (storyIndex >= content.stories.length - 1) {
           setScreen('home')
@@ -435,7 +434,7 @@ export default function LovelyflixExperience() {
 
             <div className="mb-3 flex items-center justify-between px-1 text-[11px] uppercase tracking-[0.12em] text-zinc-300">
               <span>Story {storyIndex + 1}/{content.stories.length}</span>
-              <span>{Math.max(0, Math.ceil((STORY_DURATION_MS * (1 - storyProgress / 100)) / 1000))}s</span>
+              <span>{Math.max(0, Math.ceil((WRAPPED_STORY_DURATION_MS * (1 - storyProgress / 100)) / 1000))}s</span>
             </div>
 
             <button

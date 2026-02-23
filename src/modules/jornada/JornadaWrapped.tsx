@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import flocoImage from '../../assets/floco.png'
+import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
 import type { LoveData } from '../../types/types'
 
 interface JornadaWrappedProps {
@@ -22,8 +23,6 @@ interface MemoryItem {
   rotation: number
   dateLabel: string
 }
-
-const STORY_DURATION_MS = 7600
 
 const timelineBase = [
   { title: 'Primeiro encontro', caption: 'Nosso lugar preferido' },
@@ -655,7 +654,7 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
 
     const tick = (now: number) => {
       const elapsed = now - startedAt
-      const progress = Math.min(1, elapsed / STORY_DURATION_MS)
+      const progress = Math.min(1, elapsed / WRAPPED_STORY_DURATION_MS)
       setStoryProgress(progress)
 
       if (progress >= 1) {

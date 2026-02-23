@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import { wrappedStoriesThemes } from '../assets/themes/themeAssets'
+import { WRAPPED_STORY_DURATION_MS } from '../constants/wrappedTiming'
 import type { LoveData } from '../types/types'
 
 interface WrappedStoriesProps {
@@ -20,8 +21,6 @@ interface StoryItem {
   image?: string
   animation: StoryAnimation
 }
-
-const STORY_TIME_MS = 4000
 
 const animationVariants: Record<StoryAnimation, { opacity: number[]; scale?: number[]; x?: number[]; y?: number[]; filter?: string[] }> = {
   cinematic: {
@@ -195,7 +194,7 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
     const interval = window.setInterval(() => {
       setElapsedMs((prev) => {
         const next = prev + 100
-        if (next >= STORY_TIME_MS) {
+        if (next >= WRAPPED_STORY_DURATION_MS) {
           setCurrentSlide((slide) => (slide < stories.length - 1 ? slide + 1 : slide))
           return 0
         }
@@ -216,7 +215,7 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
     setElapsedMs(0)
   }
 
-  const progress = elapsedMs / STORY_TIME_MS
+  const progress = elapsedMs / WRAPPED_STORY_DURATION_MS
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black px-3 sm:px-4">

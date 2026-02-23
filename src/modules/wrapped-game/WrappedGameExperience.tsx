@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/appStore'
+import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
 import './wrappedGame.css'
 
 type Step = 'intro' | 'stories'
@@ -253,6 +254,26 @@ export function WrappedGameExperience() {
     if (step !== 'stories') return
     setStoryProgress(0)
   }, [step, currentStory, stories.length])
+
+  useEffect(() => {
+    if (step !== 'stories') return
+
+    let raf = 0
+    const startedAt = performance.now()
+
+    const tick = (now: number) => {
+      const elapsed = now - startedAt
+      const progress = Math.min(100, (elapsed / WRAPPED_STORY_DURATION_MS) * 100)
+      setStoryProgress(progress)
+
+      if (progress < 100) {
+        raf = requestAnimationFrame(tick)
+      }
+    }
+
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [step, storyIdx])
 
   useEffect(() => {
     const start = loveData.startDate ? new Date(`${loveData.startDate}T00:00:00`) : null
