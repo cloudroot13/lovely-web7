@@ -125,6 +125,15 @@ function getRelationshipMetrics(data: LoveData, nowMs: number) {
   return { days, minutes, outingsSinceStart, monthlyMeetups }
 }
 
+function splitDays(totalDays: number) {
+  const safeDays = Math.max(1, totalDays)
+  const years = Math.floor(safeDays / 365)
+  const afterYears = safeDays % 365
+  const months = Math.floor(afterYears / 30)
+  const days = afterYears % 30
+  return { years, months, days }
+}
+
 function buildContent(data: LoveData, nowMs: number) {
   const fallback = data.fotoCasalDataUrl || data.storiesImagesDataUrls[0] || data.momentHighlights[0]?.imageDataUrl || lovelyflixAssets.top10Bg
   const images = uniqueImages([
@@ -245,6 +254,7 @@ export default function LovelyflixExperience() {
 
   const content = useMemo(() => buildContent(loveData, nowMs), [loveData, nowMs])
   const detailNarrative = useMemo(() => (selected ? buildDetailNarrative(selected, loveData) : ''), [selected, loveData])
+  const relationshipCounter = useMemo(() => splitDays(content.metrics.days), [content.metrics.days])
 
   useEffect(() => {
     if (screen !== 'stories') {
@@ -587,15 +597,15 @@ export default function LovelyflixExperience() {
                         <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-300">Tempo juntos</p>
                         <div className="mt-2 grid grid-cols-3 gap-2">
                           <motion.div className="rounded-xl bg-[#181818] px-2 py-3 text-center" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}>
-                            <p className="text-2xl font-black">{Math.max(0, loveData.anos)}</p>
+                            <p className="text-2xl font-black">{relationshipCounter.years}</p>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">Anos</p>
                           </motion.div>
                           <motion.div className="rounded-xl bg-[#181818] px-2 py-3 text-center" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: 0.15, ease: 'easeInOut' }}>
-                            <p className="text-2xl font-black">{Math.max(0, loveData.meses)}</p>
+                            <p className="text-2xl font-black">{relationshipCounter.months}</p>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">Meses</p>
                           </motion.div>
                           <motion.div className="rounded-xl bg-[#181818] px-2 py-3 text-center" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: 0.3, ease: 'easeInOut' }}>
-                            <p className="text-2xl font-black">{Math.max(0, loveData.dias)}</p>
+                            <p className="text-2xl font-black">{relationshipCounter.days}</p>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">Dias</p>
                           </motion.div>
                         </div>

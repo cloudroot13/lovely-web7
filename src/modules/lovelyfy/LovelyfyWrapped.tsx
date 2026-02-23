@@ -615,7 +615,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
               style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}
             >
               {current.type === 'player' && (
-                <div className="story-safe relative flex min-h-full flex-col px-6 pb-10 pt-14">
+                <div className="story-safe relative flex min-h-full flex-col overflow-y-auto px-6 pb-10 pt-14">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_15%,rgba(29,185,84,0.24),transparent_45%)]" />
                   <div className="relative z-10 h-full min-h-full box-border">
                     <p className="text-center text-sm font-medium text-zinc-200">
