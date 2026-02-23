@@ -354,10 +354,10 @@
 
 .game-wheel-item {
   position: absolute;
-  width: 102px;
-  max-width: 108px;
+  width: 92px;
+  max-width: 92px;
   padding: 0 4px;
-  font-size: clamp(10px, 2.5vw, 13px);
+  font-size: clamp(9px, 2.2vw, 12px);
   font-weight: 800;
   text-align: center;
   color: #ffffff;
@@ -366,7 +366,12 @@
   letter-spacing: 0.01em;
   line-height: 1.2;
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
   pointer-events: none;
 }
 
@@ -705,9 +710,9 @@
   }
 
   .game-wheel-item {
-    width: 94px;
-    max-width: 96px;
-    font-size: 11px;
+    width: 80px;
+    max-width: 80px;
+    font-size: 10px;
   }
 
   .game-photo-frame {

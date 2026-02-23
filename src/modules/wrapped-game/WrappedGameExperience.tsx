@@ -33,6 +33,12 @@ function parseWheelOptions() {
   return fallback
 }
 
+function formatWheelLabel(label: string) {
+  const clean = label.trim()
+  if (clean.length <= 20) return clean
+  return `${clean.slice(0, 20)}...`
+}
+
 function toGridWords(words: string[]) {
   return words.map((word) => word.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z]/g, '').slice(0, 10)).filter(Boolean)
 }
@@ -228,7 +234,11 @@ export function WrappedGameExperience() {
   }, [loveData.comoConheceram, loveData.momentoEspecial, loveData.oQueMaisAmo])
   const wheelSegments = useMemo(() => {
     const palette = ['#E50914', '#1E3A8A']
-    return wheelOptions.map((label, index) => ({ label, color: palette[index % 2] }))
+    return wheelOptions.map((label, index) => ({
+      label,
+      displayLabel: formatWheelLabel(label),
+      color: palette[index % 2],
+    }))
   }, [wheelOptions])
   const wheelGradient = useMemo(() => {
     const count = wheelSegments.length || 1
@@ -240,7 +250,7 @@ export function WrappedGameExperience() {
   const wheelLabelPoints = useMemo(() => {
     const count = wheelSegments.length || 1
     const step = 360 / count
-    const radius = 86
+    const radius = 102
     return wheelSegments.map((_, index) => {
       const angle = -90 + index * step + step / 2
       const rad = (angle * Math.PI) / 180
@@ -649,7 +659,7 @@ export function WrappedGameExperience() {
                             }}
                             title={item.label}
                           >
-                            {item.label}
+                            {item.displayLabel}
                           </span>
                         )
                       })}
