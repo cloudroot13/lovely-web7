@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/appStore'
 import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
@@ -330,9 +330,6 @@ export function WrappedGameExperience() {
 
   const endSelect = () => {
     if (dragStart === null || dragEnd === null) {
-      setDragStart(null)
-      setDragEnd(null)
-      setSelectedCells([])
       return
     }
     const line = lineCells(dragStart, dragEnd)
@@ -347,6 +344,62 @@ export function WrappedGameExperience() {
     setDragStart(null)
     setDragEnd(null)
     setSelectedCells([])
+  }
+
+  const handleTapSelect = (index: number) => {
+    if (foundCells.has(index)) {
+      return
+    }
+
+    if (selectedCells.includes(index)) {
+      return
+    }
+
+    const next = [...selectedCells, index]
+    const availablePlacements = searchData.placements.filter((item) => !foundWords.includes(item.word))
+
+    const matchesPrefix = availablePlacements.filter((item) => {
+      const directPrefix = item.cells.slice(0, next.length)
+      const reverseCells = [...item.cells].reverse()
+      const reversePrefix = reverseCells.slice(0, next.length)
+      const direct = directPrefix.every((cell, idx) => cell === next[idx])
+      const reverse = reversePrefix.every((cell, idx) => cell === next[idx])
+      return direct || reverse
+    })
+
+    if (!matchesPrefix.length) {
+      setWordMessage('Sequência incorreta. Tente outra combinação.')
+      setSelectedCells([])
+      return
+    }
+
+    const found = matchesPrefix.find((item) => item.cells.length === next.length)
+    if (found) {
+      setFoundWords((prev) => [...prev, found.word])
+      setFoundCells((prev) => new Set([...prev, ...found.cells]))
+      setWordMessage(`Perfeito! Você encontrou "${found.word}".`)
+      setSelectedCells([])
+      return
+    }
+
+    setSelectedCells(next)
+  }
+
+  const handleCellPointerDown = (event: ReactPointerEvent<HTMLButtonElement>, index: number) => {
+    if (event.pointerType === 'touch') {
+      event.preventDefault()
+      handleTapSelect(index)
+      return
+    }
+
+    startSelect(index)
+  }
+
+  const handleCellPointerEnter = (event: ReactPointerEvent<HTMLButtonElement>, index: number) => {
+    if (event.pointerType !== 'mouse') {
+      return
+    }
+    moveSelect(index)
   }
 
   const spinWheel = () => {
@@ -529,8 +582,13 @@ export function WrappedGameExperience() {
                           key={`cell-${index}`}
                           type="button"
                           className={`game-cell game-cell--10 ${found ? 'game-cell-found' : ''} ${selecting ? 'game-cell-selecting' : ''} ${hintCells.has(index) ? 'game-cell-hint' : ''}`}
-                          onPointerDown={() => startSelect(index)}
-                          onPointerEnter={() => moveSelect(index)}
+                          onPointerDown={(event) => handleCellPointerDown(event, index)}
+                          onPointerEnter={(event) => handleCellPointerEnter(event, index)}
+                          onClick={() => {
+                            if (dragStart === null) {
+                              handleTapSelect(index)
+                            }
+                          }}
                         >
                           {letter}
                         </button>
