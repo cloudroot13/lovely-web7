@@ -580,6 +580,7 @@ export function WrappedGameExperience() {
                 <div className="game-center" style={{ justifyContent: 'flex-start', paddingTop: 26 }}>
                   <p className="game-title" style={{ fontSize: 24 }}>Caça-Palavras Premium</p>
                   <p className="game-subtitle">{themeFromChat || 'Ache as coisas que mais amo em você'}</p>
+                  <p className="game-word-obs">Obs: quando você clicar na palavra correta, ela ficará em azul.</p>
                   <p className="game-counter">{foundWords.length}/{searchWords.length} palavras</p>
                   {difficulty === 'easy' && <p className="game-subtitle">Dica: letras iniciais destacadas.</p>}
                   <div
@@ -654,6 +655,7 @@ export function WrappedGameExperience() {
                       })}
                     </div>
                   </div>
+                  <p className="game-wheel-hint">Toque em girar e veja a sorte do amor.</p>
                   <button type="button" className="game-button" onClick={spinWheel}>
                     Girar
                   </button>
