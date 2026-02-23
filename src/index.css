@@ -140,14 +140,42 @@ select {
   100% { transform: translateY(-120vh) scale(1.15); opacity: 0; }
 }
 
+@keyframes classicHeartRise {
+  0% { transform: translateY(0) scale(0.9); opacity: 0; }
+  12% { opacity: 0.9; }
+  100% { transform: translateY(-115vh) scale(1.12); opacity: 0; }
+}
+
 @keyframes classicMeteor {
   0% { transform: translateX(-12px) translateY(-8px) rotate(-28deg); opacity: 0; }
   20% { opacity: 0.95; }
   100% { transform: translateX(56px) translateY(36px) rotate(-28deg); opacity: 0; }
 }
 
+@keyframes classicMeteorTrail {
+  0% { transform: translateX(-10px) translateY(-8px) rotate(-30deg); opacity: 0; }
+  16% { opacity: 0.95; }
+  100% { transform: translateX(72px) translateY(46px) rotate(-30deg); opacity: 0; }
+}
+
+@keyframes classicStarTwinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 0.95; transform: scale(1.25); }
+}
+
 @keyframes classicCloudMove {
   0% { transform: translateX(-24px); opacity: 0.65; }
   50% { opacity: 0.9; }
   100% { transform: translateX(86px); opacity: 0.65; }
+}
+
+@keyframes classicCloudDrift {
+  0% { transform: translateX(-30px); opacity: 0.62; }
+  50% { opacity: 0.9; }
+  100% { transform: translateX(96px); opacity: 0.62; }
+}
+
+@keyframes classicFlipFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
 }
