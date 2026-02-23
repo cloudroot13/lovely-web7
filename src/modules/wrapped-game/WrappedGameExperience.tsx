@@ -147,6 +147,7 @@ export function WrappedGameExperience() {
   const [dragEnd, setDragEnd] = useState<number | null>(null)
   const [selectedCells, setSelectedCells] = useState<number[]>([])
   const [wordMessage, setWordMessage] = useState('')
+  const [tapSelectionMode, setTapSelectionMode] = useState(false)
 
   const [wheelRotation, setWheelRotation] = useState(0)
   const [wheelSpinning, setWheelSpinning] = useState(false)
@@ -249,6 +250,14 @@ export function WrappedGameExperience() {
       }
     })
   }, [wheelSegments])
+
+  useEffect(() => {
+    const media = window.matchMedia('(hover: none), (pointer: coarse)')
+    const applyMode = () => setTapSelectionMode(media.matches)
+    applyMode()
+    media.addEventListener('change', applyMode)
+    return () => media.removeEventListener('change', applyMode)
+  }, [])
 
   useEffect(() => {
     if (step !== 'stories') return
@@ -386,7 +395,7 @@ export function WrappedGameExperience() {
   }
 
   const handleCellPointerDown = (event: ReactPointerEvent<HTMLButtonElement>, index: number) => {
-    if (event.pointerType === 'touch') {
+    if (tapSelectionMode || event.pointerType !== 'mouse') {
       event.preventDefault()
       handleTapSelect(index)
       return
@@ -396,7 +405,7 @@ export function WrappedGameExperience() {
   }
 
   const handleCellPointerEnter = (event: ReactPointerEvent<HTMLButtonElement>, index: number) => {
-    if (event.pointerType !== 'mouse') {
+    if (tapSelectionMode || event.pointerType !== 'mouse') {
       return
     }
     moveSelect(index)
@@ -573,7 +582,19 @@ export function WrappedGameExperience() {
                   <p className="game-subtitle">{themeFromChat || 'Ache as coisas que mais amo em você'}</p>
                   <p className="game-counter">{foundWords.length}/{searchWords.length} palavras</p>
                   {difficulty === 'easy' && <p className="game-subtitle">Dica: letras iniciais destacadas.</p>}
-                  <div className="game-word-grid game-word-grid--10" onPointerUp={endSelect} onPointerLeave={endSelect}>
+                  <div
+                    className="game-word-grid game-word-grid--10"
+                    onPointerUp={() => {
+                      if (!tapSelectionMode) {
+                        endSelect()
+                      }
+                    }}
+                    onPointerLeave={() => {
+                      if (!tapSelectionMode) {
+                        endSelect()
+                      }
+                    }}
+                  >
                     {searchData.grid.map((letter, index) => {
                       const found = foundCells.has(index)
                       const selecting = selectedCells.includes(index)
@@ -585,10 +606,12 @@ export function WrappedGameExperience() {
                           onPointerDown={(event) => handleCellPointerDown(event, index)}
                           onPointerEnter={(event) => handleCellPointerEnter(event, index)}
                           onClick={() => {
-                            if (dragStart === null) {
+                            if (tapSelectionMode && dragStart === null) {
                               handleTapSelect(index)
                             }
                           }}
+                          aria-pressed={found || selecting}
+                          aria-label={`Letra ${letter}`}
                         >
                           {letter}
                         </button>

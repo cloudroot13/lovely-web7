@@ -4,7 +4,7 @@ import { ChatBubble } from '../components/ChatBubble'
 import { useAppContext } from '../context/appStore'
 import type { LoveData, MomentHighlight } from '../types/types'
 
-type QuestionKind = 'text' | 'music' | 'number' | 'date' | 'datetime' | 'photo'
+type QuestionKind = 'text' | 'music' | 'gallery' | 'number' | 'date' | 'datetime' | 'photo'
 
 interface Question {
   id: string
@@ -210,10 +210,10 @@ const gameQuestions: Question[] = [
     kind: 'photo',
   },
   {
-    id: 'music',
+    id: 'gameGallery',
     text: 'Envie a foto principal do casal e as fotos extras para os novos slides.',
     placeholder: '',
-    kind: 'music',
+    kind: 'gallery',
   },
 ]
 
@@ -500,7 +500,7 @@ export default function Builder() {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
 
-    if (currentQuestion.kind === 'music') {
+    if (currentQuestion.kind === 'music' || currentQuestion.kind === 'gallery') {
       handleConfirmMusic()
       return
     }
@@ -620,7 +620,7 @@ export default function Builder() {
           {currentQuestion.kind === 'music' && (
             <div className="rounded-2xl border border-zinc-700 bg-[#161616] p-4">
               <div className="grid gap-3">
-                {!isLovelyflixFlow && !isJornadaFlow && (
+                {!isLovelyflixFlow && !isJornadaFlow && !isGameFlow && (
                   <>
                     <input
                       value={lovelyfyUrl}
@@ -646,7 +646,9 @@ export default function Builder() {
                     ? 'Foto principal do casal (capa da experiência Lovelyflix)'
                     : isJornadaFlow
                       ? 'Foto principal do casal (capa da Jornada)'
-                      : 'Foto principal do casal (capa do Wrapped)'}
+                      : isGameFlow
+                        ? 'Foto principal do casal (capa do Game)'
+                        : 'Foto principal do casal (capa do Wrapped)'}
                   <input type="file" accept="image/*" onChange={handleMainPhotoFile} aria-label="Selecionar foto principal do casal" className="mt-2 block w-full text-xs" />
                 </label>
 
@@ -674,7 +676,9 @@ export default function Builder() {
                     ? 'Envie as fotos extras para Destaques, Continuar Assistindo e Top 5 (pode selecionar em partes)'
                     : isJornadaFlow
                       ? 'Envie as fotos da linha do tempo da Jornada (pode selecionar em partes)'
-                      : 'Envie as fotos extras da história (pode selecionar em partes)'}
+                      : isGameFlow
+                        ? 'Envie as fotos extras para os capítulos do game (pode selecionar em partes)'
+                        : 'Envie as fotos extras da história (pode selecionar em partes)'}
                   {isLovelyflixFlow && (
                     <p className="mt-2 text-xs text-zinc-400">
                       Sugestão: escolha fotos diferentes entre si para deixar os capítulos mais vivos.
@@ -729,7 +733,7 @@ export default function Builder() {
                   )}
                 </label>
 
-                {!isLovelyflixFlow && !isJornadaFlow && (
+                {!isLovelyflixFlow && !isJornadaFlow && !isGameFlow && (
                   <>
                     <p className="text-xs text-zinc-400">Etapa obrigatória: informe um link de track válido no Lovelyfy.</p>
                     {spotifyTrackId && <p className="text-xs font-semibold text-green-400">Link válido detectado.</p>}
@@ -742,7 +746,102 @@ export default function Builder() {
                   onClick={handleConfirmMusic}
                   className="mt-1 rounded-full bg-[#1DB954] px-6 py-3 text-sm font-semibold text-black"
                 >
-                  {isLovelyflixFlow ? 'Confirmar conteúdo e continuar' : isJornadaFlow ? 'Confirmar jornada e continuar' : 'Confirmar música e continuar'}
+                  {isLovelyflixFlow
+                    ? 'Confirmar conteúdo e continuar'
+                    : isJornadaFlow
+                      ? 'Confirmar jornada e continuar'
+                      : isGameFlow
+                        ? 'Confirmar game e continuar'
+                        : 'Confirmar música e continuar'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentQuestion.kind === 'gallery' && (
+            <div className="rounded-2xl border border-zinc-700 bg-[#161616] p-4">
+              <div className="grid gap-3">
+                <label className="rounded-xl border border-dashed border-zinc-600 bg-zinc-900 p-3 text-sm text-zinc-300">
+                  Foto principal do casal (capa do Game)
+                  <input type="file" accept="image/*" onChange={handleMainPhotoFile} aria-label="Selecionar foto principal do casal" className="mt-2 block w-full text-xs" />
+                </label>
+
+                <label className="rounded-xl border border-zinc-700 bg-zinc-900 p-3 text-sm text-zinc-300">
+                  Quantas fotos extras você quer na retrospectiva?
+                  <input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={totalPhotos}
+                    aria-label="Quantidade de fotos extras"
+                    onChange={(event) => {
+                      const next = Number(event.target.value)
+                      const safe = Number.isNaN(next) ? 1 : Math.max(1, Math.min(20, next))
+                      setTotalPhotos(safe)
+                      setStoriesDataUrls((prev) => prev.slice(0, safe))
+                      setStoriesImageKeys((prev) => prev.slice(0, safe))
+                    }}
+                    className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm"
+                  />
+                </label>
+
+                <label className="rounded-xl border border-dashed border-zinc-600 bg-zinc-900 p-3 text-sm text-zinc-300">
+                  Envie as fotos extras para os capítulos do game (pode selecionar em partes)
+                  <input
+                    ref={extraPhotosInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleExtraStoriesFiles}
+                    className="sr-only"
+                    aria-label="Selecionar fotos extras para os capítulos do game"
+                  />
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => extraPhotosInputRef.current?.click()}
+                      className="rounded-full bg-pink-500 px-4 py-2 text-xs font-semibold text-black transition hover:bg-pink-400"
+                    >
+                      {storiesDataUrls.length === 0 ? 'Selecionar fotos' : 'Selecionar novamente'}
+                    </button>
+                    {storiesDataUrls.length > 0 && storiesDataUrls.length < totalPhotos && (
+                      <button
+                        type="button"
+                        onClick={() => extraPhotosInputRef.current?.click()}
+                        className="rounded-full border border-zinc-500 bg-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-200 transition hover:border-zinc-400"
+                      >
+                        Adicionar mais fotos
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-zinc-400" aria-live="polite">
+                    {momentCounterLabel}
+                  </p>
+                  {storiesDataUrls.length > 0 && (
+                    <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                      {storiesDataUrls.map((url, index) => (
+                        <div key={`${url}-${index}`} className="relative overflow-hidden rounded-lg border border-zinc-700">
+                          <img src={url} alt={`Foto extra ${index + 1}`} className="h-20 w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExtraStoryPhoto(index)}
+                            className="absolute right-1 top-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white"
+                            aria-label={`Remover foto ${index + 1}`}
+                          >
+                            x
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleConfirmMusic}
+                  className="mt-1 rounded-full bg-[#1DB954] px-6 py-3 text-sm font-semibold text-black"
+                >
+                  Confirmar game e continuar
                 </button>
               </div>
             </div>
