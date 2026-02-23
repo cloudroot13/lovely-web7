@@ -125,13 +125,46 @@ function getRelationshipMetrics(data: LoveData, nowMs: number) {
   return { days, minutes, outingsSinceStart, monthlyMeetups }
 }
 
-function splitDays(totalDays: number) {
-  const safeDays = Math.max(1, totalDays)
-  const years = Math.floor(safeDays / 365)
-  const afterYears = safeDays % 365
-  const months = Math.floor(afterYears / 30)
-  const days = afterYears % 30
-  return { years, months, days }
+function getRelationshipElapsedSeconds(data: LoveData, nowMs: number) {
+  if (data.startDate) {
+    const startRaw = data.startDate.includes('T') ? data.startDate : `${data.startDate}T00:00:00`
+    const start = new Date(startRaw)
+    if (!Number.isNaN(start.getTime())) {
+      const diffSeconds = Math.floor((nowMs - start.getTime()) / 1000)
+      return Math.max(1, diffSeconds)
+    }
+  }
+
+  const fallbackDays = Math.max(1, data.anos * 365 + data.meses * 30 + data.dias)
+  return fallbackDays * 24 * 60 * 60
+}
+
+function splitDuration(totalSeconds: number) {
+  const safe = Math.max(1, totalSeconds)
+  const years = Math.floor(safe / (365 * 24 * 60 * 60))
+  const afterYears = safe % (365 * 24 * 60 * 60)
+  const months = Math.floor(afterYears / (30 * 24 * 60 * 60))
+  const afterMonths = afterYears % (30 * 24 * 60 * 60)
+  const days = Math.floor(afterMonths / (24 * 60 * 60))
+  const afterDays = afterMonths % (24 * 60 * 60)
+  const hours = Math.floor(afterDays / (60 * 60))
+  const afterHours = afterDays % (60 * 60)
+  const minutes = Math.floor(afterHours / 60)
+  const seconds = afterHours % 60
+  return { years, months, days, hours, minutes, seconds }
+}
+
+function getStartDateLabel(startDate: string) {
+  if (!startDate) {
+    return 'Desde o início da história'
+  }
+
+  const parsed = new Date(startDate)
+  if (Number.isNaN(parsed.getTime())) {
+    return `Desde ${startDate}`
+  }
+
+  return `Desde ${parsed.toLocaleDateString('pt-BR')}`
 }
 
 function buildContent(data: LoveData, nowMs: number) {
@@ -248,13 +281,17 @@ export default function LovelyflixExperience() {
   }, [config.mode, config.variant, loveData, navigate])
 
   useEffect(() => {
-    const interval = window.setInterval(() => setNowMs(Date.now()), 60000)
+    const interval = window.setInterval(() => setNowMs(Date.now()), 1000)
     return () => window.clearInterval(interval)
   }, [])
 
   const content = useMemo(() => buildContent(loveData, nowMs), [loveData, nowMs])
   const detailNarrative = useMemo(() => (selected ? buildDetailNarrative(selected, loveData) : ''), [selected, loveData])
-  const relationshipCounter = useMemo(() => splitDays(content.metrics.days), [content.metrics.days])
+  const relationshipCounter = useMemo(
+    () => splitDuration(getRelationshipElapsedSeconds(loveData, nowMs)),
+    [loveData.startDate, loveData.anos, loveData.meses, loveData.dias, nowMs],
+  )
+  const relationshipStartLabel = useMemo(() => getStartDateLabel(loveData.startDate), [loveData.startDate])
 
   useEffect(() => {
     if (screen !== 'stories') {
@@ -595,6 +632,7 @@ export default function LovelyflixExperience() {
                     {isCounterStory && (
                       <div className="mt-4 rounded-2xl border border-white/20 bg-black/45 p-4 backdrop-blur-sm">
                         <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-300">Tempo juntos</p>
+                        <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-zinc-400">{relationshipStartLabel}</p>
                         <div className="mt-2 grid grid-cols-3 gap-2">
                           <motion.div className="rounded-xl bg-[#181818] px-2 py-3 text-center" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}>
                             <p className="text-2xl font-black">{relationshipCounter.years}</p>
@@ -607,6 +645,18 @@ export default function LovelyflixExperience() {
                           <motion.div className="rounded-xl bg-[#181818] px-2 py-3 text-center" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: 0.3, ease: 'easeInOut' }}>
                             <p className="text-2xl font-black">{relationshipCounter.days}</p>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">Dias</p>
+                          </motion.div>
+                          <motion.div className="rounded-xl bg-[#181818] px-2 py-3 text-center" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: 0.45, ease: 'easeInOut' }}>
+                            <p className="text-2xl font-black">{relationshipCounter.hours}</p>
+                            <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">Horas</p>
+                          </motion.div>
+                          <motion.div className="rounded-xl bg-[#181818] px-2 py-3 text-center" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: 0.6, ease: 'easeInOut' }}>
+                            <p className="text-2xl font-black">{relationshipCounter.minutes}</p>
+                            <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">Min</p>
+                          </motion.div>
+                          <motion.div className="rounded-xl bg-[#181818] px-2 py-3 text-center" animate={{ y: [0, -2, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: 0.75, ease: 'easeInOut' }}>
+                            <p className="text-2xl font-black">{relationshipCounter.seconds}</p>
+                            <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">Seg</p>
                           </motion.div>
                         </div>
                       </div>

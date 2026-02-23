@@ -193,6 +193,20 @@ function getRelationshipDays(data: LoveData) {
   return Math.max(1, data.anos * 365 + data.meses * 30 + data.dias)
 }
 
+function getRelationshipElapsedSeconds(data: LoveData, nowMs: number) {
+  if (data.startDate) {
+    const startRaw = data.startDate.includes('T') ? data.startDate : `${data.startDate}T00:00:00`
+    const start = new Date(startRaw)
+    if (!Number.isNaN(start.getTime())) {
+      const diffSeconds = Math.floor((nowMs - start.getTime()) / 1000)
+      return Math.max(1, diffSeconds)
+    }
+  }
+
+  const fallbackDays = Math.max(1, data.anos * 365 + data.meses * 30 + data.dias)
+  return fallbackDays * 24 * 60 * 60
+}
+
 function IntroScreen({ onStart }: { onStart: () => void }) {
   return (
     <div className="min-h-screen w-full bg-linear-to-b from-black via-black to-green-950/30 px-6 text-white">
@@ -234,7 +248,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
   const [paused, setPaused] = useState(false)
   const [typedLoveText, setTypedLoveText] = useState('')
   const [loveTypingDone, setLoveTypingDone] = useState(false)
-  const [runtimeSeconds, setRuntimeSeconds] = useState(0)
+  const [nowMs, setNowMs] = useState(() => Date.now())
   const [showTapHint, setShowTapHint] = useState(false)
   const [currentMediaReady, setCurrentMediaReady] = useState(true)
   const navLockUntilRef = useRef(0)
@@ -378,13 +392,13 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
   const currentDuration = getSlideDuration(current)
 
   const relationDays = useMemo(() => getRelationshipDays(loveData), [loveData.startDate, loveData.anos, loveData.meses, loveData.dias])
-  const relationshipBaseSeconds = useMemo(
-    () => Math.max(1, relationDays) * 24 * 60 * 60,
-    [relationDays],
+  const relationshipElapsedSeconds = useMemo(
+    () => getRelationshipElapsedSeconds(loveData, nowMs),
+    [loveData.startDate, loveData.anos, loveData.meses, loveData.dias, nowMs],
   )
   const relationshipClock = useMemo(
-    () => splitDuration(relationshipBaseSeconds + runtimeSeconds),
-    [relationshipBaseSeconds, runtimeSeconds],
+    () => splitDuration(relationshipElapsedSeconds),
+    [relationshipElapsedSeconds],
   )
   const sinceLabel = useMemo(() => getSinceLabel(loveData.startDate), [loveData.startDate])
 
@@ -494,7 +508,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      setRuntimeSeconds((prev) => prev + 1)
+      setNowMs(Date.now())
     }, 1000)
 
     return () => window.clearInterval(interval)
