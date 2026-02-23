@@ -13,6 +13,11 @@ export interface LoveData {
   nomeCriador: string
   nomePessoa: string
   apelido: string
+  classicTitle: string
+  classicMessage: string
+  classicCounterStyle: 'default' | 'classic' | 'simple'
+  classicPhotoDisplay: 'coverflow' | 'cube' | 'cards' | 'flip'
+  classicBackgroundAnimation: 'none' | 'hearts' | 'stars_comets' | 'stars_meteors' | 'clouds'
   comoConheceram: string
   momentoEspecial: string
   atividadeJuntos: string

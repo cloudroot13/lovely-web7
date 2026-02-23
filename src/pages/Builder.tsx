@@ -2,6 +2,7 @@ import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState 
 import { useNavigate } from 'react-router-dom'
 import { ChatBubble } from '../components/ChatBubble'
 import { useAppContext } from '../context/appStore'
+import ClassicNormalBuilder from './ClassicNormalBuilder'
 import type { LoveData, MomentHighlight } from '../types/types'
 
 type QuestionKind = 'text' | 'music' | 'gallery' | 'number' | 'date' | 'datetime' | 'photo'
@@ -225,6 +226,7 @@ function extractLovelyfyTrackId(url: string) {
 export default function Builder() {
   const navigate = useNavigate()
   const { config, setLoveData, loveData } = useAppContext()
+  const isClassicNormalFlow = config.mode === 'classic' && config.variant === 'normal'
   const isLovelyflixFlow = config.mode === 'wrapped' && config.variant === 'stories'
   const isJornadaFlow = config.mode === 'wrapped' && config.variant === 'jornada'
   const isGameFlow = config.mode === 'wrapped' && config.variant === 'game'
@@ -545,12 +547,20 @@ export default function Builder() {
   const momentCounterLabel = useMemo(() => `${storiesDataUrls.length} de ${totalPhotos} fotos extras enviadas`, [storiesDataUrls.length, totalPhotos])
 
   useEffect(() => {
+    if (isClassicNormalFlow) {
+      return
+    }
+
     if (!messagesContainerRef.current) {
       return
     }
 
     messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
   }, [messages])
+
+  if (isClassicNormalFlow) {
+    return <ClassicNormalBuilder />
+  }
 
   return (
     <main className="flex min-h-[100dvh] flex-col bg-[#0f0f0f] text-[#f5f5f5]">
