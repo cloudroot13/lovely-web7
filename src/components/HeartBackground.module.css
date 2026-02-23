@@ -1,0 +1,111 @@
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(29, 185, 84, 0.24) 0%, rgba(9, 24, 16, 0.2) 34%, rgba(0, 0, 0, 0.92) 70%, rgba(0, 0, 0, 1) 100%),
+    #000;
+}
+
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: min(86vw, 560px);
+  height: min(78vh, 560px);
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+  animation: stagePulse 6.6s ease-in-out infinite;
+}
+
+.heartPixel {
+  position: absolute;
+  border-radius: 0;
+  background: linear-gradient(180deg, #5ae58e 0%, #1db954 58%, #148a3f 100%);
+  box-shadow: 0 0 8px rgba(29, 185, 84, 0.38), 0 0 14px rgba(29, 185, 84, 0.24);
+  filter: drop-shadow(0 0 5px rgba(29, 185, 84, 0.28));
+  transform: translate3d(-50%, 120px, 0) scale(0.2);
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: pixelHeartLoop var(--p-duration) cubic-bezier(0.22, 0.72, 0.22, 1) var(--p-delay) infinite;
+}
+
+.centerParticles {
+  position: absolute;
+  inset: 0;
+}
+
+.centerPixel {
+  position: absolute;
+  border-radius: 0;
+  background: #1db954;
+  box-shadow: 0 0 8px rgba(29, 185, 84, 0.3);
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  animation: centerFloat var(--c-duration) ease-in-out var(--c-delay) infinite;
+}
+
+@keyframes pixelHeartLoop {
+  0% {
+    transform: translate3d(-50%, 120px, 0) scale(0.2);
+    opacity: 0;
+  }
+  20% {
+    transform: translate3d(-50%, 0, 0) scale(1);
+    opacity: 0.96;
+  }
+  48% {
+    transform: translate3d(-50%, calc(var(--p-drift) * -1), 0) scale(1.04);
+    opacity: 1;
+  }
+  72% {
+    transform: translate3d(-50%, calc(var(--p-drift) * 0.4), 0) scale(0.98);
+    opacity: 0.84;
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0) scale(1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes stagePulse {
+  0%,
+  100% {
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-50%, -51%, 0) scale(1.025);
+  }
+}
+
+@keyframes centerFloat {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  34% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@media (max-width: 640px) {
+  .stage {
+    width: min(94vw, 420px);
+    height: min(74vh, 520px);
+  }
+
+  .heartPixel {
+    box-shadow: 0 0 6px rgba(29, 185, 84, 0.36), 0 0 11px rgba(29, 185, 84, 0.2);
+  }
+}

@@ -1,0 +1,186 @@
+.cinematic-intro {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cinematic-intro__background {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+
+.cinematic-intro__energy-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(29, 185, 84, 0.2), transparent 60%);
+  pointer-events: none;
+}
+
+.cinematic-intro__heart {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: min(92vw, 640px);
+  height: min(86vh, 520px);
+  transform: translate3d(-50%, -50%, 0);
+  transform-style: preserve-3d;
+  will-change: transform;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cinematic-intro__heart-half {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+}
+
+.cinematic-intro__heart-half--left {
+  left: 0;
+}
+
+.cinematic-intro__heart-half--right {
+  right: 0;
+  transform: scaleX(-1) translateZ(0);
+  transform-origin: center;
+}
+
+.cinematic-intro__heart-bar {
+  position: absolute;
+  width: clamp(8px, 1.05vw, 12px);
+  border-radius: 0;
+  background: linear-gradient(to top, #14532d, #22c55e);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.35), 0 0 18px rgba(34, 197, 94, 0.2);
+  filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.22));
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  animation: heartBarRise var(--heart-duration) cubic-bezier(0.28, 0.06, 0.2, 1) var(--heart-delay) infinite both;
+}
+
+.cinematic-intro__particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cinematic-intro__particle {
+  position: absolute;
+  bottom: 42%;
+  width: 6px;
+  height: 6px;
+  background: #1db954;
+  opacity: 0;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  animation: pixelFloat var(--particle-duration) steps(8, end) var(--particle-delay) infinite;
+}
+
+.cinematic-intro__text {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.cinematic-intro__title {
+  margin: 0 auto;
+  font-size: clamp(2rem, 8vw, 3.1rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #f2f2f2;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0ch;
+  transform: scale(0.95) translateZ(0);
+  will-change: transform, width;
+  animation:
+    titleType 0.8s steps(var(--chars), end) 1.2s forwards,
+    titleScale 0.5s ease-out 1.2s forwards;
+}
+
+.cinematic-intro__subtitle {
+  margin: 0.75rem 0 0;
+  font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+  line-height: 1.35;
+  color: #f2f2f2;
+  opacity: 0;
+  transform: translateY(8px) translateZ(0);
+  will-change: transform, opacity;
+  animation: subtitleIn 0.45s ease-out 2.1s forwards;
+}
+
+@keyframes pixelFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateZ(0);
+  }
+  25% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-120px) translateZ(0);
+  }
+}
+
+@keyframes heartBarRise {
+  0% {
+    transform: translate3d(0, 16px, 0);
+    opacity: 0.4;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, -16px, 0);
+    opacity: 0.54;
+  }
+}
+
+@keyframes titleType {
+  from {
+    width: 0ch;
+  }
+  to {
+    width: calc(var(--chars) * 1ch);
+  }
+}
+
+@keyframes titleScale {
+  from {
+    transform: scale(0.95) translateZ(0);
+  }
+  to {
+    transform: scale(1) translateZ(0);
+  }
+}
+
+@keyframes subtitleIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .cinematic-intro__heart {
+    width: min(96vw, 420px);
+    height: min(72vh, 430px);
+  }
+
+  .cinematic-intro__heart-bar {
+    width: 8px;
+  }
+}

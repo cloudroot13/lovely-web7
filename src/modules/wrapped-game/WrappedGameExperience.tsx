@@ -1,0 +1,727 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAppContext } from '../../context/appStore'
+import './wrappedGame.css'
+
+type Step = 'intro' | 'stories'
+type StoryId = 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's9' | 's10'
+type Difficulty = 'easy' | 'hard'
+
+const SEARCH_SIZE = 10
+
+function randomLetter() {
+  const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  return alpha[Math.floor(Math.random() * alpha.length)]
+}
+
+function normalizeWords(raw: string, difficulty: Difficulty) {
+  const fallback = difficulty === 'hard'
+    ? ['SORRISO', 'CABELO', 'PIADAS', 'ABRACO', 'OLHAR']
+    : ['SORRISO', 'CABELO', 'PIADAS']
+  const target = difficulty === 'hard' ? 5 : 3
+  const cleaned = raw
+    .split(/[,\n;]+/)
+    .map((word) => word.trim().toUpperCase().replace(/[^A-ZÀ-ÖØ-Ý]/g, ''))
+    .filter((word) => word.length >= 3)
+    .slice(0, target)
+  return cleaned.length > 0 ? [...cleaned, ...fallback].slice(0, target) : fallback
+}
+
+function parseWheelOptions() {
+  const fallback = ['Seu abraço', 'Seu sorriso', 'Ver filmes com você', 'Seu olhar', 'Seu jeitinho', 'Seu carinho', 'Nossas risadas', 'Nossos planos']
+  return fallback
+}
+
+function toGridWords(words: string[]) {
+  return words.map((word) => word.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z]/g, '').slice(0, 10)).filter(Boolean)
+}
+
+function idxToRC(idx: number) {
+  return { r: Math.floor(idx / SEARCH_SIZE), c: idx % SEARCH_SIZE }
+}
+
+function rcToIdx(r: number, c: number) {
+  return r * SEARCH_SIZE + c
+}
+
+function inBounds(r: number, c: number) {
+  return r >= 0 && r < SEARCH_SIZE && c >= 0 && c < SEARCH_SIZE
+}
+
+function lineCells(start: number, end: number) {
+  const a = idxToRC(start)
+  const b = idxToRC(end)
+  const dr = b.r - a.r
+  const dc = b.c - a.c
+  const stepR = dr === 0 ? 0 : dr / Math.abs(dr)
+  const stepC = dc === 0 ? 0 : dc / Math.abs(dc)
+  const absR = Math.abs(dr)
+  const absC = Math.abs(dc)
+  const straight = absR === 0 || absC === 0 || absR === absC
+  if (!straight) return []
+  const len = Math.max(absR, absC)
+  const cells: number[] = []
+  for (let i = 0; i <= len; i += 1) {
+    cells.push(rcToIdx(a.r + stepR * i, a.c + stepC * i))
+  }
+  return cells
+}
+
+function buildWordSearch(words: string[]) {
+  const grid = Array.from({ length: SEARCH_SIZE * SEARCH_SIZE }, () => '')
+  const dirs: Array<[number, number]> = [
+    [0, 1],
+    [1, 0],
+    [1, 1],
+    [-1, 1],
+    [0, -1],
+    [-1, 0],
+    [-1, -1],
+    [1, -1],
+  ]
+
+  const placements = words.map((word) => {
+    let cells: number[] = []
+    let placed = false
+    for (let guard = 0; guard < 280 && !placed; guard += 1) {
+      const [dr, dc] = dirs[Math.floor(Math.random() * dirs.length)]
+      const r = Math.floor(Math.random() * SEARCH_SIZE)
+      const c = Math.floor(Math.random() * SEARCH_SIZE)
+      const test: number[] = []
+      let ok = true
+      for (let i = 0; i < word.length; i += 1) {
+        const rr = r + dr * i
+        const cc = c + dc * i
+        if (!inBounds(rr, cc)) {
+          ok = false
+          break
+        }
+        const idx = rcToIdx(rr, cc)
+        const ch = grid[idx]
+        if (ch && ch !== word[i]) {
+          ok = false
+          break
+        }
+        test.push(idx)
+      }
+      if (!ok) continue
+      test.forEach((idx, i) => {
+        grid[idx] = word[i]
+      })
+      cells = test
+      placed = true
+    }
+    if (!placed) {
+      const row = Math.floor(Math.random() * SEARCH_SIZE)
+      const startCol = Math.max(0, Math.floor(Math.random() * (SEARCH_SIZE - word.length)))
+      cells = []
+      word.split('').forEach((ch, i) => {
+        const idx = rcToIdx(row, startCol + i)
+        grid[idx] = ch
+        cells.push(idx)
+      })
+    }
+    return { word, cells }
+  })
+
+  for (let i = 0; i < grid.length; i += 1) {
+    if (!grid[i]) grid[i] = randomLetter()
+  }
+
+  return { grid, placements }
+}
+
+export function WrappedGameExperience() {
+  const navigate = useNavigate()
+  const { config, loveData } = useAppContext()
+  const [step, setStep] = useState<Step>('intro')
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy')
+  const [storyIdx, setStoryIdx] = useState(0)
+  const [storyProgress, setStoryProgress] = useState(0)
+  const [typedStart, setTypedStart] = useState('')
+
+  const [foundWords, setFoundWords] = useState<string[]>([])
+  const [foundCells, setFoundCells] = useState<Set<number>>(new Set())
+  const [dragStart, setDragStart] = useState<number | null>(null)
+  const [dragEnd, setDragEnd] = useState<number | null>(null)
+  const [selectedCells, setSelectedCells] = useState<number[]>([])
+  const [wordMessage, setWordMessage] = useState('')
+
+  const [wheelRotation, setWheelRotation] = useState(0)
+  const [wheelSpinning, setWheelSpinning] = useState(false)
+  const [wheelResult, setWheelResult] = useState('')
+  const wheelTimeoutRef = useRef<number | null>(null)
+
+  const [challengeDone, setChallengeDone] = useState(false)
+  const [challengeSequence, setChallengeSequence] = useState<number[]>([])
+  const [challengeActiveStep, setChallengeActiveStep] = useState(-1)
+  const [challengeInputIdx, setChallengeInputIdx] = useState(0)
+  const [challengeMessage, setChallengeMessage] = useState('')
+  const [challengeShake, setChallengeShake] = useState(false)
+  const [minutesTogetherLive, setMinutesTogetherLive] = useState(0)
+  const [minutesCounter, setMinutesCounter] = useState(0)
+
+  const stories: StoryId[] = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10']
+  const currentStory = stories[storyIdx]
+
+  useEffect(() => {
+    if (!(config.mode === 'wrapped' && config.variant === 'game')) {
+      return
+    }
+  }, [config.mode, config.variant])
+
+  useEffect(() => {
+    if (config.mode !== 'wrapped' || config.variant !== 'game') {
+      navigate('/choose-mode', { replace: true })
+    }
+  }, [config.mode, config.variant, navigate])
+
+  useEffect(() => {
+    const text = 'GAME EXPERIENCE'
+    let i = 0
+    const t = window.setInterval(() => {
+      i += 1
+      setTypedStart(text.slice(0, i))
+      if (i >= text.length) window.clearInterval(t)
+    }, 90)
+    return () => window.clearInterval(t)
+  }, [])
+
+  const wordsFromChat = useMemo(() => toGridWords(normalizeWords(loveData.momentoEspecial || '', difficulty)), [loveData.momentoEspecial, difficulty])
+  const themeFromChat = useMemo(() => (loveData.oQueMaisAmo || 'O que mais gosto em você').trim(), [loveData.oQueMaisAmo])
+  const wheelOptions = useMemo(() => parseWheelOptions(), [])
+  const searchWords = useMemo(() => {
+    const fixed = difficulty === 'hard'
+      ? ['SORRISO', 'CABELO', 'PIADAS', 'ABRACO', 'OLHAR']
+      : ['SORRISO', 'CABELO', 'PIADAS']
+    return Array.from(new Set([...fixed, ...wordsFromChat])).slice(0, difficulty === 'hard' ? 5 : 3)
+  }, [wordsFromChat, difficulty])
+  const searchData = useMemo(() => buildWordSearch(searchWords), [searchWords])
+  const galleryImages = useMemo(() => {
+    const items = [
+      loveData.fotoCasalDataUrl,
+      ...loveData.storiesImagesDataUrls,
+      ...loveData.momentHighlights.map((item) => item.imageDataUrl),
+    ].filter(Boolean)
+    return Array.from(new Set(items))
+  }, [loveData.fotoCasalDataUrl, loveData.storiesImagesDataUrls, loveData.momentHighlights])
+  const hintCells = useMemo(() => {
+    if (difficulty !== 'easy') return new Set<number>()
+    const hints = new Set<number>()
+    searchData.placements.forEach((placement) => {
+      if (!foundWords.includes(placement.word) && placement.cells.length) {
+        hints.add(placement.cells[0])
+      }
+    })
+    return hints
+  }, [difficulty, searchData.placements, foundWords])
+  const romanceHighlights = useMemo(() => {
+    const base = [
+      loveData.comoConheceram?.trim(),
+      loveData.momentoEspecial?.trim(),
+      loveData.oQueMaisAmo?.trim(),
+    ].filter(Boolean) as string[]
+    if (base.length) return base.slice(0, 3)
+    return ['A forma como tudo começou', 'Nosso momento favorito', 'O que mais amo em você']
+  }, [loveData.comoConheceram, loveData.momentoEspecial, loveData.oQueMaisAmo])
+  const wheelSegments = useMemo(() => {
+    const palette = ['#E50914', '#1E3A8A']
+    return wheelOptions.map((label, index) => ({ label, color: palette[index % 2] }))
+  }, [wheelOptions])
+  const wheelGradient = useMemo(() => {
+    const count = wheelSegments.length || 1
+    const part = 100 / count
+    return `conic-gradient(${wheelSegments
+      .map((seg, idx) => `${seg.color} ${idx * part}% ${(idx + 1) * part}%`)
+      .join(',')})`
+  }, [wheelSegments])
+  const wheelLabelPoints = useMemo(() => {
+    const count = wheelSegments.length || 1
+    const step = 360 / count
+    const radius = 86
+    return wheelSegments.map((_, index) => {
+      const angle = -90 + index * step + step / 2
+      const rad = (angle * Math.PI) / 180
+      return {
+        x: Math.cos(rad) * radius,
+        y: Math.sin(rad) * radius,
+      }
+    })
+  }, [wheelSegments])
+
+  useEffect(() => {
+    if (step !== 'stories') return
+    setStoryProgress(0)
+  }, [step, currentStory, stories.length])
+
+  useEffect(() => {
+    const start = loveData.startDate ? new Date(`${loveData.startDate}T00:00:00`) : null
+    if (!start || Number.isNaN(start.getTime())) {
+      setMinutesTogetherLive(0)
+      return
+    }
+    const compute = () => Math.max(0, Math.floor((Date.now() - start.getTime()) / 60000))
+    setMinutesTogetherLive(compute())
+    const intervalId = window.setInterval(() => setMinutesTogetherLive(compute()), 60000)
+    return () => window.clearInterval(intervalId)
+  }, [loveData.startDate])
+
+  useEffect(() => {
+    if (currentStory !== 's8') return
+    const target = minutesTogetherLive
+    if (target <= 0) {
+      setMinutesCounter(0)
+      return
+    }
+    let raf = 0
+    const start = performance.now()
+    const duration = 1200
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / duration)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setMinutesCounter(Math.floor(target * eased))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [currentStory, minutesTogetherLive])
+
+  const goNext = () => {
+    if (storyIdx >= stories.length - 1) {
+      navigate('/preview', { replace: true })
+      return
+    }
+    setStoryIdx((prev) => Math.min(stories.length - 1, prev + 1))
+    setStoryProgress(0)
+  }
+
+  const startSelect = (index: number) => {
+    setDragStart(index)
+    setDragEnd(index)
+    setSelectedCells([index])
+  }
+
+  const moveSelect = (index: number) => {
+    if (dragStart === null) return
+    setDragEnd(index)
+    setSelectedCells(lineCells(dragStart, index))
+  }
+
+  const endSelect = () => {
+    if (dragStart === null || dragEnd === null) {
+      setDragStart(null)
+      setDragEnd(null)
+      setSelectedCells([])
+      return
+    }
+    const line = lineCells(dragStart, dragEnd)
+    const candidate = line.map((idx) => searchData.grid[idx]).join('')
+    const reverse = candidate.split('').reverse().join('')
+    const hit = searchData.placements.find((item) => (item.word === candidate || item.word === reverse) && !foundWords.includes(item.word))
+    if (hit) {
+      setFoundWords((prev) => [...prev, hit.word])
+      setFoundCells((prev) => new Set([...prev, ...hit.cells]))
+      setWordMessage(`Perfeito! Você encontrou "${hit.word}".`)
+    }
+    setDragStart(null)
+    setDragEnd(null)
+    setSelectedCells([])
+  }
+
+  const spinWheel = () => {
+    if (wheelSpinning) return
+    setWheelSpinning(true)
+    const idx = Math.floor(Math.random() * wheelOptions.length)
+    const per = 360 / wheelOptions.length
+    const targetDelta = 360 * 6 + (360 - idx * per - per / 2)
+    setWheelRotation((prev) => prev + targetDelta)
+    if (wheelTimeoutRef.current) window.clearTimeout(wheelTimeoutRef.current)
+    wheelTimeoutRef.current = window.setTimeout(() => {
+      setWheelResult(wheelOptions[idx])
+      setWheelSpinning(false)
+    }, 4100)
+  }
+
+  useEffect(() => {
+    if (currentStory !== 's4') return
+    const seqSize = difficulty === 'hard' ? 4 : 3
+    const seq = Array.from({ length: seqSize }).map(() => Math.floor(Math.random() * 6))
+    setChallengeSequence(seq)
+    setChallengeActiveStep(-1)
+    setChallengeInputIdx(0)
+    setChallengeDone(false)
+    setChallengeMessage('Memorize a sequência e repita.')
+    let step = 0
+    const interval = window.setInterval(() => {
+      setChallengeActiveStep(seq[step])
+      step += 1
+      if (step >= seq.length) {
+        window.clearInterval(interval)
+        window.setTimeout(() => setChallengeActiveStep(-1), 450)
+      }
+    }, 700)
+    return () => window.clearInterval(interval)
+  }, [currentStory, difficulty])
+
+  const onChallengeTap = (idx: number) => {
+    if (!challengeSequence.length || challengeDone) return
+    const expected = challengeSequence[challengeInputIdx]
+    if (idx === expected) {
+      const next = challengeInputIdx + 1
+      setChallengeInputIdx(next)
+      if (next >= challengeSequence.length) {
+        setChallengeDone(true)
+        setChallengeMessage('Perfeito! Sequência completa. 💖')
+      } else {
+        setChallengeMessage(`Boa! ${next}/${challengeSequence.length}`)
+      }
+      return
+    }
+    setChallengeInputIdx(0)
+    setChallengeShake(true)
+    setChallengeMessage('Ops, você errou. Tente de novo!')
+    window.setTimeout(() => setChallengeShake(false), 350)
+  }
+
+  const storyLabel = useMemo(() => `Story ${storyIdx + 1}/${stories.length}`, [storyIdx, stories.length])
+  const searchDone = currentStory === 's2' && foundWords.length >= searchWords.length
+  const wheelDone = currentStory === 's3' && Boolean(wheelResult)
+  const challengeDoneCard = currentStory === 's4' && challengeDone
+
+  useEffect(
+    () => () => {
+      if (wheelTimeoutRef.current) window.clearTimeout(wheelTimeoutRef.current)
+    },
+    [],
+  )
+
+  if (step === 'intro') {
+    return (
+      <main className="game-root">
+        <div className="game-shell">
+          <div className="game-layer">
+            {Array.from({ length: 24 }).map((_, idx) => (
+              <span
+                key={`intro-dot-${idx}`}
+                className="game-dot"
+                style={{
+                  left: `${6 + (idx % 8) * 12}%`,
+                  top: `${8 + Math.floor(idx / 8) * 28}%`,
+                  ['--dur' as string]: `${2.6 + (idx % 4) * 0.5}s`,
+                  ['--delay' as string]: `${idx * 0.11}s`,
+                }}
+              />
+            ))}
+          </div>
+          <div className="game-content">
+            <div className="game-story">
+              <div className="game-card">
+                <div className="game-center">
+                  <p className="game-title">Está pronta para começar a melhor experiência?</p>
+                  <p className="game-subtitle">
+                    {typedStart}
+                    <span style={{ opacity: 0.7 }}> |</span>
+                  </p>
+                  <button type="button" className="game-button" onClick={() => setStep('stories')}>
+                    Começar Jogo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className="game-root">
+      <div className="game-shell">
+        <button className="game-close" onClick={() => navigate('/preview', { replace: true })} aria-label="Fechar">
+          X
+        </button>
+
+        <header className="game-progress">
+          <div className="game-progress-row">
+            {stories.map((id, idx) => (
+              <span key={id} className="game-progress-track">
+                <span className="game-progress-fill" style={{ width: idx < storyIdx ? '100%' : idx === storyIdx ? `${storyProgress}%` : '0%' }} />
+              </span>
+            ))}
+          </div>
+          <div style={{ marginTop: 7, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(224,233,255,0.8)' }}>{storyLabel}</div>
+        </header>
+
+        <div className="game-layer">
+          {Array.from({ length: 18 }).map((_, idx) => (
+            <span
+              key={`story-dot-${idx}`}
+              className="game-dot"
+              style={{
+                left: `${8 + (idx % 6) * 15}%`,
+                top: `${10 + Math.floor(idx / 6) * 27}%`,
+                ['--dur' as string]: `${2.4 + (idx % 5) * 0.4}s`,
+                ['--delay' as string]: `${idx * 0.09}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="game-content">
+          <section className="game-story">
+            <article className="game-card">
+              {currentStory === 's1' && (
+                <div className="game-center">
+                  <p className="game-title">Game Start</p>
+                  <p className="game-subtitle">Modo romance ativado. Prepare-se para os próximos desafios.</p>
+                  <div className="game-mode-row">
+                    <button type="button" className={`game-mode-btn ${difficulty === 'easy' ? 'game-mode-btn-active' : ''}`} onClick={() => setDifficulty('easy')}>
+                      Fácil
+                    </button>
+                    <button type="button" className={`game-mode-btn ${difficulty === 'hard' ? 'game-mode-btn-active' : ''}`} onClick={() => setDifficulty('hard')}>
+                      Difícil
+                    </button>
+                  </div>
+                  <p className="game-subtitle">
+                    {difficulty === 'easy'
+                      ? 'Fácil: dicas no caça-palavras e desafio mais simples.'
+                      : 'Difícil: 5 palavras e sequência maior no desafio.'}
+                  </p>
+                  <button type="button" className="game-button" onClick={() => setStoryIdx(1)}>
+                    Continuar
+                  </button>
+                </div>
+              )}
+
+              {currentStory === 's2' && (
+                <div className="game-center" style={{ justifyContent: 'flex-start', paddingTop: 26 }}>
+                  <p className="game-title" style={{ fontSize: 24 }}>Caça-Palavras Premium</p>
+                  <p className="game-subtitle">{themeFromChat || 'Ache as coisas que mais amo em você'}</p>
+                  <p className="game-counter">{foundWords.length}/{searchWords.length} palavras</p>
+                  {difficulty === 'easy' && <p className="game-subtitle">Dica: letras iniciais destacadas.</p>}
+                  <div className="game-word-grid game-word-grid--10" onPointerUp={endSelect} onPointerLeave={endSelect}>
+                    {searchData.grid.map((letter, index) => {
+                      const found = foundCells.has(index)
+                      const selecting = selectedCells.includes(index)
+                      return (
+                        <button
+                          key={`cell-${index}`}
+                          type="button"
+                          className={`game-cell game-cell--10 ${found ? 'game-cell-found' : ''} ${selecting ? 'game-cell-selecting' : ''} ${hintCells.has(index) ? 'game-cell-hint' : ''}`}
+                          onPointerDown={() => startSelect(index)}
+                          onPointerEnter={() => moveSelect(index)}
+                        >
+                          {letter}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div className="game-chip-row">
+                    {searchWords.map((word) => (
+                      <span key={word} className={`game-chip ${foundWords.includes(word) ? 'game-chip-found' : ''}`}>
+                        {word}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="game-subtitle" style={{ minHeight: 20 }}>{wordMessage}</p>
+                </div>
+              )}
+
+              {currentStory === 's3' && (
+                <div className="game-center" style={{ justifyContent: 'flex-start', paddingTop: 18 }}>
+                  <p className="game-title" style={{ fontSize: 24 }}>Roleta Romântica</p>
+                  <p className="game-subtitle">Gire e descubra coisas que eu amo em você.</p>
+                  <div className="game-wheel-pointer" />
+                  <div className="game-wheel-wrap">
+                    <div className={`game-wheel ${wheelSpinning ? 'game-wheel-spinning' : ''}`} style={{ transform: `rotate(${wheelRotation}deg)`, background: wheelGradient }}>
+                      {wheelSegments.map((item, index) => {
+                        const point = wheelLabelPoints[index]
+                        return (
+                          <span
+                            key={`${item.label}-${index}`}
+                            className="game-wheel-item"
+                            style={{
+                              left: `calc(50% + ${point.x}px)`,
+                              top: `calc(50% + ${point.y}px)`,
+                            }}
+                            title={item.label}
+                          >
+                            {item.label}
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <button type="button" className="game-button" onClick={spinWheel}>
+                    Girar
+                  </button>
+                  {wheelResult && <div className="game-wheel-result">{wheelResult}</div>}
+                </div>
+              )}
+
+              {currentStory === 's4' && (
+                <div className="game-center">
+                  <p className="game-title" style={{ fontSize: 24 }}>Desafio de Memória</p>
+                  <p className="game-subtitle">Repita a sequência de toques.</p>
+                  <div className={`game-choice-grid-2 ${challengeShake ? 'game-choice-grid-2-shake' : ''}`}>
+                    {Array.from({ length: 6 }).map((_, idx) => (
+                      <button
+                        key={`memory-${idx}`}
+                        type="button"
+                        className={`game-memory-cell ${challengeDone ? 'game-memory-cell-win' : ''} ${challengeActiveStep === idx ? 'game-memory-cell-active' : ''}`}
+                        onClick={() => onChallengeTap(idx)}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="game-subtitle">{challengeMessage}</p>
+                </div>
+              )}
+
+              {currentStory === 's5' && (
+                <div className="game-center">
+                  {Array.from({ length: 38 }).map((_, idx) => (
+                    <span
+                      key={`final-conf-${idx}`}
+                      className="game-confetti"
+                      style={{
+                        left: `${8 + (idx % 8) * 11}%`,
+                        top: `${-6 + Math.floor(idx / 8) * 2}%`,
+                        background: idx % 2 === 0 ? '#8fd7ff' : idx % 3 === 0 ? '#ff9ecb' : '#ffffff',
+                        ['--dur' as string]: `${2 + (idx % 5) * 0.4}s`,
+                        animationDelay: `${(idx % 7) * 0.18}s`,
+                      }}
+                    />
+                  ))}
+                  <p className="game-final-win">Parabéns, concluiu as missões do presente especial com sucesso.</p>
+                  <button type="button" className="game-button" onClick={goNext}>
+                    Continuar história
+                  </button>
+                </div>
+              )}
+
+              {currentStory === 's6' && (
+                <div className="game-center">
+                  <p className="game-title" style={{ fontSize: 24 }}>Capítulo de Fotos 1</p>
+                  <p className="game-subtitle">Nosso momento especial em destaque.</p>
+                  {galleryImages[0] ? (
+                    <img src={galleryImages[0]} alt="Momento do casal" className="game-photo-frame game-photo-frame-a" />
+                  ) : (
+                    <div className="game-photo-frame game-photo-placeholder">Adicione fotos no chat para aparecer aqui</div>
+                  )}
+                  <button type="button" className="game-button" onClick={goNext}>
+                    Próxima seção
+                  </button>
+                </div>
+              )}
+
+              {currentStory === 's7' && (
+                <div className="game-center">
+                  <p className="game-title" style={{ fontSize: 24 }}>Capítulo de Fotos 2</p>
+                  <p className="game-subtitle">Mais um registro lindo da nossa história.</p>
+                  {galleryImages[1] ? (
+                    <img src={galleryImages[1]} alt="Outro momento do casal" className="game-photo-frame game-photo-frame-b" />
+                  ) : (
+                    <div className="game-photo-frame game-photo-placeholder">Envie ao menos 2 fotos no chat para completar</div>
+                  )}
+                  <button type="button" className="game-button" onClick={goNext}>
+                    Próxima seção
+                  </button>
+                </div>
+              )}
+
+              {currentStory === 's8' && (
+                <div className="game-center">
+                  <p className="game-title" style={{ fontSize: 24 }}>Contador da Nossa História</p>
+                  <p className="game-subtitle">Vivendo esse amor há</p>
+                  <p className="game-time-counter">{minutesCounter.toLocaleString('pt-BR')} minutos</p>
+                  <p className="game-subtitle">e contando a cada minuto ✨</p>
+                  <button type="button" className="game-button" onClick={goNext}>
+                    Próxima seção
+                  </button>
+                </div>
+              )}
+
+              {currentStory === 's9' && (
+                <div className="game-center">
+                  <p className="game-title" style={{ fontSize: 24 }}>Missões do Coração</p>
+                  <p className="game-subtitle">Resumo do que você contou no chat:</p>
+                  <div className="game-highlights">
+                    {romanceHighlights.map((text) => (
+                      <div key={text} className="game-highlight-item">
+                        {text}
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" className="game-button" onClick={goNext}>
+                    Ir para o final
+                  </button>
+                </div>
+              )}
+
+              {currentStory === 's10' && (
+                <div className="game-center">
+                  {Array.from({ length: 26 }).map((_, idx) => (
+                    <span
+                      key={`extra-final-conf-${idx}`}
+                      className="game-confetti"
+                      style={{
+                        left: `${8 + (idx % 7) * 12}%`,
+                        top: `${-4 + Math.floor(idx / 7) * 2}%`,
+                        background: idx % 2 === 0 ? '#8fd7ff' : idx % 3 === 0 ? '#ff9ecb' : '#ffffff',
+                        ['--dur' as string]: `${2 + (idx % 5) * 0.45}s`,
+                      }}
+                    />
+                  ))}
+                  <p className="game-final-win">Fim do jogo. Você concluiu cada etapa com muito amor. 💖</p>
+                  <button type="button" className="game-button" onClick={() => navigate('/preview', { replace: true })}>
+                    Finalizar
+                  </button>
+                </div>
+              )}
+
+            </article>
+            {searchDone && (
+              <div className="game-complete-overlay">
+                <div className="game-complete-card">
+                  <p className="game-complete-title">Parabéns! 🎉</p>
+                  <p className="game-complete-line">As palavras eram: {searchWords.join(', ')}</p>
+                  <button type="button" className="game-complete-next" onClick={goNext}>
+                    Próxima Seção
+                  </button>
+                </div>
+              </div>
+            )}
+            {wheelDone && (
+              <div className="game-complete-overlay">
+                <div className="game-complete-card">
+                  <p className="game-complete-title">Parabéns! 🎉</p>
+                  <p className="game-complete-line">A missão sorteada foi:</p>
+                  <p className="game-complete-highlight">{wheelResult}</p>
+                  <button type="button" className="game-complete-next" onClick={goNext}>
+                    Próxima Seção
+                  </button>
+                </div>
+              </div>
+            )}
+            {challengeDoneCard && (
+              <div className="game-complete-overlay">
+                <div className="game-complete-card">
+                  <p className="game-complete-title">Parabéns! 🎉</p>
+                  <p className="game-complete-line">Você completou o desafio de memória.</p>
+                  <button type="button" className="game-complete-next" onClick={goNext}>
+                    Próxima Seção
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </section>
+        </div>
+      </div>
+    </main>
+  )
+}
+
+export default WrappedGameExperience
