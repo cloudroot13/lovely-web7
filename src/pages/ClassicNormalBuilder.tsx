@@ -271,6 +271,16 @@ export default function ClassicNormalBuilder() {
   const embedUrl = buildSpotifyTrackEmbedUrl(loveData.musicaSpotifyUrl)
 
   const next = () => {
+    if (steps[stepIndex].id === 'photos') {
+      if (!loveData.fotoCasalDataUrl) {
+        alert('A foto principal e obrigatoria para continuar.')
+        return
+      }
+      if (loveData.storiesImagesDataUrls.length === 0) {
+        alert('Envie pelo menos 1 foto extra para continuar.')
+        return
+      }
+    }
     if (stepIndex >= steps.length - 1) {
       navigate('/preview')
       return

@@ -274,6 +274,11 @@ export default function Builder() {
   }
 
   const handleConfirmMusic = () => {
+    if (!photoDataUrl) {
+      alert('A foto principal do casal e obrigatoria para continuar.')
+      return
+    }
+
     if (isLovelyflixFlow) {
       if (!momentoEspecialFotoDataUrl || !atividadeFotoDataUrl) {
         alert('Antes de continuar, envie as 2 fotos dos momentos marcantes.')
@@ -309,11 +314,6 @@ export default function Builder() {
         return
       }
 
-      if (!photoDataUrl) {
-        alert('Envie a foto principal do casal para continuar.')
-        return
-      }
-
       if (storiesDataUrls.length !== totalPhotos) {
         alert(`Envie exatamente ${totalPhotos} fotos extras para continuar.`)
         return
@@ -343,11 +343,6 @@ export default function Builder() {
     if (isGameFlow) {
       if (!momentoEspecialFotoDataUrl || !atividadeFotoDataUrl) {
         alert('Antes de continuar, envie as 2 fotos dos momentos marcantes.')
-        return
-      }
-
-      if (!photoDataUrl) {
-        alert('Envie a foto principal do casal para continuar.')
         return
       }
 
