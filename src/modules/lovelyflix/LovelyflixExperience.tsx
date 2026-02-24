@@ -290,7 +290,7 @@ function buildContent(data: LoveData, nowMs: number) {
 
 export default function LovelyflixExperience() {
   const navigate = useNavigate()
-  const { config, loveData } = useAppContext()
+  const { config, loveData, setConfig } = useAppContext()
   const [screen, setScreen] = useState<Screen>('home')
   const [selected, setSelected] = useState<Tile | null>(null)
   const [storyIndex, setStoryIndex] = useState(0)
@@ -304,6 +304,7 @@ export default function LovelyflixExperience() {
   const [heartNotes, setHeartNotes] = useState<HeartNote[]>([])
   const [animatedOutings, setAnimatedOutings] = useState(0)
   const [animatedMinutes, setAnimatedMinutes] = useState(0)
+  const [metricsSnapshot, setMetricsSnapshot] = useState(() => getRelationshipMetrics(loveData, Date.now()))
   const [loveBurstCount, setLoveBurstCount] = useState(0)
   const [heartTapBoost, setHeartTapBoost] = useState(false)
   const [showLoveWords, setShowLoveWords] = useState(false)
@@ -313,12 +314,13 @@ export default function LovelyflixExperience() {
 
   useEffect(() => {
     if (!(config.mode === 'wrapped' && config.variant === 'stories')) {
-      navigate('/choose-mode', { replace: true })
+      setConfig({ mode: 'wrapped', variant: 'stories' })
       return
     }
 
     if (!hasLovelyflixData(loveData)) {
-      navigate('/builder', { replace: true })
+      setScreen('home')
+      setStoryIndex(0)
       return
     }
   }, [config.mode, config.variant, loveData, navigate])
@@ -404,8 +406,8 @@ export default function LovelyflixExperience() {
     let frame = 0
     const duration = 1400
     const startedAt = performance.now()
-    const targetOutings = content.metrics.outingsSinceStart
-    const targetMinutes = content.metrics.minutes
+    const targetOutings = metricsSnapshot.outingsSinceStart
+    const targetMinutes = metricsSnapshot.minutes
 
     const tick = (now: number) => {
       const progress = Math.min(1, (now - startedAt) / duration)
@@ -419,7 +421,14 @@ export default function LovelyflixExperience() {
 
     frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
-  }, [screen, storyIndex, content.metrics, content.stories])
+  }, [screen, storyIndex, metricsSnapshot, content.stories])
+
+  useEffect(() => {
+    if (screen !== 'stories') {
+      return
+    }
+    setMetricsSnapshot(getRelationshipMetrics(loveData, Date.now()))
+  }, [screen, storyIndex, loveData.startDate, loveData.anos, loveData.meses, loveData.dias, loveData.monthlyMeetups])
 
   useEffect(() => {
     if (screen !== 'stories') {
