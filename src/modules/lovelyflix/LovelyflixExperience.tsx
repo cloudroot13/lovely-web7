@@ -23,6 +23,11 @@ interface HeartNote {
   top: number
 }
 
+function formatCompactNumber(value: number) {
+  if (!Number.isFinite(value)) return '0'
+  return new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+}
+
 interface FinalLoveWord {
   id: string
   text: string
@@ -760,7 +765,7 @@ export default function LovelyflixExperience() {
                             transition={{ duration: 1.8, repeat: Infinity, delay: 0.15, ease: 'easeInOut' }}
                           >
                             <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-400">Desde o início</p>
-                            <p className="mt-1 text-2xl font-black text-white">{animatedOutings} saídas</p>
+                            <p className="mt-1 text-2xl font-black text-white">{formatCompactNumber(animatedOutings)} saídas</p>
                           </motion.div>
                         </div>
                         <motion.div
@@ -769,7 +774,7 @@ export default function LovelyflixExperience() {
                           transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
                         >
                           <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-400">Minutos juntos nessa história</p>
-                          <p className="mt-1 text-2xl font-black text-white">{animatedMinutes.toLocaleString('pt-BR')} min</p>
+                          <p className="mt-1 text-2xl font-black text-white">{formatCompactNumber(animatedMinutes)} min</p>
                         </motion.div>
                         <div className="mt-3">
                           <button className="rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.14em]" onClick={goNextStory}>
