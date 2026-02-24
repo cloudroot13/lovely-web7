@@ -255,6 +255,7 @@ export default function LovelyflixExperience() {
   const [storyProgress, setStoryProgress] = useState(0)
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [typedStoryText, setTypedStoryText] = useState('')
+  const [storyTextSnapshot, setStoryTextSnapshot] = useState('')
   const [clickedHearts, setClickedHearts] = useState(0)
   const [hiddenHearts, setHiddenHearts] = useState<number[]>([])
   const [heartNotes, setHeartNotes] = useState<HeartNote[]>([])
@@ -377,11 +378,23 @@ export default function LovelyflixExperience() {
 
   useEffect(() => {
     if (screen !== 'stories') {
-      const reset = window.setTimeout(() => setTypedStoryText(''), 0)
+      const reset = window.setTimeout(() => {
+        setTypedStoryText('')
+        setStoryTextSnapshot('')
+      }, 0)
       return () => window.clearTimeout(reset)
     }
 
-    const storyText = content.stories[storyIndex]?.text ?? ''
+    const snapshot = content.stories[storyIndex]?.text ?? ''
+    setStoryTextSnapshot(snapshot)
+  }, [screen, storyIndex, content.stories])
+
+  useEffect(() => {
+    if (screen !== 'stories') {
+      return
+    }
+
+    const storyText = storyTextSnapshot
     const reset = window.setTimeout(() => setTypedStoryText(''), 0)
     let index = 0
     const interval = window.setInterval(() => {
@@ -396,7 +409,7 @@ export default function LovelyflixExperience() {
       window.clearTimeout(reset)
       window.clearInterval(interval)
     }
-  }, [screen, storyIndex, content.stories])
+  }, [screen, storyTextSnapshot, storyIndex])
 
   if (screen === 'stories') {
     const current = content.stories[storyIndex]
