@@ -251,6 +251,7 @@ export default function Builder() {
   const [lovelyfyUrl, setLovelyfyUrl] = useState('')
   const [photoDataUrl, setPhotoDataUrl] = useState('')
   const [totalPhotos, setTotalPhotos] = useState(5)
+  const [totalPhotosInput, setTotalPhotosInput] = useState('5')
   const [storiesDataUrls, setStoriesDataUrls] = useState<string[]>([])
   const [storiesImageKeys, setStoriesImageKeys] = useState<string[]>([])
   const [musicValidationMessage, setMusicValidationMessage] = useState('')
@@ -487,6 +488,37 @@ export default function Builder() {
     event.target.value = ''
   }
 
+  const handleTotalPhotosChange = (value: string) => {
+    if (value === '') {
+      setTotalPhotosInput('')
+      return
+    }
+    if (!/^\d+$/.test(value)) {
+      return
+    }
+    const next = Number(value)
+    const safe = Number.isNaN(next) ? totalPhotos : Math.max(1, Math.min(20, next))
+    setTotalPhotosInput(String(next))
+    setTotalPhotos(safe)
+    setStoriesDataUrls((prev) => prev.slice(0, safe))
+    setStoriesImageKeys((prev) => prev.slice(0, safe))
+  }
+
+  const handleTotalPhotosBlur = () => {
+    if (totalPhotosInput === '') {
+      setTotalPhotosInput(String(totalPhotos))
+      return
+    }
+    const next = Number(totalPhotosInput)
+    const safe = Number.isNaN(next) ? totalPhotos : Math.max(1, Math.min(20, next))
+    setTotalPhotosInput(String(safe))
+    if (safe !== totalPhotos) {
+      setTotalPhotos(safe)
+      setStoriesDataUrls((prev) => prev.slice(0, safe))
+      setStoriesImageKeys((prev) => prev.slice(0, safe))
+    }
+  }
+
   const handleRemoveExtraStoryPhoto = (index: number) => {
     setStoriesDataUrls((prev) => prev.filter((_, idx) => idx !== index))
     setStoriesImageKeys((prev) => prev.filter((_, idx) => idx !== index))
@@ -705,18 +737,13 @@ export default function Builder() {
                 <label className="rounded-xl border border-zinc-700 bg-zinc-900 p-3 text-sm text-zinc-300">
                   Quantas fotos extras você quer na retrospectiva?
                   <input
-                    type="number"
-                    min={1}
-                    max={20}
-                    value={totalPhotos}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={totalPhotosInput}
                     aria-label="Quantidade de fotos extras"
-                    onChange={(event) => {
-                      const next = Number(event.target.value)
-                      const safe = Number.isNaN(next) ? 1 : Math.max(1, Math.min(20, next))
-                      setTotalPhotos(safe)
-                      setStoriesDataUrls((prev) => prev.slice(0, safe))
-                      setStoriesImageKeys((prev) => prev.slice(0, safe))
-                    }}
+                    onChange={(event) => handleTotalPhotosChange(event.target.value)}
+                    onBlur={handleTotalPhotosBlur}
                     className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm"
                   />
                 </label>
@@ -819,18 +846,13 @@ export default function Builder() {
                 <label className="rounded-xl border border-zinc-700 bg-zinc-900 p-3 text-sm text-zinc-300">
                   Quantas fotos extras você quer na retrospectiva?
                   <input
-                    type="number"
-                    min={1}
-                    max={20}
-                    value={totalPhotos}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={totalPhotosInput}
                     aria-label="Quantidade de fotos extras"
-                    onChange={(event) => {
-                      const next = Number(event.target.value)
-                      const safe = Number.isNaN(next) ? 1 : Math.max(1, Math.min(20, next))
-                      setTotalPhotos(safe)
-                      setStoriesDataUrls((prev) => prev.slice(0, safe))
-                      setStoriesImageKeys((prev) => prev.slice(0, safe))
-                    }}
+                    onChange={(event) => handleTotalPhotosChange(event.target.value)}
+                    onBlur={handleTotalPhotosBlur}
                     className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm"
                   />
                 </label>
