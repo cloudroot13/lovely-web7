@@ -259,6 +259,8 @@ export default function Builder() {
   const extraPhotosInputRef = useRef<HTMLInputElement | null>(null)
   const messagesContainerRef = useRef<HTMLElement | null>(null)
   const textInputRef = useRef<HTMLInputElement | null>(null)
+  const bottomRef = useRef<HTMLDivElement | null>(null)
+  const [notice, setNotice] = useState<{ type: 'error' | 'success'; message: string } | null>(null)
 
   const currentQuestion = activeQuestions[step]
   const spotifyTrackId = extractLovelyfyTrackId(lovelyfyUrl.trim())
@@ -272,22 +274,23 @@ export default function Builder() {
     }
     setStep(nextStep)
     setMessages((prev) => [...prev, { sender: 'bot', text: activeQuestions[nextStep].text }])
+    setNotice(null)
   }
 
   const handleConfirmMusic = () => {
     if (!photoDataUrl) {
-      alert('A foto principal do casal e obrigatoria para continuar.')
+      setNotice({ type: 'error', message: 'A foto principal do casal e obrigatoria para continuar.' })
       return
     }
 
     if (isLovelyflixFlow) {
       if (!momentoEspecialFotoDataUrl || !atividadeFotoDataUrl) {
-        alert('Antes de continuar, envie as 2 fotos dos momentos marcantes.')
+        setNotice({ type: 'error', message: 'Antes de continuar, envie as 2 fotos dos momentos marcantes.' })
         return
       }
 
       if (storiesDataUrls.length !== totalPhotos) {
-        alert(`Envie exatamente ${totalPhotos} fotos extras para continuar.`)
+        setNotice({ type: 'error', message: `Envie exatamente ${totalPhotos} fotos extras para continuar.` })
         return
       }
 
@@ -311,12 +314,12 @@ export default function Builder() {
 
     if (isJornadaFlow) {
       if (!momentoEspecialFotoDataUrl || !atividadeFotoDataUrl) {
-        alert('Antes de continuar, envie as 2 fotos dos momentos marcantes.')
+        setNotice({ type: 'error', message: 'Antes de continuar, envie as 2 fotos dos momentos marcantes.' })
         return
       }
 
       if (storiesDataUrls.length !== totalPhotos) {
-        alert(`Envie exatamente ${totalPhotos} fotos extras para continuar.`)
+        setNotice({ type: 'error', message: `Envie exatamente ${totalPhotos} fotos extras para continuar.` })
         return
       }
 
@@ -343,12 +346,12 @@ export default function Builder() {
 
     if (isGameFlow) {
       if (!momentoEspecialFotoDataUrl || !atividadeFotoDataUrl) {
-        alert('Antes de continuar, envie as 2 fotos dos momentos marcantes.')
+        setNotice({ type: 'error', message: 'Antes de continuar, envie as 2 fotos dos momentos marcantes.' })
         return
       }
 
       if (storiesDataUrls.length !== totalPhotos) {
-        alert(`Envie exatamente ${totalPhotos} fotos extras para continuar.`)
+        setNotice({ type: 'error', message: `Envie exatamente ${totalPhotos} fotos extras para continuar.` })
         return
       }
 
@@ -378,17 +381,17 @@ export default function Builder() {
 
     if (!trackId) {
       setMusicValidationMessage('')
-      alert('Link do Lovelyfy inválido')
+      setNotice({ type: 'error', message: 'Link do Lovelyfy inválido.' })
       return
     }
 
     if (storiesDataUrls.length !== totalPhotos) {
-      alert(`Envie exatamente ${totalPhotos} fotos extras para continuar.`)
+      setNotice({ type: 'error', message: `Envie exatamente ${totalPhotos} fotos extras para continuar.` })
       return
     }
 
     if (!momentoEspecialFotoDataUrl || !atividadeFotoDataUrl) {
-      alert('Antes de continuar, envie as 2 fotos dos momentos marcantes.')
+      setNotice({ type: 'error', message: 'Antes de continuar, envie as 2 fotos dos momentos marcantes.' })
       return
     }
 
@@ -414,6 +417,7 @@ export default function Builder() {
       { sender: 'user', text: `Música confirmada: ${musicTitle.trim() || 'Faixa Lovelyfy'}` },
       { sender: 'user', text: `${storiesDataUrls.length} fotos extras enviadas para retrospectiva.` },
     ])
+    setNotice(null)
     moveNext()
   }
 
@@ -447,7 +451,7 @@ export default function Builder() {
     }
 
     if (remainingPhotos <= 0) {
-      alert(`Você já enviou ${totalPhotos} de ${totalPhotos} fotos.`)
+      setNotice({ type: 'error', message: `Você já enviou ${totalPhotos} de ${totalPhotos} fotos.` })
       return
     }
 
@@ -468,11 +472,11 @@ export default function Builder() {
     })
 
     if (duplicates > 0) {
-      alert(`${duplicates} foto(s) repetida(s) foram ignoradas.`)
+      setNotice({ type: 'error', message: `${duplicates} foto(s) repetida(s) foram ignoradas.` })
     }
 
     if (uniqueBatch.length > remainingPhotos) {
-      alert(`Só faltam ${remainingPhotos} foto(s). O restante foi ignorado.`)
+      setNotice({ type: 'error', message: `Só faltam ${remainingPhotos} foto(s). O restante foi ignorado.` })
     }
 
     const limited = uniqueBatch.slice(0, remainingPhotos)
@@ -491,11 +495,12 @@ export default function Builder() {
   const handleConfirmPhotoStep = () => {
     const hasPhoto = currentQuestion.id === 'momentoEspecialFoto' ? Boolean(momentoEspecialFotoDataUrl) : Boolean(atividadeFotoDataUrl)
     if (!hasPhoto) {
-      alert('Selecione uma foto para continuar.')
+      setNotice({ type: 'error', message: 'Selecione uma foto para continuar.' })
       return
     }
 
     setMessages((prev) => [...prev, { sender: 'user', text: 'Foto enviada.' }])
+    setNotice(null)
     moveNext()
   }
 
@@ -514,6 +519,7 @@ export default function Builder() {
 
     const value = answer.trim()
     if (!value) {
+      setNotice({ type: 'error', message: 'Preencha a resposta para continuar.' })
       return
     }
 
@@ -524,6 +530,7 @@ export default function Builder() {
       const key = currentQuestion.id as keyof LoveData
       setLoveData({ [key]: numericValue } as Partial<LoveData>)
       setAnswer('')
+      setNotice(null)
       moveNext()
       return
     }
@@ -531,6 +538,7 @@ export default function Builder() {
     const key = currentQuestion.id as keyof LoveData
     setLoveData({ [key]: value } as Partial<LoveData>)
     setAnswer('')
+    setNotice(null)
     moveNext()
   }
 
@@ -555,7 +563,17 @@ export default function Builder() {
       return
     }
 
-    messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+    const container = messagesContainerRef.current
+    const scroll = () => {
+      container.scrollTop = container.scrollHeight
+      bottomRef.current?.scrollIntoView({ block: 'end' })
+    }
+    const handle = window.requestAnimationFrame(scroll)
+    const handle2 = window.requestAnimationFrame(scroll)
+    return () => {
+      window.cancelAnimationFrame(handle)
+      window.cancelAnimationFrame(handle2)
+    }
   }, [isClassicNormalFlow, messages])
 
   useEffect(() => {
@@ -594,6 +612,7 @@ export default function Builder() {
         {messages.map((message, index) => (
           <ChatBubble key={`${index}-${message.sender}`} text={message.text} sender={message.sender} />
         ))}
+        <div ref={bottomRef} />
       </section>
 
       <form onSubmit={handleSubmit} className="shrink-0 border-t border-zinc-800 bg-zinc-950 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -605,7 +624,12 @@ export default function Builder() {
                 type={inputType}
                 value={answer}
                 min={currentQuestion.kind === 'number' ? 1 : undefined}
-                onChange={(event) => setAnswer(event.target.value)}
+                onChange={(event) => {
+                  setAnswer(event.target.value)
+                  if (notice) {
+                    setNotice(null)
+                  }
+                }}
                 placeholder={currentQuestion.placeholder}
                 aria-label={currentQuestion.text}
                 className="flex-1 rounded-full border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm outline-none ring-pink-500 transition focus:ring"
@@ -870,6 +894,21 @@ export default function Builder() {
                   Confirmar game e continuar
                 </button>
               </div>
+            </div>
+          )}
+
+          {notice && (
+            <div
+              className={`mt-3 rounded-2xl border px-4 py-3 text-sm ${
+                notice.type === 'error'
+                  ? 'border-rose-400/60 bg-rose-500/15 text-rose-100'
+                  : 'border-emerald-400/60 bg-emerald-500/15 text-emerald-100'
+              }`}
+              role="alert"
+              aria-live="polite"
+            >
+              <p className="font-semibold">{notice.type === 'error' ? 'Atenção' : 'Tudo certo'}</p>
+              <p className="mt-1 text-xs text-white/80">{notice.message}</p>
             </div>
           )}
         </div>
