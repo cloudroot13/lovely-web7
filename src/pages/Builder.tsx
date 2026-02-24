@@ -258,6 +258,7 @@ export default function Builder() {
   const [atividadeFotoDataUrl, setAtividadeFotoDataUrl] = useState('')
   const extraPhotosInputRef = useRef<HTMLInputElement | null>(null)
   const messagesContainerRef = useRef<HTMLElement | null>(null)
+  const textInputRef = useRef<HTMLInputElement | null>(null)
 
   const currentQuestion = activeQuestions[step]
   const spotifyTrackId = extractLovelyfyTrackId(lovelyfyUrl.trim())
@@ -557,6 +558,17 @@ export default function Builder() {
     messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
   }, [isClassicNormalFlow, messages])
 
+  useEffect(() => {
+    if (isClassicNormalFlow) {
+      return
+    }
+    if (currentQuestion.kind !== 'text' && currentQuestion.kind !== 'number' && currentQuestion.kind !== 'date' && currentQuestion.kind !== 'datetime') {
+      return
+    }
+    const handle = window.setTimeout(() => textInputRef.current?.focus(), 0)
+    return () => window.clearTimeout(handle)
+  }, [currentQuestion.kind, isClassicNormalFlow, step])
+
   if (isClassicNormalFlow) {
     return <ClassicNormalBuilder />
   }
@@ -589,6 +601,7 @@ export default function Builder() {
           {(currentQuestion.kind === 'text' || currentQuestion.kind === 'number' || currentQuestion.kind === 'date' || currentQuestion.kind === 'datetime') && (
             <div className="flex gap-3">
               <input
+                ref={textInputRef}
                 type={inputType}
                 value={answer}
                 min={currentQuestion.kind === 'number' ? 1 : undefined}
