@@ -253,6 +253,7 @@ export default function LovelyflixExperience() {
   const [selected, setSelected] = useState<Tile | null>(null)
   const [storyIndex, setStoryIndex] = useState(0)
   const [storyProgress, setStoryProgress] = useState(0)
+  const [storyElapsedMs, setStoryElapsedMs] = useState(0)
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [typedStoryText, setTypedStoryText] = useState('')
   const [storyTextSnapshot, setStoryTextSnapshot] = useState('')
@@ -306,6 +307,7 @@ export default function LovelyflixExperience() {
     }
 
     setStoryProgress(0)
+    setStoryElapsedMs(0)
     let raf = 0
     const startedAt = performance.now()
 
@@ -313,6 +315,7 @@ export default function LovelyflixExperience() {
       const elapsed = now - startedAt
       const progress = Math.min(100, (elapsed / WRAPPED_STORY_DURATION_MS) * 100)
       setStoryProgress(progress)
+      setStoryElapsedMs(elapsed)
 
       if (elapsed >= WRAPPED_STORY_DURATION_MS) {
         if (storyIndex >= content.stories.length - 1) {
@@ -453,7 +456,7 @@ export default function LovelyflixExperience() {
 
             <div className="mb-3 flex items-center justify-between px-1 text-[11px] uppercase tracking-[0.12em] text-zinc-300">
               <span>Story {storyIndex + 1}/{content.stories.length}</span>
-              <span>{Math.max(0, Math.ceil((WRAPPED_STORY_DURATION_MS * (1 - storyProgress / 100)) / 1000))}s</span>
+              <span>{Math.max(0, Math.ceil((WRAPPED_STORY_DURATION_MS - storyElapsedMs) / 1000))}s</span>
             </div>
 
             <button
@@ -860,7 +863,7 @@ export default function LovelyflixExperience() {
                     className="flex-1 rounded-lg bg-white px-4 py-3 text-lg font-bold text-black"
                     whileTap={{ scale: 0.97 }}
                   >
-                    ▶ Descobrir
+                    Descobrir
                   </motion.button>
                   <motion.button
                     onClick={() => {
