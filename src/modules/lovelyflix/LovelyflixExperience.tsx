@@ -208,7 +208,7 @@ function getStartDateLabel(startDate: string) {
   return `Desde ${parsed.toLocaleDateString('pt-BR')}`
 }
 
-function buildContent(data: LoveData, nowMs: number) {
+function buildContent(data: LoveData, metrics: ReturnType<typeof getRelationshipMetrics>) {
   const fallback = data.fotoCasalDataUrl || data.storiesImagesDataUrls[0] || data.momentHighlights[0]?.imageDataUrl || lovelyflixAssets.top10Bg
   const images = uniqueImages([
     data.fotoCasalDataUrl,
@@ -265,7 +265,6 @@ function buildContent(data: LoveData, nowMs: number) {
     { id: 't5', title: 'Top 5 momentos', subtitle: 'Top 5 - #5', text: continueWatching[3].text, image: pickImage(6) },
   ]
 
-  const metrics = getRelationshipMetrics(data, nowMs)
   const daysTogether = metrics.days
 
   const stories: Tile[] = [
@@ -330,7 +329,7 @@ export default function LovelyflixExperience() {
     return () => window.clearInterval(interval)
   }, [])
 
-  const content = useMemo(() => buildContent(loveData, nowMs), [loveData, nowMs])
+  const content = useMemo(() => buildContent(loveData, metricsSnapshot), [loveData, metricsSnapshot])
   const detailNarrative = useMemo(() => (selected ? buildDetailNarrative(selected, loveData) : ''), [selected, loveData])
   const relationshipCounter = useMemo(
     () => splitDuration(getRelationshipElapsedSeconds(loveData, nowMs)),
