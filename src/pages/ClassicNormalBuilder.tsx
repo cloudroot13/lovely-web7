@@ -320,20 +320,43 @@ export default function ClassicNormalBuilder() {
   }
 
   const onMemoriesBanner = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const input = event.currentTarget
+    const file = input.files?.[0]
+    input.value = ''
     if (!file) return
-    const dataUrl = await readFileAsDataUrl(file)
-    setLoveData({ classicMemoriesBannerDataUrl: dataUrl })
+    try {
+      const dataUrl = await readFileAsDataUrl(file)
+      setLoveData({ classicMemoriesBannerDataUrl: dataUrl })
+    } catch {
+      setMemoryError('Nao foi possivel ler a imagem do banner. Tente JPG, PNG ou WEBP.')
+    }
   }
 
   const onMemoryImage = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const input = event.currentTarget
+    const file = input.files?.[0]
+    input.value = ''
     if (!file) return
+
+    const unsupportedMobileFormat =
+      /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
+    if (unsupportedMobileFormat) {
+      setMemoryImageDataUrl('')
+      setMemoryImageName('')
+      setMemoryError('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+      return
+    }
+
     setMemoryImageName(file.name)
-    const dataUrl = await readFileAsDataUrl(file)
-    setMemoryImageDataUrl(dataUrl)
     setMemoryError('')
-    event.target.value = ''
+    try {
+      const dataUrl = await readFileAsDataUrl(file)
+      setMemoryImageDataUrl(dataUrl)
+    } catch {
+      setMemoryImageDataUrl('')
+      setMemoryImageName('')
+      setMemoryError('Nao foi possivel ler essa imagem. Tente JPG, PNG ou WEBP.')
+    }
   }
 
   const addMemory = () => {
@@ -583,7 +606,7 @@ export default function ClassicNormalBuilder() {
                 />
                 <input
                   type="file"
-                  accept="image/*,.heic,.HEIC,.heif,.HEIF,.avif,.AVIF,.webp,.WEBP,.jfif,.JFIF,.png,.jpg,.jpeg,.gif,.bmp,.svg"
+                  accept="image/*,.avif,.AVIF,.webp,.WEBP,.jfif,.JFIF,.png,.jpg,.jpeg,.gif,.bmp,.svg"
                   onChange={onMemoryImage}
                   className="mt-2 block w-full text-xs"
                 />
