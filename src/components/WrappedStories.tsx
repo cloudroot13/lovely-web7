@@ -191,6 +191,12 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
       return
     }
 
+    setElapsedMs(0)
+
+    if (currentSlide >= stories.length - 1) {
+      return
+    }
+
     const interval = window.setInterval(() => {
       setElapsedMs((prev) => {
         const next = prev + 100
@@ -203,7 +209,7 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
     }, 100)
 
     return () => window.clearInterval(interval)
-  }, [started, stories.length])
+  }, [started, currentSlide, stories.length])
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev < stories.length - 1 ? prev + 1 : prev))
