@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../context/appStore'
 import { buildSpotifyTrackEmbedUrl } from '../utils/spotify'
 import { readFileAsDataUrl } from '../utils/file'
+import { readImageFileAsDataUrl } from '../utils/image'
 import '../styles/classic-hearts-animation.css'
 import '../styles/classic-cloud-animation.css'
 import '../styles/classic-stars-meteors-animation.css'
@@ -283,9 +284,15 @@ export default function ClassicNormalBuilder() {
   const onMainPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
+    const unsupportedMobileFormat =
+      /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
+    if (unsupportedMobileFormat) {
+      setMemoryError('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+      return
+    }
     const cappedExtras = loveData.storiesImagesDataUrls.slice(0, CLASSIC_MAX_EXTRA_PHOTOS)
     setPhotoKeys((prev) => prev.slice(0, CLASSIC_MAX_EXTRA_PHOTOS))
-    const dataUrl = await readFileAsDataUrl(file)
+    const dataUrl = await readImageFileAsDataUrl(file)
     setLoveData({ fotoCasalDataUrl: dataUrl, storiesImagesDataUrls: cappedExtras, totalPhotos: cappedExtras.length + 1 })
   }
 
@@ -299,12 +306,18 @@ export default function ClassicNormalBuilder() {
     const nextKeys = [...photoKeys]
 
     for (const file of Array.from(files)) {
+      const unsupportedMobileFormat =
+        /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
+      if (unsupportedMobileFormat) {
+        setMemoryError('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+        continue
+      }
       const key = `${file.name}-${file.size}-${file.lastModified}`
       if (existingKeys.has(key)) continue
       if (nextUrls.length >= CLASSIC_MAX_EXTRA_PHOTOS) break
       existingKeys.add(key)
       nextKeys.push(key)
-      nextUrls.push(await readFileAsDataUrl(file))
+      nextUrls.push(await readImageFileAsDataUrl(file))
     }
 
     setPhotoKeys(nextKeys)

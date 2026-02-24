@@ -2,7 +2,7 @@ import { useMemo, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ClassicNetflix } from '../components/ClassicNetflix'
 import { useAppContext } from '../context/appStore'
-import { readFileAsDataUrl } from '../utils/file'
+import { readImageFileAsDataUrl } from '../utils/image'
 
 type NetflixStep = 'title' | 'counter' | 'description' | 'photo'
 
@@ -64,7 +64,13 @@ export default function ClassicNetflixBuilder() {
   const onMainPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-    const dataUrl = await readFileAsDataUrl(file)
+    const unsupportedMobileFormat =
+      /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
+    if (unsupportedMobileFormat) {
+      alert('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+      return
+    }
+    const dataUrl = await readImageFileAsDataUrl(file)
     setLoveData({ fotoCasalDataUrl: dataUrl })
   }
 
@@ -79,11 +85,17 @@ export default function ClassicNetflixBuilder() {
 
     for (const file of Array.from(files)) {
       if (nextUrls.length >= 10) break
+      const unsupportedMobileFormat =
+        /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
+      if (unsupportedMobileFormat) {
+        alert('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+        continue
+      }
       const key = `${file.name}-${file.size}-${file.lastModified}`
       if (existingKeys.has(key)) continue
       existingKeys.add(key)
       nextKeys.push(key)
-      nextUrls.push(await readFileAsDataUrl(file))
+      nextUrls.push(await readImageFileAsDataUrl(file))
     }
 
     setEpisodePhotoKeys(nextKeys.slice(0, 10))

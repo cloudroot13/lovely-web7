@@ -107,7 +107,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loveData = useMemo(() => normalizeLoveData(loveDataByKey[experienceKey]), [experienceKey, loveDataByKey])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ config, loveDataByKey }))
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ config, loveDataByKey }))
+    } catch (error) {
+      console.error('Falha ao salvar no storage.', error)
+    }
   }, [config, loveDataByKey])
 
   const value = useMemo<AppState>(
