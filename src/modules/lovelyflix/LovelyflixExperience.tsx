@@ -71,7 +71,44 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function buildFinalLoveWords() {
-  const words = ['Eu te amo', 'I love you', "Je t’aime", 'Ti amo', 'Ich liebe dich', 'Te quiero', 'Aishiteru', 'Saranghae', 'Ya tebya lyublyu']
+  const words = [
+    'Eu te amo',
+    'I love you',
+    "Je t’aime",
+    'Ti amo',
+    'Ich liebe dich',
+    'Te quiero',
+    'Aishiteru',
+    'Saranghae',
+    'Ya tebya lyublyu',
+    'Je t’aime bien',
+    'Eu te adoro',
+    'Ily',
+    'Te amo',
+    'Te iubesc',
+    'Kocham cię',
+    'Ik hou van jou',
+    'Jag älskar dig',
+    'Jeg elsker deg',
+    'Jeg elsker dig',
+    'Jag elsker dig',
+    'Te amo mucho',
+    'Seni seviyorum',
+    'Ana behibak',
+    'Wo ai ni',
+    'Ngo oi nei',
+    'Mahal kita',
+    'Aku cinta kamu',
+    'Saya cinta kamu',
+    'Amo-te',
+    'Aroha ahau ki a koe',
+    'Minä rakastan sinua',
+    'Τα αγαπώ',
+    'Я люблю тебя',
+    'ฉันรักคุณ',
+    'Tôi yêu bạn',
+    'Saya sayang kamu',
+  ]
   return words.map((text, idx) => {
     const spreadX = clamp((Math.random() - 0.5) * 250, -125, 125)
     const spreadY = clamp((Math.random() - 0.5) * 330, -175, 165)
@@ -566,6 +603,9 @@ export default function LovelyflixExperience() {
                           >
                             ❤
                           </motion.button>
+                          <div className="pointer-events-none absolute top-[58%] left-1/2 -translate-x-1/2 rounded-full border border-white/25 bg-black/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow-[0_0_20px_rgba(255,167,210,0.35)]">
+                            Clique no coração
+                          </div>
                         </div>
                       )}
 
