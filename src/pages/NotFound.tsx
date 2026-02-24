@@ -8,11 +8,11 @@ export default function NotFound() {
 
       <section className="relative mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-md flex-col items-center justify-center rounded-3xl border border-white/10 bg-black/55 p-6 text-center shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur-sm">
         <p className="text-xs uppercase tracking-[0.24em] text-zinc-300">Erro 404</p>
-        <h1 className="mt-2 text-3xl font-black sm:text-4xl">Pagina nao encontrada</h1>
+        <h1 className="mt-2 text-3xl font-black sm:text-4xl">Página não encontrada</h1>
 
         <div className="relative mt-7 w-full">
           <div className="mx-auto max-w-72.5 rounded-2xl border border-white/15 bg-[#171717] px-4 py-3 text-sm font-semibold text-zinc-100 shadow-[0_10px_26px_rgba(0,0,0,0.45)] sm:text-base">
-            Oq esta fznd aqui? Esta perdido? Clique para voltar.
+            O que você está fazendo aqui? Está perdido? Clique para voltar.
           </div>
           <div className="mx-auto -mt-1 h-4 w-4 rotate-45 border-b border-r border-white/15 bg-[#171717]" />
         </div>
@@ -23,7 +23,7 @@ export default function NotFound() {
           to="/"
           className="mt-6 inline-flex items-center justify-center rounded-full bg-[#1DB954] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-black transition duration-300 hover:scale-105"
         >
-          Voltar para inicio
+          Voltar para início
         </Link>
       </section>
     </main>

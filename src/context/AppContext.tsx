@@ -19,6 +19,8 @@ const initialLoveData: LoveData = {
   classicCounterStyle: 'default',
   classicPhotoDisplay: 'coverflow',
   classicBackgroundAnimation: 'none',
+  classicMemoriesTitle: '',
+  classicMemoriesBannerDataUrl: '',
   comoConheceram: '',
   momentoEspecial: '',
   atividadeJuntos: '',

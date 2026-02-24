@@ -5,7 +5,7 @@ import type { ClassicVariant, Mode, WrappedVariant } from '../types/types'
 
 const variantsByMode: Record<Mode, { label: string; value: ClassicVariant | WrappedVariant; themeLocked: boolean }[]> = {
   classic: [
-    { label: 'Clássica Normal', value: 'normal', themeLocked: false },
+    { label: 'Clássica Normal', value: 'normal', themeLocked: true },
     { label: 'Clássica Lovelyflix', value: 'netflix', themeLocked: true },
   ],
   wrapped: [

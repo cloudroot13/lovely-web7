@@ -1,0 +1,107 @@
+.classic-star-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 2;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(121, 151, 255, 0.16), transparent 40%),
+    radial-gradient(circle at 24% 68%, rgba(183, 138, 255, 0.08), transparent 45%),
+    linear-gradient(180deg, #060814 0%, #04050d 54%, #03030a 100%);
+}
+
+.classic-star-haze {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(180, 210, 255, 0.12), transparent 35%),
+    radial-gradient(circle at 84% 36%, rgba(194, 186, 255, 0.1), transparent 32%),
+    radial-gradient(circle at 52% 76%, rgba(120, 164, 255, 0.09), transparent 38%);
+  filter: blur(18px);
+  opacity: 0.55;
+}
+
+.classic-star-dot {
+  position: absolute;
+  z-index: 2;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 7px rgba(225, 237, 255, 0.5), 0 0 13px rgba(167, 199, 255, 0.18);
+  will-change: opacity, transform;
+}
+
+.classic-star-dot-twinkle {
+  animation-name: classic-star-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes classic-star-twinkle {
+  0%, 100% {
+    opacity: 0.26;
+    transform: scale(0.88);
+  }
+  45% {
+    opacity: 0.95;
+    transform: scale(1.18);
+  }
+}
+
+.classic-star-meteor {
+  position: absolute;
+  left: var(--start-x, 102%);
+  top: var(--start-y, -24%);
+  z-index: 4;
+  width: var(--trail, 130px);
+  height: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.8) 22%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  box-shadow: 0 0 16px rgba(194, 225, 255, 0.9), 0 0 26px rgba(146, 194, 255, 0.5);
+  filter: drop-shadow(0 0 8px rgba(207, 232, 255, 0.75));
+  z-index: 3;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: classic-star-meteor-diagonal var(--duration, 6s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.classic-star-meteor::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px #fff;
+}
+
+@keyframes classic-star-meteor-diagonal {
+  0% {
+    left: var(--start-x, 102%);
+    top: var(--start-y, -24%);
+    transform: rotate(var(--angle, 112deg));
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.95;
+  }
+  38% {
+    left: var(--end-x, 64%);
+    top: var(--end-y, 118%);
+    transform: rotate(var(--angle, 112deg));
+    opacity: 0;
+  }
+  100% {
+    left: var(--end-x, 64%);
+    top: var(--end-y, 118%);
+    transform: rotate(var(--angle, 112deg));
+    opacity: 0;
+  }
+}

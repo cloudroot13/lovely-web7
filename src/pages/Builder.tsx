@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { ChatBubble } from '../components/ChatBubble'
 import { useAppContext } from '../context/appStore'
 import ClassicNormalBuilder from './ClassicNormalBuilder'
+import ClassicNetflixBuilder from './ClassicNetflixBuilder'
 import type { LoveData, MomentHighlight } from '../types/types'
+import { readFileAsDataUrl } from '../utils/file'
 
 type QuestionKind = 'text' | 'music' | 'gallery' | 'number' | 'date' | 'datetime' | 'photo'
 
@@ -227,6 +229,7 @@ export default function Builder() {
   const navigate = useNavigate()
   const { config, setLoveData, loveData } = useAppContext()
   const isClassicNormalFlow = config.mode === 'classic' && config.variant === 'normal'
+  const isClassicNetflixFlow = config.mode === 'classic' && config.variant === 'netflix'
   const isLovelyflixFlow = config.mode === 'wrapped' && config.variant === 'stories'
   const isJornadaFlow = config.mode === 'wrapped' && config.variant === 'jornada'
   const isGameFlow = config.mode === 'wrapped' && config.variant === 'game'
@@ -418,21 +421,22 @@ export default function Builder() {
     moveNext()
   }
 
-  const handleMainPhotoFile = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMainPhotoFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) {
       return
     }
-    setPhotoDataUrl(URL.createObjectURL(file))
+    const dataUrl = await readFileAsDataUrl(file)
+    setPhotoDataUrl(dataUrl)
   }
 
-  const handleMomentPhotoFile = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMomentPhotoFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) {
       return
     }
 
-    const url = URL.createObjectURL(file)
+    const url = await readFileAsDataUrl(file)
     if (currentQuestion.id === 'momentoEspecialFoto') {
       setMomentoEspecialFotoDataUrl(url)
     } else if (currentQuestion.id === 'atividadeFoto') {
@@ -440,7 +444,7 @@ export default function Builder() {
     }
   }
 
-  const handleExtraStoriesFiles = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleExtraStoriesFiles = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) {
       return
@@ -476,7 +480,7 @@ export default function Builder() {
     }
 
     const limited = uniqueBatch.slice(0, remainingPhotos)
-    const nextUrls = limited.map((file) => URL.createObjectURL(file))
+    const nextUrls = await Promise.all(limited.map((file) => readFileAsDataUrl(file)))
     const nextKeys = limited.map((file) => `${file.name}-${file.size}-${file.lastModified}`)
     setStoriesDataUrls((prev) => [...prev, ...nextUrls])
     setStoriesImageKeys((prev) => [...prev, ...nextKeys])
@@ -556,10 +560,14 @@ export default function Builder() {
     }
 
     messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
-  }, [messages])
+  }, [isClassicNormalFlow, messages])
 
   if (isClassicNormalFlow) {
     return <ClassicNormalBuilder />
+  }
+
+  if (isClassicNetflixFlow) {
+    return <ClassicNetflixBuilder />
   }
 
   return (

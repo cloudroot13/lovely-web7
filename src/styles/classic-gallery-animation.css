@@ -1,0 +1,4 @@
+@keyframes classicFlipFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+}

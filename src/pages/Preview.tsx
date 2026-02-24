@@ -21,7 +21,7 @@ export default function Preview() {
         </Link>
       </div>
 
-      {config.mode === 'classic' && config.variant === 'normal' && <ClassicNormal loveData={loveData} theme={config.theme} />}
+      {config.mode === 'classic' && config.variant === 'normal' && <ClassicNormal loveData={loveData} />}
       {config.mode === 'classic' && config.variant === 'netflix' && <ClassicNetflix loveData={loveData} />}
       {config.mode === 'wrapped' && config.variant === 'stories' && <WrappedStories loveData={loveData} theme={config.theme} />}
       {config.mode === 'wrapped' && config.variant === 'spotify' && <LovelyfyWrapped loveData={loveData} />}

@@ -6,6 +6,10 @@ export type WrappedVariant = 'stories' | 'spotify' | 'jornada' | 'game'
 
 export interface MomentHighlight {
   text: string
+  id?: string
+  date?: string
+  title?: string
+  message?: string
   imageDataUrl: string
 }
 
@@ -17,7 +21,9 @@ export interface LoveData {
   classicMessage: string
   classicCounterStyle: 'default' | 'classic' | 'simple'
   classicPhotoDisplay: 'coverflow' | 'cube' | 'cards' | 'flip'
-  classicBackgroundAnimation: 'none' | 'hearts' | 'stars_comets' | 'stars_meteors' | 'clouds'
+  classicBackgroundAnimation: 'none' | 'hearts' | 'stars_meteors' | 'clouds'
+  classicMemoriesTitle: string
+  classicMemoriesBannerDataUrl: string
   comoConheceram: string
   momentoEspecial: string
   atividadeJuntos: string

@@ -28,9 +28,16 @@ function normalizeWords(raw: string, difficulty: Difficulty) {
   return cleaned.length > 0 ? [...cleaned, ...fallback].slice(0, target) : fallback
 }
 
-function parseWheelOptions() {
+function parseWheelOptions(raw: string) {
   const fallback = ['Seu abraço', 'Seu sorriso', 'Ver filmes com você', 'Seu olhar', 'Seu jeitinho', 'Seu carinho', 'Nossas risadas', 'Nossos planos']
-  return fallback
+  const parsed = raw
+    .split(/[,\n;]+/)
+    .map((item) => item.trim())
+    .filter((item) => item.length >= 3)
+  if (!parsed.length) {
+    return fallback
+  }
+  return Array.from(new Set([...parsed, ...fallback])).slice(0, 8)
 }
 
 function formatWheelLabel(label: string) {
@@ -173,12 +180,6 @@ export function WrappedGameExperience() {
   const currentStory = stories[storyIdx]
 
   useEffect(() => {
-    if (!(config.mode === 'wrapped' && config.variant === 'game')) {
-      return
-    }
-  }, [config.mode, config.variant])
-
-  useEffect(() => {
     if (config.mode !== 'wrapped' || config.variant !== 'game') {
       navigate('/choose-mode', { replace: true })
     }
@@ -197,7 +198,7 @@ export function WrappedGameExperience() {
 
   const wordsFromChat = useMemo(() => toGridWords(normalizeWords(loveData.momentoEspecial || '', difficulty)), [loveData.momentoEspecial, difficulty])
   const themeFromChat = useMemo(() => (loveData.oQueMaisAmo || 'O que mais gosto em você').trim(), [loveData.oQueMaisAmo])
-  const wheelOptions = useMemo(() => parseWheelOptions(), [])
+  const wheelOptions = useMemo(() => parseWheelOptions(loveData.atividadeJuntos || ''), [loveData.atividadeJuntos])
   const searchWords = useMemo(() => {
     const fixed = difficulty === 'hard'
       ? ['SORRISO', 'CABELO', 'PIADAS', 'ABRACO', 'OLHAR']
@@ -271,11 +272,6 @@ export function WrappedGameExperience() {
 
   useEffect(() => {
     if (step !== 'stories') return
-    setStoryProgress(0)
-  }, [step, currentStory, stories.length])
-
-  useEffect(() => {
-    if (step !== 'stories') return
 
     let raf = 0
     const startedAt = performance.now()
@@ -297,21 +293,24 @@ export function WrappedGameExperience() {
   useEffect(() => {
     const start = loveData.startDate ? new Date(`${loveData.startDate}T00:00:00`) : null
     if (!start || Number.isNaN(start.getTime())) {
-      setMinutesTogetherLive(0)
-      return
+      const reset = window.setTimeout(() => setMinutesTogetherLive(0), 0)
+      return () => window.clearTimeout(reset)
     }
     const compute = () => Math.max(0, Math.floor((Date.now() - start.getTime()) / 60000))
-    setMinutesTogetherLive(compute())
+    const prime = window.setTimeout(() => setMinutesTogetherLive(compute()), 0)
     const intervalId = window.setInterval(() => setMinutesTogetherLive(compute()), 60000)
-    return () => window.clearInterval(intervalId)
+    return () => {
+      window.clearTimeout(prime)
+      window.clearInterval(intervalId)
+    }
   }, [loveData.startDate])
 
   useEffect(() => {
     if (currentStory !== 's8') return
     const target = minutesTogetherLive
     if (target <= 0) {
-      setMinutesCounter(0)
-      return
+      const reset = window.setTimeout(() => setMinutesCounter(0), 0)
+      return () => window.clearTimeout(reset)
     }
     let raf = 0
     const start = performance.now()
@@ -439,11 +438,13 @@ export function WrappedGameExperience() {
     if (currentStory !== 's4') return
     const seqSize = difficulty === 'hard' ? 4 : 3
     const seq = Array.from({ length: seqSize }).map(() => Math.floor(Math.random() * 6))
-    setChallengeSequence(seq)
-    setChallengeActiveStep(-1)
-    setChallengeInputIdx(0)
-    setChallengeDone(false)
-    setChallengeMessage('Memorize a sequência e repita.')
+    const boot = window.setTimeout(() => {
+      setChallengeSequence(seq)
+      setChallengeActiveStep(-1)
+      setChallengeInputIdx(0)
+      setChallengeDone(false)
+      setChallengeMessage('Memorize a sequência e repita.')
+    }, 0)
     let step = 0
     const interval = window.setInterval(() => {
       setChallengeActiveStep(seq[step])
@@ -453,7 +454,10 @@ export function WrappedGameExperience() {
         window.setTimeout(() => setChallengeActiveStep(-1), 450)
       }
     }, 700)
-    return () => window.clearInterval(interval)
+    return () => {
+      window.clearTimeout(boot)
+      window.clearInterval(interval)
+    }
   }, [currentStory, difficulty])
 
   const onChallengeTap = (idx: number) => {
@@ -580,7 +584,14 @@ export function WrappedGameExperience() {
                       ? 'Fácil: dicas no caça-palavras e desafio mais simples.'
                       : 'Difícil: 5 palavras e sequência maior no desafio.'}
                   </p>
-                  <button type="button" className="game-button" onClick={() => setStoryIdx(1)}>
+                  <button
+                    type="button"
+                    className="game-button"
+                    onClick={() => {
+                      setStoryIdx(1)
+                      setStoryProgress(0)
+                    }}
+                  >
                     Continuar
                   </button>
                 </div>

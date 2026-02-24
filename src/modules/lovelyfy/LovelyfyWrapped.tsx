@@ -113,7 +113,7 @@ function formatDate(dateString: string) {
   })
 }
 
-function getSlideDuration(_story: StoryItem) {
+function getSlideDuration() {
   return WRAPPED_STORY_DURATION_MS
 }
 
@@ -200,7 +200,7 @@ function getRelationshipElapsedSeconds(data: LoveData, nowMs: number) {
   return fallbackDays * 24 * 60 * 60
 }
 
-function IntroScreen({ onStart }: { onStart: () => void }) {
+function IntroScreen({ onStart, creatorName }: { onStart: () => void; creatorName: string }) {
   return (
     <div className="min-h-screen w-full bg-linear-to-b from-black via-black to-green-950/30 px-6 text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-md items-center justify-center">
@@ -212,7 +212,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         >
           <div className="space-y-6">
             <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl">
-              Leonardo separou um <span className="text-green-500">presente</span> especial!
+              {creatorName} separou um <span className="text-green-500">presente</span> especial!
             </h1>
 
             <p className="text-base leading-relaxed text-white/70">
@@ -382,12 +382,12 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
   }, [embedUrl, extraMoments, highlightMoments, loveData, photoPool])
 
   const current = stories[step]
-  const currentDuration = getSlideDuration(current)
+  const currentDuration = getSlideDuration()
 
-  const relationDays = useMemo(() => getRelationshipDays(loveData), [loveData.startDate, loveData.anos, loveData.meses, loveData.dias])
+  const relationDays = useMemo(() => getRelationshipDays(loveData), [loveData])
   const relationshipElapsedSeconds = useMemo(
     () => getRelationshipElapsedSeconds(loveData, nowMs),
-    [loveData.startDate, loveData.anos, loveData.meses, loveData.dias, nowMs],
+    [loveData, nowMs],
   )
   const relationshipClock = useMemo(
     () => splitDuration(relationshipElapsedSeconds),
@@ -413,6 +413,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
 
     return first || second || 'Nosso Amor'
   }, [loveData.apelido, loveData.nomePessoa])
+  const creatorName = useMemo(() => loveData.nomeCriador?.trim() || 'Alguém especial', [loveData.nomeCriador])
   const storyMotion = useMemo(() => getStoryMotion(), [])
   const chapterAlignClass = useMemo(() => getTextAlignmentClass(step), [step])
   const lockNavigation = useCallback((ms = 280) => {
@@ -422,15 +423,20 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
 
   useEffect(() => {
     if (current.type !== 'love') {
-      setTypedLoveText('')
-      setLoveTypingDone(false)
-      return
+      const reset = window.setTimeout(() => {
+        setTypedLoveText('')
+        setLoveTypingDone(false)
+      }, 0)
+      return () => window.clearTimeout(reset)
     }
 
-    let index = 0
     const text = current.phrase || ''
-    setTypedLoveText('')
-    setLoveTypingDone(text.length === 0)
+    const prime = window.setTimeout(() => {
+      setTypedLoveText('')
+      setLoveTypingDone(text.length === 0)
+    }, 0)
+
+    let index = 0
     const perCharDelay = Math.min(170, Math.max(55, Math.floor(3000 / Math.max(1, text.length))))
 
     const interval = window.setInterval(() => {
@@ -443,9 +449,48 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
     }, perCharDelay)
 
     return () => {
+      window.clearTimeout(prime)
       window.clearInterval(interval)
     }
   }, [current.id, current.phrase, current.type])
+
+  useEffect(() => {
+    if (!current.image || current.type === 'player' || current.type === 'moments_intro') {
+      const ready = window.setTimeout(() => setCurrentMediaReady(true), 0)
+      return () => window.clearTimeout(ready)
+    }
+
+    const markNotReady = window.setTimeout(() => setCurrentMediaReady(false), 0)
+    const img = new Image()
+
+    const markReady = () => setCurrentMediaReady(true)
+    img.addEventListener('load', markReady)
+    img.addEventListener('error', markReady)
+    img.src = current.image
+
+    if (img.complete) {
+      window.setTimeout(() => setCurrentMediaReady(true), 0)
+    }
+
+    return () => {
+      window.clearTimeout(markNotReady)
+      img.removeEventListener('load', markReady)
+      img.removeEventListener('error', markReady)
+    }
+  }, [current.id, current.image, current.type])
+
+  useEffect(() => {
+    if (!started || step === 0 || hasShownTapHintRef.current) {
+      return
+    }
+    const showHint = window.setTimeout(() => setShowTapHint(true), 0)
+    hasShownTapHintRef.current = true
+    const timeout = window.setTimeout(() => setShowTapHint(false), 5000)
+    return () => {
+      window.clearTimeout(showHint)
+      window.clearTimeout(timeout)
+    }
+  }, [started, step])
 
   useEffect(() => {
     if (
@@ -474,30 +519,6 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
 
     return () => window.clearInterval(interval)
   }, [current.type, currentDuration, currentMediaReady, isNavigationLocked, lockNavigation, loveTypingDone, paused, started, stories.length])
-
-  useEffect(() => {
-    if (!current.image || current.type === 'player' || current.type === 'moments_intro') {
-      setCurrentMediaReady(true)
-      return
-    }
-
-    setCurrentMediaReady(false)
-    const img = new Image()
-
-    const markReady = () => setCurrentMediaReady(true)
-    img.addEventListener('load', markReady)
-    img.addEventListener('error', markReady)
-    img.src = current.image
-
-    if (img.complete) {
-      setCurrentMediaReady(true)
-    }
-
-    return () => {
-      img.removeEventListener('load', markReady)
-      img.removeEventListener('error', markReady)
-    }
-  }, [current.id, current.image, current.type])
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -552,19 +573,8 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
 
   const handleHoldEnd = useCallback(() => setPaused(false), [])
 
-  useEffect(() => {
-    if (!started || step === 0 || hasShownTapHintRef.current) {
-      return
-    }
-
-    hasShownTapHintRef.current = true
-    setShowTapHint(true)
-    const timeout = window.setTimeout(() => setShowTapHint(false), 5000)
-    return () => window.clearTimeout(timeout)
-  }, [started, step])
-
   if (showIntro) {
-    return <IntroScreen onStart={() => setShowIntro(false)} />
+    return <IntroScreen onStart={() => setShowIntro(false)} creatorName={creatorName} />
   }
 
   return (

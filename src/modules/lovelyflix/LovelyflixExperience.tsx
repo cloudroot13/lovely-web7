@@ -288,7 +288,7 @@ export default function LovelyflixExperience() {
   const detailNarrative = useMemo(() => (selected ? buildDetailNarrative(selected, loveData) : ''), [selected, loveData])
   const relationshipCounter = useMemo(
     () => splitDuration(getRelationshipElapsedSeconds(loveData, nowMs)),
-    [loveData.startDate, loveData.anos, loveData.meses, loveData.dias, nowMs],
+    [loveData, nowMs],
   )
   const relationshipStartLabel = useMemo(() => getStartDateLabel(loveData.startDate), [loveData.startDate])
 

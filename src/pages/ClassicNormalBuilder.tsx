@@ -1,6 +1,12 @@
-import { useMemo, useState, type ChangeEvent } from 'react'
+import { useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../context/appStore'
+import { buildSpotifyTrackEmbedUrl } from '../utils/spotify'
+import { readFileAsDataUrl } from '../utils/file'
+import '../styles/classic-hearts-animation.css'
+import '../styles/classic-cloud-animation.css'
+import '../styles/classic-stars-meteors-animation.css'
+import '../styles/classic-gallery-animation.css'
 
 const steps = [
   { id: 'title', label: 'Titulo da pagina' },
@@ -8,17 +14,21 @@ const steps = [
   { id: 'counter', label: 'Contador' },
   { id: 'photos', label: 'Fotos' },
   { id: 'music', label: 'Iframe de musica' },
+  { id: 'memories', label: 'Memórias' },
   { id: 'background', label: 'Animacao de fundo' },
 ] as const
 
-type BackgroundMode = 'none' | 'hearts' | 'stars_comets' | 'stars_meteors' | 'clouds'
+type BackgroundMode = 'none' | 'hearts' | 'stars_meteors' | 'clouds'
 type PhotoMode = 'coverflow' | 'cube' | 'cards' | 'flip'
+const CLASSIC_MAX_TOTAL_PHOTOS = 6
+const CLASSIC_MAX_EXTRA_PHOTOS = 5
+const CLASSIC_MAX_MEMORIES = 8
 
 type StepId = (typeof steps)[number]['id']
 
-function extractTrackId(url: string) {
-  const match = url.match(/spotify\.com\/track\/([a-zA-Z0-9]+)/)
-  return match?.[1] ?? ''
+function seeded(index: number, multiplier: number, offset = 0) {
+  const raw = Math.sin((index + 1) * multiplier + offset) * 10000
+  return raw - Math.floor(raw)
 }
 
 function buildClock(startDate: string, yearsFallback: number, monthsFallback: number, daysFallback: number) {
@@ -52,22 +62,22 @@ function buildClock(startDate: string, yearsFallback: number, monthsFallback: nu
 
 function BackgroundLayer({ mode }: { mode: BackgroundMode }) {
   if (mode === 'none') {
-    return <div className="absolute inset-0 bg-gradient-to-b from-[#131313] via-[#101010] to-[#080808]" />
+    return <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#09090b] via-[#0a0a0d] to-[#060609]" />
   }
 
   if (mode === 'hearts') {
     return (
-      <div className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#1a0f16] via-[#101014] to-[#080808]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_18%,rgba(255,90,165,0.2),transparent_38%),radial-gradient(circle_at_78%_78%,rgba(255,90,165,0.14),transparent_42%)]" />
-        {Array.from({ length: 22 }).map((_, idx) => (
+      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-gradient-to-b from-[#170d14] via-[#0f0d12] to-[#07070a]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_18%,rgba(255,70,152,0.22),transparent_40%),radial-gradient(circle_at_75%_72%,rgba(255,70,152,0.16),transparent_44%)]" />
+        {Array.from({ length: 30 }).map((_, idx) => (
           <span
             key={idx}
             className="absolute text-pink-300/70"
             style={{
-              left: `${(idx * 9) % 100}%`,
-              bottom: '-10%',
-              fontSize: `${10 + (idx % 4) * 5}px`,
-              animation: `classicHeartRise ${4.2 + (idx % 4) * 0.7}s ease-in-out ${idx * 0.12}s infinite`,
+              left: `${(idx * 7.4) % 100}%`,
+              bottom: '-12%',
+              fontSize: `${10 + (idx % 4) * 6}px`,
+              animation: `classicHeartRise ${4 + (idx % 5) * 0.6}s ease-in-out ${idx * 0.08}s infinite`,
             }}
           >
             ❤
@@ -78,50 +88,101 @@ function BackgroundLayer({ mode }: { mode: BackgroundMode }) {
   }
 
   if (mode === 'clouds') {
+    const cloudLayers = [
+      { key: 'back', className: 'classic-cloud-layer-back', count: 6, minTop: 12, maxTop: 42, minWidth: 190, maxWidth: 320, minOpacity: 0.24, maxOpacity: 0.4, minDuration: 82, maxDuration: 96 },
+      { key: 'mid', className: 'classic-cloud-layer-mid', count: 7, minTop: 26, maxTop: 68, minWidth: 150, maxWidth: 265, minOpacity: 0.32, maxOpacity: 0.5, minDuration: 56, maxDuration: 74 },
+      { key: 'front', className: 'classic-cloud-layer-front', count: 8, minTop: 44, maxTop: 88, minWidth: 120, maxWidth: 220, minOpacity: 0.4, maxOpacity: 0.58, minDuration: 34, maxDuration: 52 },
+    ] as const
+
     return (
-      <div className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#151825] via-[#0e1220] to-[#070a13]">
-        {Array.from({ length: 9 }).map((_, idx) => (
-          <span
-            key={idx}
-            className="absolute h-7 rounded-full bg-white/14 blur-sm"
-            style={{
-              width: `${58 + (idx % 4) * 22}px`,
-              left: `${-16 + idx * 13}%`,
-              top: `${10 + (idx % 5) * 14}%`,
-              animation: `classicCloudDrift ${8 + (idx % 4) * 1.6}s linear ${idx * 0.14}s infinite`,
-            }}
-          />
+      <div className="classic-cloud-scene pointer-events-none absolute inset-0">
+        {cloudLayers.map((layer, layerIdx) => (
+          <div key={layer.key} className={`classic-cloud-layer ${layer.className}`}>
+            {Array.from({ length: layer.count }).map((_, idx) => {
+              const seedIndex = layerIdx * 40 + idx
+              const top = layer.minTop + seeded(seedIndex, 7.1, 0.6) * (layer.maxTop - layer.minTop)
+              const width = layer.minWidth + seeded(seedIndex, 5.3, 1.3) * (layer.maxWidth - layer.minWidth)
+              const opacity = layer.minOpacity + seeded(seedIndex, 8.6, 0.3) * (layer.maxOpacity - layer.minOpacity)
+              const driftDuration = layer.minDuration + seeded(seedIndex, 6.7, 0.2) * (layer.maxDuration - layer.minDuration)
+              const bobDuration = 8 + seeded(seedIndex, 2.8, 1.2) * 7
+              const delay = -seeded(seedIndex, 4.4, 0.1) * driftDuration
+
+              return (
+                <div
+                  key={`${layer.key}-${idx}`}
+                  className="classic-cloud-item"
+                  style={{
+                    top: `${top}%`,
+                    width: `${width}px`,
+                    opacity,
+                    animationDuration: `${driftDuration}s`,
+                    animationDelay: `${delay}s`,
+                  }}
+                >
+                  <div className="classic-cloud-body" style={{ animation: `classic-cloud-float ${bobDuration}s ease-in-out ${delay * 0.4}s infinite` }}>
+                    <span className="classic-cloud-puff classic-cloud-puff-a" />
+                    <span className="classic-cloud-puff classic-cloud-puff-b" />
+                    <span className="classic-cloud-puff classic-cloud-puff-c" />
+                    <span className="classic-cloud-puff classic-cloud-puff-d" />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         ))}
       </div>
     )
   }
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#121726] via-[#0b0e17] to-[#06070b]">
-      {Array.from({ length: 48 }).map((_, idx) => (
-        <span
-          key={`star-${idx}`}
-          className="absolute h-[2px] w-[2px] rounded-full bg-white"
-          style={{
-            left: `${4 + (idx % 12) * 8}%`,
-            top: `${5 + Math.floor(idx / 12) * 20}%`,
-            opacity: 0.25 + (idx % 5) * 0.14,
-            animation: `classicStarTwinkle ${2.2 + (idx % 4) * 0.9}s ease-in-out ${idx * 0.07}s infinite`,
-          }}
-        />
-      ))}
-      {Array.from({ length: mode === 'stars_comets' ? 3 : 5 }).map((_, idx) => (
+    <div className="classic-star-scene pointer-events-none absolute inset-0">
+      <div className="classic-star-haze" />
+      {Array.from({ length: 240 }).map((_, idx) => {
+        const x = seeded(idx, 37.91, 0.33) * 100
+        const y = seeded(idx, 19.73, 0.92) * 100
+        const size = 1 + Math.floor(seeded(idx, 12.77, 0.41) * 3)
+        const opacity = 0.18 + seeded(idx, 8.27, 0.14) * 0.72
+        const twinkleDuration = 2.2 + seeded(idx, 6.13, 0.25) * 3.8
+        const twinkleDelay = seeded(idx, 9.27, 0.73) * 3.2
+        const shouldTwinkle = idx % 3 !== 0
+
+        return (
+          <span
+            key={`star-${idx}`}
+            className={`classic-star-dot ${shouldTwinkle ? 'classic-star-dot-twinkle' : ''}`}
+            style={{
+              left: `${x}%`,
+              top: `${y}%`,
+              width: `${size}px`,
+              height: `${size}px`,
+              opacity,
+              animationDuration: shouldTwinkle ? `${twinkleDuration}s` : undefined,
+              animationDelay: shouldTwinkle ? `${twinkleDelay}s` : undefined,
+            }}
+          />
+        )
+      })}
+      {Array.from({ length: 10 }).map((_, idx) => {
+        const startX = -8 + seeded(idx, 3.83, 0.2) * 128
+        const endX = startX - (10 + seeded(idx, 4.61, 0.4) * 26)
+
+        return (
         <span
           key={`meteor-${idx}`}
-          className="absolute h-px w-16 bg-gradient-to-r from-white/0 to-white/90"
+          className="classic-star-meteor"
           style={{
-            left: `${8 + idx * 16}%`,
-            top: `${18 + idx * 11}%`,
-            transform: 'rotate(-30deg)',
-            animation: `classicMeteorTrail ${3.8 + idx * 0.55}s linear ${idx * 0.4}s infinite`,
+            ['--start-x' as string]: `${startX}%`,
+            ['--start-y' as string]: `${-28 + seeded(idx, 5.27, 0.8) * 20}%`,
+            ['--end-x' as string]: `${endX}%`,
+            ['--end-y' as string]: `${102 + seeded(idx, 7.11, 0.3) * 24}%`,
+            ['--trail' as string]: `${84 + seeded(idx, 2.37, 0.7) * 48}px`,
+            ['--angle' as string]: `${108 + seeded(idx, 8.3, 0.2) * 12}deg`,
+            ['--duration' as string]: `${5.4 + seeded(idx, 2.17, 0.9) * 3.6}s`,
+            ['--delay' as string]: `${idx * 0.44 + seeded(idx, 1.71, 0.6) * 1.8}s`,
           }}
         />
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -196,11 +257,17 @@ export default function ClassicNormalBuilder() {
   const { loveData, setLoveData } = useAppContext()
   const [stepIndex, setStepIndex] = useState(0)
   const [photoKeys, setPhotoKeys] = useState<string[]>([])
+  const addOnePhotoInputRef = useRef<HTMLInputElement | null>(null)
+  const [memoryDate, setMemoryDate] = useState('')
+  const [memoryTitle, setMemoryTitle] = useState('')
+  const [memoryMessage, setMemoryMessage] = useState('')
+  const [memoryImageDataUrl, setMemoryImageDataUrl] = useState('')
+  const [memoryImageName, setMemoryImageName] = useState('')
+  const [memoryError, setMemoryError] = useState('')
 
   const clock = useMemo(() => buildClock(loveData.startDate, loveData.anos, loveData.meses, loveData.dias), [loveData.startDate, loveData.anos, loveData.meses, loveData.dias])
 
-  const trackId = extractTrackId(loveData.musicaSpotifyUrl)
-  const embedUrl = trackId ? `https://open.spotify.com/embed/track/${trackId}` : null
+  const embedUrl = buildSpotifyTrackEmbedUrl(loveData.musicaSpotifyUrl)
 
   const next = () => {
     if (stepIndex >= steps.length - 1) {
@@ -213,13 +280,16 @@ export default function ClassicNormalBuilder() {
   const prev = () => setStepIndex((prev) => Math.max(0, prev - 1))
   const current = steps[stepIndex].id as StepId
 
-  const onMainPhoto = (event: ChangeEvent<HTMLInputElement>) => {
+  const onMainPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-    setLoveData({ fotoCasalDataUrl: URL.createObjectURL(file) })
+    const cappedExtras = loveData.storiesImagesDataUrls.slice(0, CLASSIC_MAX_EXTRA_PHOTOS)
+    setPhotoKeys((prev) => prev.slice(0, CLASSIC_MAX_EXTRA_PHOTOS))
+    const dataUrl = await readFileAsDataUrl(file)
+    setLoveData({ fotoCasalDataUrl: dataUrl, storiesImagesDataUrls: cappedExtras, totalPhotos: cappedExtras.length + 1 })
   }
 
-  const onExtraPhotos = (event: ChangeEvent<HTMLInputElement>) => {
+  const onExtraPhotos = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files?.length) return
 
@@ -231,14 +301,14 @@ export default function ClassicNormalBuilder() {
     for (const file of Array.from(files)) {
       const key = `${file.name}-${file.size}-${file.lastModified}`
       if (existingKeys.has(key)) continue
-      if (nextUrls.length >= 8) break
+      if (nextUrls.length >= CLASSIC_MAX_EXTRA_PHOTOS) break
       existingKeys.add(key)
       nextKeys.push(key)
-      nextUrls.push(URL.createObjectURL(file))
+      nextUrls.push(await readFileAsDataUrl(file))
     }
 
     setPhotoKeys(nextKeys)
-    setLoveData({ storiesImagesDataUrls: nextUrls, totalPhotos: nextUrls.length })
+    setLoveData({ storiesImagesDataUrls: nextUrls, totalPhotos: nextUrls.length + (loveData.fotoCasalDataUrl ? 1 : 0) })
     event.target.value = ''
   }
 
@@ -246,16 +316,88 @@ export default function ClassicNormalBuilder() {
     const nextUrls = loveData.storiesImagesDataUrls.filter((_, idx) => idx !== index)
     const nextKeys = photoKeys.filter((_, idx) => idx !== index)
     setPhotoKeys(nextKeys)
-    setLoveData({ storiesImagesDataUrls: nextUrls, totalPhotos: nextUrls.length })
+    setLoveData({ storiesImagesDataUrls: nextUrls, totalPhotos: nextUrls.length + (loveData.fotoCasalDataUrl ? 1 : 0) })
   }
 
-  const previewImages = [loveData.fotoCasalDataUrl, ...loveData.storiesImagesDataUrls].filter(Boolean)
+  const onMemoriesBanner = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const dataUrl = await readFileAsDataUrl(file)
+    setLoveData({ classicMemoriesBannerDataUrl: dataUrl })
+  }
+
+  const onMemoryImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setMemoryImageName(file.name)
+    const dataUrl = await readFileAsDataUrl(file)
+    setMemoryImageDataUrl(dataUrl)
+    setMemoryError('')
+    event.target.value = ''
+  }
+
+  const addMemory = () => {
+    const resolvedMemoryImage =
+      memoryImageDataUrl ||
+      loveData.classicMemoriesBannerDataUrl ||
+      loveData.fotoCasalDataUrl ||
+      loveData.storiesImagesDataUrls[0] ||
+      ''
+    const missing: string[] = []
+    if (!memoryDate) missing.push('data')
+    if (!memoryTitle.trim()) missing.push('titulo')
+    if (!resolvedMemoryImage) missing.push('foto da memoria (campo abaixo, banner, ou foto principal)')
+    if (missing.length > 0) {
+      setMemoryError(`Falta preencher: ${missing.join(', ')}.`)
+      return
+    }
+    if (loveData.momentHighlights.length >= CLASSIC_MAX_MEMORIES) return
+
+    const next = [
+      ...loveData.momentHighlights,
+      {
+        text: memoryMessage.trim() || memoryTitle.trim(),
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        date: memoryDate,
+        title: memoryTitle.trim(),
+        message: memoryMessage.trim(),
+        imageDataUrl: resolvedMemoryImage,
+      },
+    ].sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''))
+
+    setLoveData({ momentHighlights: next })
+    setMemoryDate('')
+    setMemoryTitle('')
+    setMemoryMessage('')
+    setMemoryImageDataUrl('')
+    setMemoryImageName('')
+    setMemoryError('')
+  }
+
+  const removeMemoryAt = (indexToRemove: number) => {
+    setLoveData({ momentHighlights: loveData.momentHighlights.filter((_, index) => index !== indexToRemove) })
+  }
+
+  const clearAllMemories = () => {
+    setLoveData({ momentHighlights: [] })
+  }
+
+  const triggerAddOnePhoto = () => {
+    if (loveData.storiesImagesDataUrls.length >= CLASSIC_MAX_EXTRA_PHOTOS) {
+      return
+    }
+    addOnePhotoInputRef.current?.click()
+  }
+
+  const previewImages = [loveData.fotoCasalDataUrl, ...loveData.storiesImagesDataUrls].filter(Boolean).slice(0, CLASSIC_MAX_TOTAL_PHOTOS)
+  const remainingExtraPhotos = Math.max(0, CLASSIC_MAX_EXTRA_PHOTOS - loveData.storiesImagesDataUrls.length)
 
   const showTitle = stepIndex >= 0 && Boolean(loveData.classicTitle.trim())
   const showMessage = stepIndex >= 1 && Boolean(loveData.classicMessage.trim())
   const showCounter = stepIndex >= 2 && Boolean(loveData.startDate || loveData.anos || loveData.meses || loveData.dias)
   const showPhotos = stepIndex >= 3 && previewImages.length > 0
   const showMusic = stepIndex >= 4 && Boolean(embedUrl)
+  const showMemoriesButton = stepIndex >= 5 && loveData.momentHighlights.length > 0
 
   return (
     <main className="min-h-dvh bg-[#050506] text-white">
@@ -329,8 +471,23 @@ export default function ClassicNormalBuilder() {
               </label>
 
               <label className="block rounded-xl border border-dashed border-zinc-600 bg-[#16161a] p-4">
-                <p className="text-sm text-zinc-300">Fotos extras (ate 8)</p>
+                <p className="text-sm text-zinc-300">Fotos extras (ate {CLASSIC_MAX_EXTRA_PHOTOS}, total da pagina: {CLASSIC_MAX_TOTAL_PHOTOS})</p>
                 <input type="file" accept="image/*" multiple onChange={onExtraPhotos} className="mt-3 block w-full text-xs" />
+                <p className="mt-2 text-xs text-zinc-400">
+                  {loveData.storiesImagesDataUrls.length}/{CLASSIC_MAX_EXTRA_PHOTOS} adicionadas
+                  {remainingExtraPhotos > 0 ? ` (${remainingExtraPhotos} restantes)` : ' (limite atingido)'}
+                </p>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={triggerAddOnePhoto}
+                    disabled={remainingExtraPhotos === 0}
+                    className="rounded-lg border border-pink-400/60 bg-pink-500/15 px-3 py-2 text-sm font-semibold text-pink-100 transition hover:bg-pink-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Adicionar mais uma
+                  </button>
+                  <input ref={addOnePhotoInputRef} type="file" accept="image/*" onChange={onExtraPhotos} className="hidden" />
+                </div>
               </label>
 
               {loveData.storiesImagesDataUrls.length > 0 && (
@@ -368,8 +525,120 @@ export default function ClassicNormalBuilder() {
                 value={loveData.musicaSpotifyUrl}
                 onChange={(event) => setLoveData({ musicaSpotifyUrl: event.target.value, musicaSource: 'spotify_link' })}
                 className="w-full rounded-xl border border-zinc-700 bg-[#16161a] px-4 py-3 text-base outline-none focus:border-pink-400"
-                placeholder="https://open.spotify.com/track/..."
+                placeholder="https://open.spotify.com/track/... ou spotify:track:..."
               />
+              {!embedUrl && loveData.musicaSpotifyUrl.trim() && (
+                <p className="text-xs text-amber-300">Link invalido. Use um link de track do Spotify.</p>
+              )}
+            </div>
+          )}
+
+          {current === 'memories' && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-zinc-300">Titulo das memorias</p>
+                <input
+                  value={loveData.classicMemoriesTitle}
+                  onChange={(event) => setLoveData({ classicMemoriesTitle: event.target.value })}
+                  className="mt-2 w-full rounded-xl border border-zinc-700 bg-[#16161a] px-4 py-3 text-base outline-none focus:border-pink-400"
+                  placeholder="Ex: Nossa historia"
+                />
+              </div>
+
+              <label className="block rounded-xl border border-dashed border-zinc-600 bg-[#16161a] p-4">
+                <p className="text-sm text-zinc-300">Banner de fundo (opcional)</p>
+                <input type="file" accept="image/*" onChange={onMemoriesBanner} className="mt-3 block w-full text-xs" />
+              </label>
+
+              <div className="rounded-xl border border-dashed border-zinc-600 bg-[#111216] p-4">
+                <p className="text-sm text-zinc-300">Adicionar memoria</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <input
+                    type="date"
+                    value={memoryDate}
+                    onChange={(event) => {
+                      setMemoryDate(event.target.value)
+                      setMemoryError('')
+                    }}
+                    className="rounded-lg border border-zinc-700 bg-[#16161a] px-3 py-2 text-sm outline-none focus:border-pink-400"
+                  />
+                  <input
+                    value={memoryTitle}
+                    onChange={(event) => {
+                      setMemoryTitle(event.target.value)
+                      setMemoryError('')
+                    }}
+                    placeholder="Titulo"
+                    className="rounded-lg border border-zinc-700 bg-[#16161a] px-3 py-2 text-sm outline-none focus:border-pink-400"
+                  />
+                </div>
+                <textarea
+                  value={memoryMessage}
+                  onChange={(event) => {
+                    setMemoryMessage(event.target.value)
+                    setMemoryError('')
+                  }}
+                  placeholder="Mensagem (opcional)"
+                  className="mt-2 h-20 w-full rounded-lg border border-zinc-700 bg-[#16161a] px-3 py-2 text-sm outline-none focus:border-pink-400"
+                />
+                <input
+                  type="file"
+                  accept="image/*,.heic,.HEIC,.heif,.HEIF,.avif,.AVIF,.webp,.WEBP,.jfif,.JFIF,.png,.jpg,.jpeg,.gif,.bmp,.svg"
+                  onChange={onMemoryImage}
+                  className="mt-2 block w-full text-xs"
+                />
+                <p className="mt-1 text-[11px] text-zinc-400">Se nao escolher aqui, o banner sera usado automaticamente.</p>
+                {memoryImageDataUrl && (
+                  <div className="mt-2 flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-900/60 p-2">
+                    <img src={memoryImageDataUrl} alt="Preview memoria" className="h-10 w-10 rounded object-cover" />
+                    <p className="truncate text-xs text-zinc-300">{memoryImageName || 'Foto selecionada'}</p>
+                  </div>
+                )}
+                {!memoryImageDataUrl && loveData.classicMemoriesBannerDataUrl && (
+                  <p className="mt-2 text-xs text-zinc-300">Usando foto do banner para esta memoria.</p>
+                )}
+                {!memoryImageDataUrl && !loveData.classicMemoriesBannerDataUrl && loveData.fotoCasalDataUrl && (
+                  <p className="mt-2 text-xs text-zinc-300">Usando foto principal para esta memoria.</p>
+                )}
+                {memoryError && <p className="mt-2 text-xs text-amber-300">{memoryError}</p>}
+                <div className="mt-3 flex items-center justify-between">
+                  <p className="text-xs text-zinc-400">{loveData.momentHighlights.length}/{CLASSIC_MAX_MEMORIES} memorias</p>
+                  <button
+                    type="button"
+                    onClick={addMemory}
+                    disabled={loveData.momentHighlights.length >= CLASSIC_MAX_MEMORIES}
+                    className="rounded-lg border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm font-semibold text-zinc-100 transition hover:border-pink-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    + Adicionar memoria
+                  </button>
+                </div>
+              </div>
+
+              {loveData.momentHighlights.length > 0 && (
+                <>
+                  <div className="mb-2 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={clearAllMemories}
+                      className="rounded border border-zinc-600 bg-zinc-900 px-3 py-1 text-xs text-zinc-200 transition hover:border-pink-400"
+                    >
+                      Limpar memorias
+                    </button>
+                  </div>
+                  <div className="grid max-h-60 gap-2 overflow-y-auto rounded-xl border border-zinc-700 bg-[#111216] p-3">
+                    {loveData.momentHighlights.map((item, index) => (
+                      <div key={item.id ?? `legacy-${index}`} className="flex items-center gap-3 rounded-lg border border-zinc-700 bg-[#17181d] p-2">
+                        <img src={item.imageDataUrl} alt={item.title ?? item.text ?? 'Memoria'} className="h-12 w-12 rounded-md object-cover" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-zinc-100">{item.title ?? item.text ?? 'Memoria'}</p>
+                          <p className="text-xs text-zinc-400">{item.date ?? ''}</p>
+                        </div>
+                        <button type="button" onClick={() => removeMemoryAt(index)} className="rounded bg-black/60 px-2 py-1 text-xs">x</button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -380,7 +649,6 @@ export default function ClassicNormalBuilder() {
                 {[
                   { key: 'none', label: 'Nenhuma' },
                   { key: 'hearts', label: 'Chuva de coracoes' },
-                  { key: 'stars_comets', label: 'Ceu estrelado com cometas' },
                   { key: 'stars_meteors', label: 'Ceu estrelado com meteoros' },
                   { key: 'clouds', label: 'Nuvens' },
                 ].map((item) => (
@@ -412,7 +680,8 @@ export default function ClassicNormalBuilder() {
         <aside className="sticky top-4 hidden lg:block">
           <div className="mx-auto w-[392px] rounded-[44px] border border-zinc-700 bg-[#08080b] p-3 shadow-[0_0_50px_rgba(0,0,0,0.6)]">
             <div className="relative h-[720px] overflow-hidden rounded-[34px] border border-zinc-800 bg-[#101014]">
-              <BackgroundLayer mode={stepIndex >= 5 ? loveData.classicBackgroundAnimation : 'none'} />
+              <BackgroundLayer mode={stepIndex >= 6 ? loveData.classicBackgroundAnimation : 'none'} />
+              <div className="absolute inset-0 z-[3] bg-gradient-to-b from-black/55 via-black/45 to-black/70" />
 
               <div className="relative z-10 flex h-full flex-col px-5 py-8 text-center">
                 {showTitle && <h2 className="text-3xl font-black text-pink-400">{loveData.classicTitle}</h2>}
@@ -449,13 +718,24 @@ export default function ClassicNormalBuilder() {
                 )}
 
                 {showMusic && (
-                  <iframe
-                    src={embedUrl ?? undefined}
-                    className="mt-5 w-full rounded-2xl"
-                    height="152"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                  />
+                  <div className="mt-5 overflow-hidden rounded-2xl border border-white/15 bg-[#121212]">
+                    <iframe
+                      src={embedUrl ? `${embedUrl}?theme=0` : undefined}
+                      className="block w-full border-0 align-top"
+                      height="152"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+
+                {showMemoriesButton && (
+                  <button
+                    type="button"
+                    className="mx-auto mt-5 rounded-full bg-gradient-to-r from-[#ff4e8d] to-[#ff6a5a] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(255,90,150,0.5)]"
+                  >
+                    ✨ Ver memorias
+                  </button>
                 )}
               </div>
             </div>
