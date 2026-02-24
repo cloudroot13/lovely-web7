@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AppContext, type AppState } from './appStore'
 import type { AppConfig, LoveData } from '../types/types'
 
-const STORAGE_KEY = 'lovely-romance-app'
+const STORAGE_KEY = 'lovely-romance-app-v2'
+const LEGACY_STORAGE_KEY = 'lovely-romance-app'
 
 const initialConfig: AppConfig = {
   mode: 'classic',
@@ -44,44 +45,90 @@ const initialLoveData: LoveData = {
   dias: 0,
 }
 
-function getStoredState() {
-  const raw = localStorage.getItem(STORAGE_KEY)
+type StoredState = {
+  config: AppConfig
+  loveDataByKey: Record<string, LoveData>
+}
+
+function buildExperienceKey(config: AppConfig) {
+  return `${config.mode}:${config.variant}`
+}
+
+function normalizeLoveData(data?: LoveData) {
+  return { ...initialLoveData, ...(data ?? {}) }
+}
+
+function getStoredState(): StoredState {
+  const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY)
   if (!raw) {
-    return { config: initialConfig, loveData: initialLoveData }
+    return {
+      config: initialConfig,
+      loveDataByKey: { [buildExperienceKey(initialConfig)]: initialLoveData },
+    }
   }
 
   try {
-    const parsed = JSON.parse(raw) as { config?: AppConfig; loveData?: LoveData }
+    const parsed = JSON.parse(raw) as {
+      config?: AppConfig
+      loveData?: LoveData
+      loveDataByKey?: Record<string, LoveData>
+    }
+    const config = { ...initialConfig, ...parsed.config }
+    const fallbackKey = buildExperienceKey(config)
+    const baseMap = parsed.loveDataByKey
+      ? Object.fromEntries(Object.entries(parsed.loveDataByKey).map(([key, value]) => [key, normalizeLoveData(value)]))
+      : {}
+
+    if (!parsed.loveDataByKey && parsed.loveData) {
+      baseMap[fallbackKey] = normalizeLoveData(parsed.loveData)
+    }
+
+    if (!baseMap[fallbackKey]) {
+      baseMap[fallbackKey] = initialLoveData
+    }
+
     return {
-      config: { ...initialConfig, ...parsed.config },
-      loveData: { ...initialLoveData, ...parsed.loveData },
+      config,
+      loveDataByKey: baseMap,
     }
   } catch {
     localStorage.removeItem(STORAGE_KEY)
-    return { config: initialConfig, loveData: initialLoveData }
+    return {
+      config: initialConfig,
+      loveDataByKey: { [buildExperienceKey(initialConfig)]: initialLoveData },
+    }
   }
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [config, setConfigState] = useState<AppConfig>(() => getStoredState().config)
-  const [loveData, setLoveDataState] = useState<LoveData>(() => getStoredState().loveData)
+  const [loveDataByKey, setLoveDataByKey] = useState<Record<string, LoveData>>(() => getStoredState().loveDataByKey)
+  const experienceKey = useMemo(() => buildExperienceKey(config), [config])
+  const loveData = useMemo(() => normalizeLoveData(loveDataByKey[experienceKey]), [experienceKey, loveDataByKey])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ config, loveData }))
-  }, [config, loveData])
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ config, loveDataByKey }))
+  }, [config, loveDataByKey])
 
   const value = useMemo<AppState>(
     () => ({
       config,
       loveData,
       setConfig: (next) => setConfigState((prev) => ({ ...prev, ...next })),
-      setLoveData: (next) => setLoveDataState((prev) => ({ ...prev, ...next })),
+      setLoveData: (next) =>
+        setLoveDataByKey((prev) => ({
+          ...prev,
+          [experienceKey]: { ...normalizeLoveData(prev[experienceKey]), ...next },
+        })),
       resetAll: () => {
         setConfigState(initialConfig)
-        setLoveDataState(initialLoveData)
+        setLoveDataByKey((prev) => ({
+          ...prev,
+          [buildExperienceKey(initialConfig)]: initialLoveData,
+        }))
       },
     }),
-    [config, loveData],
+    [config, experienceKey, loveData, loveDataByKey],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
