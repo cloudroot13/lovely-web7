@@ -304,25 +304,31 @@ export default function LovelyflixExperience() {
       return () => window.clearTimeout(reset)
     }
 
-    const startedAt = Date.now()
-    const interval = window.setInterval(() => {
-      const elapsed = Date.now() - startedAt
+    setStoryProgress(0)
+    let raf = 0
+    const startedAt = performance.now()
+
+    const tick = (now: number) => {
+      const elapsed = now - startedAt
       const progress = Math.min(100, (elapsed / WRAPPED_STORY_DURATION_MS) * 100)
       setStoryProgress(progress)
 
       if (elapsed >= WRAPPED_STORY_DURATION_MS) {
-        window.clearInterval(interval)
         if (storyIndex >= content.stories.length - 1) {
           setScreen('home')
           setStoryIndex(0)
           return
         }
         setStoryIndex((prev) => prev + 1)
+        return
       }
-    }, 80)
 
-    return () => window.clearInterval(interval)
-  }, [screen, storyIndex, content.stories])
+      raf = window.requestAnimationFrame(tick)
+    }
+
+    raf = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(raf)
+  }, [screen, storyIndex, content.stories.length])
 
   useEffect(() => {
     if (screen !== 'stories') {
