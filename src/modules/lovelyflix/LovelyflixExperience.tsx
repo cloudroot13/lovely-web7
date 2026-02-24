@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { netflixAssets as lovelyflixAssets } from '../../assets/themes/themeAssets'
@@ -310,6 +310,7 @@ export default function LovelyflixExperience() {
   const [finalHeartGone, setFinalHeartGone] = useState(false)
   const [finalLoveWords, setFinalLoveWords] = useState<FinalLoveWord[]>([])
   const [finalLoveParticles, setFinalLoveParticles] = useState<FinalLoveParticle[]>([])
+  const statsAnimatedForRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (!(config.mode === 'wrapped' && config.variant === 'stories')) {
@@ -402,6 +403,11 @@ export default function LovelyflixExperience() {
       return
     }
 
+    if (statsAnimatedForRef.current === storyIndex) {
+      return
+    }
+    statsAnimatedForRef.current = storyIndex
+
     let frame = 0
     const duration = 1400
     const startedAt = performance.now()
@@ -415,12 +421,21 @@ export default function LovelyflixExperience() {
       setAnimatedMinutes(Math.floor(targetMinutes * eased))
       if (progress < 1) {
         frame = requestAnimationFrame(tick)
+      } else {
+        setAnimatedOutings(targetOutings)
+        setAnimatedMinutes(targetMinutes)
       }
     }
 
     frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
   }, [screen, storyIndex, metricsSnapshot, content.stories])
+
+  useEffect(() => {
+    if (screen !== 'stories') {
+      statsAnimatedForRef.current = null
+    }
+  }, [screen])
 
   useEffect(() => {
     if (screen !== 'stories') {

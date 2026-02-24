@@ -521,12 +521,17 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
   }, [current.type, currentDuration, currentMediaReady, isNavigationLocked, lockNavigation, loveTypingDone, paused, started, stories.length])
 
   useEffect(() => {
+    if (current.type !== 'start') {
+      return
+    }
+
+    setNowMs(Date.now())
     const interval = window.setInterval(() => {
       setNowMs(Date.now())
     }, 1000)
 
     return () => window.clearInterval(interval)
-  }, [])
+  }, [current.type])
 
   useEffect(() => {
     const preloadList = [loveData.fotoCasalDataUrl, ...photoPool].filter(Boolean)
@@ -646,7 +651,8 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_15%,rgba(29,185,84,0.24),transparent_45%)]" />
                   <div className="relative z-10 h-full min-h-full box-border">
                     <p className="text-center text-sm font-medium text-zinc-200">
-                      Para o meu grande amor {loveData.nomeCriador ? `• de ${loveData.nomeCriador}` : ''}
+                      {loveData.nomeCriador || 'Alguém especial'} para {loveData.nomePessoa || 'meu amor'}
+                      {loveData.apelido ? ` • ${loveData.apelido}` : ''}
                     </p>
 
                     <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/60 shadow-2xl">
@@ -665,7 +671,7 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                         height="152"
                         frameBorder="0"
                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy"
+                        loading="eager"
                         style={{ borderRadius: '16px', marginTop: '20px' }}
                       />
                     ) : (
