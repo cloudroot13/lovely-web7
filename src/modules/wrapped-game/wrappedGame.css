@@ -201,18 +201,19 @@
 
 .game-word-grid {
   width: 100%;
-  max-width: 280px;
+  max-width: 260px;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
-  margin: 14px auto 0;
+  gap: 5px;
+  margin: 10px auto 0;
   touch-action: none;
 }
 
 .game-word-grid--10 {
-  max-width: min(92vw, 308px);
+  width: 100%;
+  max-width: 100%;
   grid-template-columns: repeat(10, 1fr);
-  gap: 4px;
+  gap: clamp(2px, 0.6vw, 4px);
 }
 
 .game-cell {
@@ -226,12 +227,33 @@
 }
 
 .game-cell--10 {
-  width: clamp(22px, 7.6vw, 27px);
-  height: clamp(22px, 7.6vw, 27px);
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
   border-radius: 7px;
-  font-size: clamp(9px, 2.8vw, 11px);
+  font-size: clamp(8px, 2.2vw, 11px);
   touch-action: none;
   user-select: none;
+}
+
+.game-center-tight .game-title {
+  font-size: clamp(20px, 5.6vw, 26px);
+}
+
+.game-center-tight .game-subtitle,
+.game-center-tight .game-word-obs {
+  font-size: 12px;
+}
+
+.game-center-tight .game-counter {
+  margin-top: 4px;
+  font-size: 10px;
+}
+
+.game-center-tight {
+  overflow-y: auto;
+  max-height: 100%;
+  padding-bottom: 8px;
 }
 
 .game-cell-selecting {
@@ -252,8 +274,8 @@
 }
 
 .game-counter {
-  margin-top: 8px;
-  font-size: 12px;
+  margin-top: 6px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(222, 231, 255, 0.88);
@@ -761,15 +783,16 @@
     font-size: 13px;
   }
 
-  .game-word-grid--10 {
-    max-width: min(92vw, 300px);
-    gap: 3px;
+  .game-cell--10 {
+    font-size: 8px;
   }
 
-  .game-cell--10 {
-    width: 24px;
-    height: 24px;
-    font-size: 10px;
+  .game-center-tight .game-word-obs {
+    display: none;
+  }
+
+  .game-center-tight .game-subtitle {
+    font-size: 11px;
   }
 
   .game-wheel-wrap {

@@ -656,7 +656,7 @@ export function WrappedGameExperience() {
               )}
 
               {currentStory === 's2' && (
-                <div className="game-center" style={{ justifyContent: 'flex-start', paddingTop: 26 }}>
+                <div className="game-center game-center-tight" style={{ justifyContent: 'flex-start', paddingTop: 18 }}>
                   <p className="game-title" style={{ fontSize: 24 }}>Caça-Palavras Premium</p>
                   <p className="game-subtitle">{themeFromChat || 'Ache as coisas que mais amo em você'}</p>
                   <p className="game-word-obs">Obs: quando você clicar na palavra correta, ela ficará em azul.</p>
