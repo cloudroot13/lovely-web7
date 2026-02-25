@@ -22,6 +22,7 @@ const initialLoveData: LoveData = {
   classicBackgroundAnimation: 'none',
   classicMemoriesTitle: '',
   classicMemoriesBannerDataUrl: '',
+  localConheceram: '',
   comoConheceram: '',
   momentoEspecial: '',
   atividadeJuntos: '',

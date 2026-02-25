@@ -26,13 +26,13 @@ interface MemoryItem {
 
 const timelineBase = [
   { title: 'Primeiro encontro', caption: 'Nosso lugar preferido' },
-  { title: 'Primeiro beijo', caption: 'Nunca fiquei tao nervoso' },
+  { title: 'Primeiro beijo', caption: 'Nunca fiquei tão nervoso' },
   { title: 'Primeira viagem', caption: 'A nossa melhor aventura' },
   { title: 'Pedido de namoro', caption: 'O sim mais bonito da vida' },
   { title: 'Momento especial', caption: 'Um capítulo que mora em mim' },
 ]
 
-const monthNames = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
 function randomFromSeed(seed: number) {
   const x = Math.sin(seed * 999) * 10000
@@ -48,6 +48,17 @@ function formatPtMonthYear(dateValue?: string) {
     return 'Junho 2022'
   }
   return `${monthNames[parsed.getMonth()]} ${parsed.getFullYear()}`
+}
+
+function formatPtDate(dateValue?: string) {
+  if (!dateValue) {
+    return '11 de Setembro de 2022'
+  }
+  const parsed = new Date(dateValue)
+  if (Number.isNaN(parsed.getTime())) {
+    return '11 de Setembro de 2022'
+  }
+  return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
 function addMonths(base: Date, months: number) {
@@ -72,6 +83,7 @@ const loveLanguages = [
   'I love you',
   "Je t’aime",
   'Ti amo',
+  'Te amo',
   'Te quiero',
   'Ich liebe dich',
   'Aishiteru',
@@ -82,9 +94,24 @@ const loveLanguages = [
   'S’agapo',
   'Mahal kita',
   'Te iubesc',
-  'Ik hou van jou',
+  'Ik hou van je',
+  'T’estimo',
+  'Szeretlek',
+  'Volim te',
+  'Seni seviyorum',
+  'Aku cinta kamu',
+  'Saya cinta kamu',
+  'Phom rak khun',
+  'Chan rak khun',
+  'Main tumse pyaar karta hoon',
+  'Main tumse pyaar karti hoon',
+  'Kocham cię',
+  'Aloha wau ia oe',
+  'Mina armastan sind',
+  'Ikh hob dikh',
   'Jeg elsker deg',
-  'Jag alskar dig',
+  'Jeg elsker dig',
+  'Jag älskar dig',
   'Kocham cie',
 ]
 
@@ -106,7 +133,7 @@ function FinalLoveBurstSlide() {
 
   const particles = useMemo(
     () =>
-      Array.from({ length: 36 }).map((_, idx) => {
+      Array.from({ length: 48 }).map((_, idx) => {
         const angle = (idx / 36) * Math.PI * 2
         const radius = 70 + (idx % 7) * 18
         return { id: idx, x: Math.cos(angle) * radius, y: Math.sin(angle) * radius }
@@ -146,14 +173,14 @@ function FinalLoveBurstSlide() {
                 loveLanguages.map((text, idx) => ({
                   id: `${text}-${idx}-${Date.now()}`,
                   text,
-                  x: (Math.random() - 0.5) * 320,
-                  y: (Math.random() - 0.5) * 460,
-                  r: (Math.random() - 0.5) * 18,
-                  d: 3.8 + Math.random() * 2.2,
-                  delay: idx * 0.05,
+                  x: (Math.random() - 0.5) * 340,
+                  y: (Math.random() - 0.5) * 520,
+                  r: (Math.random() - 0.5) * 22,
+                  d: 4.4 + Math.random() * 2.8,
+                  delay: idx * 0.04,
                 })),
               )
-              window.setTimeout(() => setHeartGone(true), 220)
+              window.setTimeout(() => setHeartGone(true), 260)
             }}
             className="journey-love-heart"
             aria-label="Explodir coração"
@@ -203,7 +230,7 @@ function FinalLoveBurstSlide() {
   )
 }
 
-function StorySlide({ story, coupleName, onAdvance }: { story: JourneyStory; coupleName: string; onAdvance: () => void }) {
+function StorySlide({ story, coupleName, loveData, onAdvance }: { story: JourneyStory; coupleName: string; loveData: LoveData; onAdvance: () => void }) {
   if (story.kind === 'constellation') {
     const field = Array.from({ length: 56 }).map((_, idx) => {
       const angle = `${Math.round(randomFromSeed(idx + 2.1) * 360)}deg`
@@ -291,8 +318,12 @@ function StorySlide({ story, coupleName, onAdvance }: { story: JourneyStory; cou
 
         <div className="story-bottom-zone px-6 text-center">
           <p className="journey-story-quote">"Foi ali que o universo decidiu escrever nossa história"</p>
-          <p className="journey-small mt-3 uppercase tracking-[0.22em] text-zinc-300/85">Pires do Rio, GO, Brasil</p>
-          <p className="journey-small mt-1 uppercase tracking-[0.18em] text-zinc-400">11 de Setembro de 2022</p>
+          <p className="journey-small mt-3 uppercase tracking-[0.22em] text-zinc-300/85">
+            {loveData.localConheceram || loveData.comoConheceram || 'Onde tudo começou'}
+          </p>
+          <p className="journey-small mt-1 uppercase tracking-[0.18em] text-zinc-400">
+            {formatPtDate(loveData.startDate)}
+          </p>
           <button
             type="button"
             onClick={onAdvance}
@@ -327,7 +358,7 @@ function StorySlide({ story, coupleName, onAdvance }: { story: JourneyStory; cou
         </div>
 
         <div className="story-top-zone px-7 text-center">
-          <p className="journey-title-main text-white">Naquela noite, a lua foi testemunha do nosso comeco</p>
+          <p className="journey-title-main text-white">Naquela noite, a lua foi testemunha do nosso começo</p>
         </div>
 
         <div className="moon-wrapper">
@@ -376,7 +407,7 @@ function StorySlide({ story, coupleName, onAdvance }: { story: JourneyStory; cou
         </div>
 
         <div className="story-top-zone px-8 text-center">
-          <p className="journey-title-main text-white">No silencio do inverno</p>
+          <p className="journey-title-main text-white">No silêncio do inverno</p>
         </div>
 
         <div className="animation-wrapper">
@@ -403,7 +434,7 @@ function StorySlide({ story, coupleName, onAdvance }: { story: JourneyStory; cou
         </div>
 
         <div className="story-bottom-zone text-center">
-          <p className="winter-title journey-title-main">Na estacao mais fria, encontramos o calor um no outro</p>
+          <p className="winter-title journey-title-main">Na estação mais fria, encontramos o calor um no outro</p>
         </div>
       </div>
     )
@@ -486,23 +517,33 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
   const coupleName = useMemo(() => formatCoupleName(loveData), [loveData])
 
   const memories = useMemo<MemoryItem[]>(() => {
-    const images = [
-      loveData.fotoCasalDataUrl,
-      ...loveData.momentHighlights.map((item) => item.imageDataUrl),
-      ...loveData.storiesImagesDataUrls,
-    ].filter(Boolean)
-
-    const fallback = loveData.fotoCasalDataUrl || loveData.storiesImagesDataUrls[0] || ''
     const rotations = [-2.6, 1.8, -1.2, 2.2, -0.8]
-
+    const fallback = loveData.fotoCasalDataUrl || loveData.storiesImagesDataUrls[0] || ''
     const start = !Number.isNaN(new Date(loveData.startDate).getTime()) ? new Date(loveData.startDate) : new Date('2022-06-01')
 
-    return timelineBase.map((entry, index) => ({
-      title: entry.title,
-      caption: entry.caption,
-      image: images[index] || fallback,
+    const highlights = loveData.momentHighlights.slice(0, 5)
+    const base = timelineBase.map((entry, index) => {
+      const dateLabel = formatPtMonthYear(addMonths(start, index * 2).toISOString())
+      return {
+        title: entry.title,
+        caption: entry.caption,
+        image: fallback,
+        dateLabel,
+      }
+    })
+
+    const merged = base.map((entry, index) => {
+      const highlight = highlights[index]
+      const title = highlight?.title?.trim() || highlight?.text?.trim() || entry.title
+      const caption = highlight?.message?.trim() || highlight?.text?.trim() || highlight?.title?.trim() || entry.caption
+      const image = highlight?.imageDataUrl || entry.image
+      const dateLabel = highlight?.date ? formatPtMonthYear(highlight.date) : entry.dateLabel
+      return { title, caption, image, dateLabel }
+    })
+
+    return merged.map((item, index) => ({
+      ...item,
       rotation: rotations[index % rotations.length],
-      dateLabel: formatPtMonthYear(index === 0 ? loveData.startDate : addMonths(start, index * 2).toISOString()),
     }))
   }, [loveData])
 
@@ -510,14 +551,14 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
     () => [
       {
         id: 'journey-1',
-        title: 'Constelacao',
+        title: 'Constelação',
         text: 'Foi ali que o universo decidiu escrever nossa história',
         kind: 'constellation',
       },
       {
         id: 'journey-2',
         title: 'Lua',
-        text: 'Naquela noite, a lua foi testemunha do nosso comeco',
+        text: 'Naquela noite, a lua foi testemunha do nosso começo',
         kind: 'moon',
       },
       {
@@ -535,7 +576,7 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
       {
         id: 'journey-5',
         title: 'Final',
-        text: 'Essa e apenas o comeco da nossa Jornada',
+        text: 'Essa é apenas o começo da nossa Jornada',
         kind: 'final',
       },
     ],
@@ -710,7 +751,7 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
                         className="journey-polaroid group relative rounded-[8px] border border-white/20 bg-[#f6f1df] p-3 text-black shadow-[0_12px_28px_rgba(0,0,0,0.38)] transition duration-300 ease-in-out will-change-transform hover:-translate-y-2.5 hover:scale-[1.03] hover:shadow-[0_0_24px_rgba(255,255,255,0.18)]"
                         style={{ transform: `rotate(${item.rotation}deg)` }}
                       >
-                        <div className="overflow-hidden rounded-[4px] bg-zinc-200">
+                        <div className="journey-polaroid-photo overflow-hidden rounded-[6px] bg-zinc-200">
                           {item.image ? (
                             <img src={item.image} alt={item.title} className="h-40 w-full object-cover" loading="lazy" />
                           ) : (
@@ -752,7 +793,7 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
                 </div>
 
                 <div className="mb-2 mt-2 rounded-2xl border border-white/10 bg-black/45 px-4 py-7 text-center">
-                  <p className="journey-title-main leading-tight">E estamos apenas comecando...</p>
+                  <p className="journey-title-main leading-tight">E estamos apenas começando...</p>
                   <button
                     type="button"
                     onClick={openStories}
@@ -773,7 +814,7 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
                 <div className="flex h-full transition-transform duration-[400ms] ease-in-out" style={{ transform: `translateX(-${storyIndex * 100}%)` }}>
                   {stories.map((slide) => (
                     <div key={slide.id} className="h-full min-w-full px-1">
-                      <StorySlide story={slide} coupleName={coupleName} onAdvance={nextStory} />
+                      <StorySlide story={slide} coupleName={coupleName} loveData={loveData} onAdvance={nextStory} />
                     </div>
                   ))}
                 </div>
@@ -874,6 +915,42 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
           font-size: 16px;
           line-height: 22px;
           text-align: center;
+        }
+
+        .journey-polaroid {
+          background: linear-gradient(180deg, #fff9f2 0%, #f1e4d6 100%);
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          box-shadow: 0 18px 38px rgba(0, 0, 0, 0.45);
+        }
+
+        .journey-polaroid::before,
+        .journey-polaroid::after {
+          content: '';
+          position: absolute;
+          top: -10px;
+          width: 52px;
+          height: 16px;
+          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+          transform: rotate(-4deg);
+          opacity: 0.9;
+          pointer-events: none;
+        }
+
+        .journey-polaroid::after {
+          right: 16px;
+          transform: rotate(4deg);
+        }
+
+        .journey-polaroid::before {
+          left: 16px;
+        }
+
+        .journey-polaroid-photo {
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
         }
 
         .story-top-zone {
@@ -1271,20 +1348,22 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
         }
 
         @keyframes loveFlash {
-          0% { transform: scale(0.2); opacity: 0.8; }
-          100% { transform: scale(2.1); opacity: 0; }
+          0% { transform: scale(0.15); opacity: 0.9; }
+          35% { transform: scale(1.6); opacity: 0.7; }
+          100% { transform: scale(2.6); opacity: 0; }
         }
 
         @keyframes loveParticleBurst {
-          0% { transform: translate(0, 0) scale(0.78); opacity: 1; }
-          100% { transform: translate(var(--x), var(--y)) scale(1.18); opacity: 0; }
+          0% { transform: translate(0, 0) scale(0.6); opacity: 1; }
+          45% { opacity: 0.9; }
+          100% { transform: translate(var(--x), var(--y)) scale(1.25); opacity: 0; }
         }
 
         @keyframes loveWordSpread {
-          0% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) rotate(0deg); }
-          14% { opacity: 1; transform: translate(-50%, -50%) translate(calc(var(--x) * 0.7), calc(var(--y) * 0.7)) rotate(var(--r)); }
-          60% { opacity: 0.96; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--r)); }
-          100% { opacity: 0.76; transform: translate(-50%, -50%) translate(calc(var(--x) + 9px), calc(var(--y) - 13px)) rotate(var(--r)); }
+          0% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(0.9); }
+          18% { opacity: 1; transform: translate(-50%, -50%) translate(calc(var(--x) * 0.65), calc(var(--y) * 0.65)) rotate(var(--r)) scale(1); }
+          60% { opacity: 0.96; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--r)) scale(1.04); }
+          100% { opacity: 0.7; transform: translate(-50%, -50%) translate(calc(var(--x) + 12px), calc(var(--y) - 12px)) rotate(var(--r)) scale(1.08); }
         }
 
         @media (max-width: 768px) {

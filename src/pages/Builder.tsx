@@ -7,7 +7,7 @@ import ClassicNetflixBuilder from './ClassicNetflixBuilder'
 import type { LoveData, MomentHighlight } from '../types/types'
 import { readFileAsDataUrl } from '../utils/file'
 
-type QuestionKind = 'text' | 'music' | 'gallery' | 'number' | 'date' | 'datetime' | 'photo'
+type QuestionKind = 'text' | 'music' | 'gallery' | 'number' | 'date' | 'datetime' | 'photo' | 'polaroids'
 
 interface Question {
   id: string
@@ -128,54 +128,17 @@ const jornadaQuestions: Question[] = [
   { id: 'nomePessoa', text: 'Qual o nome da sua pessoa amada?', placeholder: 'Ex: Amanda', kind: 'text' },
   { id: 'apelido', text: 'Como você chama ela no dia a dia?', placeholder: 'Ex: Meu amor, vida, meu bem...', kind: 'text' },
   {
-    id: 'comoConheceram',
-    text: 'Vamos começar pela primeira polaroid: como foi o primeiro encontro de vocês?',
-    placeholder: 'Ex: café no fim da tarde, cinema, praça...',
+    id: 'localConheceram',
+    text: 'Onde vocês se conheceram?',
+    placeholder: 'Ex: na escola, no trabalho, na praça...',
     kind: 'text',
   },
+  { id: 'startDate', text: 'Qual a data que vocês se conheceram?', placeholder: '', kind: 'date' },
   {
-    id: 'momentoEspecial',
-    text: 'Agora a segunda polaroid: descreva o primeiro beijo de vocês.',
-    placeholder: 'Ex: depois do cinema, na chuva, no carro...',
-    kind: 'text',
-  },
-  {
-    id: 'momentoEspecialFoto',
-    text: 'Envie a foto que vai representar esse capítulo.',
+    id: 'jornadaPolaroids',
+    text: 'Agora vamos montar as 5 polaroids. Escolha momentos que tenham significado para vocês.',
     placeholder: '',
-    kind: 'photo',
-  },
-  {
-    id: 'atividadeJuntos',
-    text: 'Terceira polaroid: qual foi a primeira viagem ou passeio inesquecível?',
-    placeholder: 'Ex: praia, interior, viagem curta de fim de semana...',
-    kind: 'text',
-  },
-  {
-    id: 'atividadeFoto',
-    text: 'Perfeito. Envie a foto dessa viagem/passeio.',
-    placeholder: '',
-    kind: 'photo',
-  },
-  { id: 'dataImportante', text: 'Qual foi a data do pedido de namoro (quarta polaroid)?', placeholder: '', kind: 'date' },
-  { id: 'startDate', text: 'Qual foi a data do primeiro encontro?', placeholder: '', kind: 'date' },
-  {
-    id: 'weeklyMeetups',
-    text: 'Em média, quantas vezes por mês vocês criam novos momentos juntos?',
-    placeholder: 'Ex: 4',
-    kind: 'number',
-  },
-  {
-    id: 'oQueMaisAmo',
-    text: 'Quinta polaroid: descreva o momento especial que não pode faltar na Jornada.',
-    placeholder: 'Ex: jantar surpresa, conquista juntos, data marcante...',
-    kind: 'text',
-  },
-  {
-    id: 'music',
-    text: 'Envie a foto principal e mais 5 fotos na ordem: encontro, beijo, viagem, pedido e momento especial.',
-    placeholder: '',
-    kind: 'music',
+    kind: 'polaroids',
   },
 ]
 
@@ -239,6 +202,25 @@ export default function Builder() {
   const [musicValidationMessage, setMusicValidationMessage] = useState('')
   const [momentoEspecialFotoDataUrl, setMomentoEspecialFotoDataUrl] = useState('')
   const [atividadeFotoDataUrl, setAtividadeFotoDataUrl] = useState('')
+  const jornadaPolaroids = useMemo(
+    () => [
+      { label: 'Momento 1', hint: 'Ex: nosso primeiro encontro no shopping' },
+      { label: 'Momento 2', hint: 'Ex: o dia do nosso primeiro beijo' },
+      { label: 'Momento 3', hint: 'Ex: a nossa primeira viagem juntos' },
+      { label: 'Momento 4', hint: 'Ex: o pedido de namoro' },
+      { label: 'Momento 5', hint: 'Ex: nosso momento mais especial' },
+    ],
+    [],
+  )
+  const [jornadaInputs, setJornadaInputs] = useState(() =>
+    Array.from({ length: 5 }).map(() => ({
+      title: '',
+      description: '',
+      date: '',
+      imageDataUrl: '',
+      imageName: '',
+    })),
+  )
   const extraPhotosInputRef = useRef<HTMLInputElement | null>(null)
   const messagesContainerRef = useRef<HTMLElement | null>(null)
   const textInputRef = useRef<HTMLInputElement | null>(null)
@@ -518,6 +500,51 @@ export default function Builder() {
     moveNext()
   }
 
+  const handleJornadaPolaroidChange = (index: number, patch: Partial<(typeof jornadaInputs)[number]>) => {
+    setJornadaInputs((prev) => prev.map((item, idx) => (idx === index ? { ...item, ...patch } : item)))
+  }
+
+  const handleJornadaPolaroidPhoto = async (index: number, event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const dataUrl = await readFileAsDataUrl(file)
+    handleJornadaPolaroidChange(index, { imageDataUrl: dataUrl, imageName: file.name })
+    event.target.value = ''
+  }
+
+  const handleConfirmJornadaPolaroids = () => {
+    const missing = jornadaInputs
+      .map((item, idx) => (!item.title.trim() || !item.description.trim() || !item.date || !item.imageDataUrl ? idx + 1 : null))
+      .filter(Boolean) as number[]
+
+    if (missing.length) {
+      setNotice({ type: 'error', message: `Preencha todas as polaroids (título, descrição, data e foto). Faltam: ${missing.join(', ')}.` })
+      return
+    }
+
+    const cover = jornadaInputs[0]
+    const highlights: MomentHighlight[] = jornadaInputs.map((item) => ({
+      text: item.title.trim(),
+      title: item.title.trim(),
+      message: item.description.trim(),
+      date: item.date,
+      imageDataUrl: item.imageDataUrl,
+    }))
+
+    setLoveData({
+      fotoCasalDataUrl: cover.imageDataUrl,
+      startDate: cover.date,
+      momentHighlights: highlights,
+      storiesImagesDataUrls: [],
+      totalPhotos: 0,
+      memoriesCreated: highlights.length,
+    })
+
+    setMessages((prev) => [...prev, { sender: 'user', text: 'Polaroids preenchidas com sucesso.' }])
+    setNotice(null)
+    moveNext()
+  }
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
 
@@ -528,6 +555,11 @@ export default function Builder() {
 
     if (currentQuestion.kind === 'photo') {
       handleConfirmPhotoStep()
+      return
+    }
+
+    if (currentQuestion.kind === 'polaroids') {
+      handleConfirmJornadaPolaroids()
       return
     }
 
@@ -600,6 +632,15 @@ export default function Builder() {
     const handle = window.setTimeout(() => textInputRef.current?.focus(), 0)
     return () => window.clearTimeout(handle)
   }, [currentQuestion.kind, isClassicNormalFlow, step])
+
+  useEffect(() => {
+    if (!isJornadaFlow || currentQuestion.kind !== 'polaroids') {
+      return
+    }
+    if (loveData.startDate && !jornadaInputs[0]?.date) {
+      setJornadaInputs((prev) => prev.map((item, idx) => (idx === 0 ? { ...item, date: loveData.startDate } : item)))
+    }
+  }, [currentQuestion.kind, isJornadaFlow, jornadaInputs, loveData.startDate])
 
   if (isClassicNormalFlow) {
     return <ClassicNormalBuilder />
@@ -677,6 +718,61 @@ export default function Builder() {
               )}
               <button type="button" onClick={handleConfirmPhotoStep} className="mt-3 rounded-full bg-pink-500 px-5 py-2 text-sm font-semibold text-black">
                 Confirmar foto e continuar
+              </button>
+            </div>
+          )}
+
+          {currentQuestion.kind === 'polaroids' && (
+            <div className="rounded-2xl border border-zinc-700 bg-[#161616] p-4">
+              <p className="text-sm text-zinc-300">Preencha as 5 polaroids com momento, data e foto.</p>
+              <div className="mt-4 grid gap-4">
+                {jornadaInputs.map((item, index) => (
+                  <div key={`polaroid-${index}`} className="rounded-2xl border border-zinc-700 bg-zinc-900 p-4">
+                    <p className="text-sm font-semibold text-pink-300">{index + 1}. {jornadaPolaroids[index]?.label}</p>
+                    <div className="mt-3 grid gap-3">
+                      <input
+                        type="text"
+                        value={item.title}
+                        onChange={(event) => handleJornadaPolaroidChange(index, { title: event.target.value })}
+                        placeholder={jornadaPolaroids[index]?.hint}
+                        className="rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm outline-none ring-pink-500 transition focus:ring"
+                      />
+                      <textarea
+                        value={item.description}
+                        onChange={(event) => handleJornadaPolaroidChange(index, { description: event.target.value })}
+                        placeholder="Escreva uma descrição romântica para esse momento"
+                        rows={3}
+                        className="rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm outline-none ring-pink-500 transition focus:ring"
+                      />
+                      <input
+                        type="date"
+                        value={item.date}
+                        onChange={(event) => handleJornadaPolaroidChange(index, { date: event.target.value })}
+                        className="rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm outline-none ring-pink-500 transition focus:ring"
+                      />
+                      <label className="rounded-xl border border-dashed border-zinc-600 bg-zinc-950 p-3 text-sm text-zinc-300">
+                        Foto da polaroid
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(event) => handleJornadaPolaroidPhoto(index, event)}
+                          className="mt-2 block w-full text-xs"
+                        />
+                        {item.imageName && <p className="mt-2 text-xs text-green-400">{item.imageName}</p>}
+                      </label>
+                      {item.imageDataUrl && (
+                        <img src={item.imageDataUrl} alt={`Polaroid ${index + 1}`} className="h-24 w-full rounded-xl object-cover" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={handleConfirmJornadaPolaroids}
+                className="mt-4 w-full rounded-full bg-pink-500 px-6 py-3 text-sm font-semibold text-black"
+              >
+                Confirmar polaroids e continuar
               </button>
             </div>
           )}

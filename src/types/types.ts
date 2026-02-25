@@ -24,6 +24,7 @@ export interface LoveData {
   classicBackgroundAnimation: 'none' | 'hearts' | 'stars_meteors' | 'clouds'
   classicMemoriesTitle: string
   classicMemoriesBannerDataUrl: string
+  localConheceram: string
   comoConheceram: string
   momentoEspecial: string
   atividadeJuntos: string
