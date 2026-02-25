@@ -183,24 +183,6 @@ const gameQuestions: Question[] = [
   { id: 'nomeCriador', text: 'Qual o seu nome de jogador(a)?', placeholder: 'Ex: Leo', kind: 'text' },
   { id: 'nomePessoa', text: 'Quem joga essa aventura com você?', placeholder: 'Ex: Amanda', kind: 'text' },
   {
-    id: 'momentoEspecial',
-    text: 'Quais palavras quer usar no caça-palavras? (separe por vírgula)',
-    placeholder: 'Ex: sorriso, cabelo, piadas, abraço',
-    kind: 'text',
-  },
-  {
-    id: 'oQueMaisAmo',
-    text: 'Qual tema da frase do jogo? (ex: O que mais gosto em você)',
-    placeholder: 'Ex: O que mais gosto em você',
-    kind: 'text',
-  },
-  {
-    id: 'atividadeJuntos',
-    text: 'Digite opções da roleta (coisas que você ama nela), separadas por vírgula.',
-    placeholder: 'Ex: seu abraço, seu sorriso, ver filmes com você, seu olhar',
-    kind: 'text',
-  },
-  {
     id: 'momentoEspecialFoto',
     text: 'Envie uma foto do momento especial para os capítulos extras.',
     placeholder: '',

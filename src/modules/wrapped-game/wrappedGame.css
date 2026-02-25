@@ -107,6 +107,26 @@
   flex-direction: column;
 }
 
+.game-tap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 18%;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  z-index: 3;
+}
+
+.game-tap-zone-left {
+  left: 0;
+}
+
+.game-tap-zone-right {
+  right: 0;
+}
+
+
 .game-center {
   flex: 1;
   display: flex;
@@ -186,6 +206,7 @@
   grid-template-columns: repeat(6, 1fr);
   gap: 6px;
   margin: 14px auto 0;
+  touch-action: none;
 }
 
 .game-word-grid--10 {
@@ -209,6 +230,8 @@
   height: 27px;
   border-radius: 7px;
   font-size: 11px;
+  touch-action: none;
+  user-select: none;
 }
 
 .game-cell-selecting {

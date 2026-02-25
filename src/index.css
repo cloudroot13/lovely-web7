@@ -64,6 +64,14 @@ select {
   outline-offset: 2px;
 }
 
+.anim-pausable {
+  animation-play-state: paused !important;
+}
+
+.anim-pausable.anim-inview {
+  animation-play-state: running !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

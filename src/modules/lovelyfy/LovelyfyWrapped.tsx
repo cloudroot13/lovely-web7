@@ -404,15 +404,15 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
   const moments = useAnimatedCounter(momentsValue, current.type === 'stats')
   const days = useAnimatedCounter(daysValue, current.type === 'stats')
   const coupleName = useMemo(() => {
-    const first = loveData.nomePessoa?.trim()
-    const second = loveData.apelido?.trim()
+    const creator = loveData.nomeCriador?.trim()
+    const receiver = loveData.nomePessoa?.trim()
 
-    if (first && second) {
-      return `${first} & ${second}`
+    if (creator && receiver) {
+      return `${creator} + ${receiver}`
     }
 
-    return first || second || 'Nosso Amor'
-  }, [loveData.apelido, loveData.nomePessoa])
+    return creator || receiver || 'Nosso Amor'
+  }, [loveData.nomeCriador, loveData.nomePessoa])
   const creatorName = useMemo(() => loveData.nomeCriador?.trim() || 'Alguém especial', [loveData.nomeCriador])
   const storyMotion = useMemo(() => getStoryMotion(), [])
   const chapterAlignClass = useMemo(() => getTextAlignmentClass(step), [step])

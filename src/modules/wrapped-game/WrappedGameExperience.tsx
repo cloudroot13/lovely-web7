@@ -5,7 +5,7 @@ import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
 import './wrappedGame.css'
 
 type Step = 'intro' | 'stories'
-type StoryId = 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's9' | 's10'
+type StoryId = 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's10'
 type Difficulty = 'easy' | 'hard'
 
 const SEARCH_SIZE = 10
@@ -15,29 +15,16 @@ function randomLetter() {
   return alpha[Math.floor(Math.random() * alpha.length)]
 }
 
-function normalizeWords(raw: string, difficulty: Difficulty) {
+function normalizeWords(_: string, difficulty: Difficulty) {
   const fallback = difficulty === 'hard'
     ? ['SORRISO', 'CABELO', 'PIADAS', 'ABRACO', 'OLHAR']
     : ['SORRISO', 'CABELO', 'PIADAS']
-  const target = difficulty === 'hard' ? 5 : 3
-  const cleaned = raw
-    .split(/[,\n;]+/)
-    .map((word) => word.trim().toUpperCase().replace(/[^A-ZÀ-ÖØ-Ý]/g, ''))
-    .filter((word) => word.length >= 3)
-    .slice(0, target)
-  return cleaned.length > 0 ? [...cleaned, ...fallback].slice(0, target) : fallback
+  return fallback
 }
 
-function parseWheelOptions(raw: string) {
+function parseWheelOptions(_: string) {
   const fallback = ['Seu abraço', 'Seu sorriso', 'Ver filmes com você', 'Seu olhar', 'Seu jeitinho', 'Seu carinho', 'Nossas risadas', 'Nossos planos']
-  const parsed = raw
-    .split(/[,\n;]+/)
-    .map((item) => item.trim())
-    .filter((item) => item.length >= 3)
-  if (!parsed.length) {
-    return fallback
-  }
-  return Array.from(new Set([...parsed, ...fallback])).slice(0, 8)
+  return fallback
 }
 
 function formatWheelLabel(label: string) {
@@ -173,10 +160,10 @@ export function WrappedGameExperience() {
   const [challengeInputIdx, setChallengeInputIdx] = useState(0)
   const [challengeMessage, setChallengeMessage] = useState('')
   const [challengeShake, setChallengeShake] = useState(false)
-  const [minutesTogetherLive, setMinutesTogetherLive] = useState(0)
   const [minutesCounter, setMinutesCounter] = useState(0)
+  const challengeTimeoutsRef = useRef<number[]>([])
 
-  const stories: StoryId[] = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10']
+  const stories: StoryId[] = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's10']
   const currentStory = stories[storyIdx]
 
   useEffect(() => {
@@ -224,15 +211,6 @@ export function WrappedGameExperience() {
     })
     return hints
   }, [difficulty, searchData.placements, foundWords])
-  const romanceHighlights = useMemo(() => {
-    const base = [
-      loveData.comoConheceram?.trim(),
-      loveData.momentoEspecial?.trim(),
-      loveData.oQueMaisAmo?.trim(),
-    ].filter(Boolean) as string[]
-    if (base.length) return base.slice(0, 3)
-    return ['A forma como tudo começou', 'Nosso momento favorito', 'O que mais amo em você']
-  }, [loveData.comoConheceram, loveData.momentoEspecial, loveData.oQueMaisAmo])
   const wheelSegments = useMemo(() => {
     const palette = ['#E50914', '#1E3A8A']
     return wheelOptions.map((label, index) => ({
@@ -290,40 +268,35 @@ export function WrappedGameExperience() {
     return () => cancelAnimationFrame(raf)
   }, [step, storyIdx])
 
-  useEffect(() => {
+  const computeMinutesTogether = useMemo(() => {
     const start = loveData.startDate ? new Date(`${loveData.startDate}T00:00:00`) : null
-    if (!start || Number.isNaN(start.getTime())) {
-      const reset = window.setTimeout(() => setMinutesTogetherLive(0), 0)
-      return () => window.clearTimeout(reset)
+    if (start && !Number.isNaN(start.getTime())) {
+      return Math.max(1, Math.floor((Date.now() - start.getTime()) / 60000))
     }
-    const compute = () => Math.max(0, Math.floor((Date.now() - start.getTime()) / 60000))
-    const prime = window.setTimeout(() => setMinutesTogetherLive(compute()), 0)
-    const intervalId = window.setInterval(() => setMinutesTogetherLive(compute()), 60000)
-    return () => {
-      window.clearTimeout(prime)
-      window.clearInterval(intervalId)
-    }
-  }, [loveData.startDate])
+    const fallbackDays = Math.max(1, loveData.anos * 365 + loveData.meses * 30 + loveData.dias)
+    return Math.max(1, fallbackDays * 24 * 60)
+  }, [loveData.startDate, loveData.anos, loveData.meses, loveData.dias])
 
   useEffect(() => {
     if (currentStory !== 's8') return
-    const target = minutesTogetherLive
-    if (target <= 0) {
-      const reset = window.setTimeout(() => setMinutesCounter(0), 0)
-      return () => window.clearTimeout(reset)
-    }
+    const target = computeMinutesTogether
     let raf = 0
     const start = performance.now()
     const duration = 1200
     const tick = (now: number) => {
       const p = Math.min(1, (now - start) / duration)
       const eased = 1 - Math.pow(1 - p, 3)
-      setMinutesCounter(Math.floor(target * eased))
-      if (p < 1) raf = requestAnimationFrame(tick)
+      const value = Math.floor(target * eased)
+      setMinutesCounter(value)
+      if (p < 1) {
+        raf = requestAnimationFrame(tick)
+      } else {
+        setMinutesCounter(target)
+      }
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [currentStory, minutesTogetherLive])
+  }, [currentStory, computeMinutesTogether])
 
   const goNext = () => {
     if (storyIdx >= stories.length - 1) {
@@ -332,6 +305,34 @@ export function WrappedGameExperience() {
     }
     setStoryIdx((prev) => Math.min(stories.length - 1, prev + 1))
     setStoryProgress(0)
+  }
+
+  const goPrev = () => {
+    if (storyIdx <= 0) {
+      return
+    }
+    setStoryIdx((prev) => Math.max(0, prev - 1))
+    setStoryProgress(0)
+  }
+
+  const resetGameState = () => {
+    setStoryIdx(0)
+    setStoryProgress(0)
+    setFoundWords([])
+    setFoundCells(new Set())
+    setDragStart(null)
+    setDragEnd(null)
+    setSelectedCells([])
+    setWordMessage('')
+    setWheelRotation(0)
+    setWheelSpinning(false)
+    setWheelResult('')
+    setChallengeDone(false)
+    setChallengeSequence([])
+    setChallengeActiveStep(-1)
+    setChallengeInputIdx(0)
+    setChallengeMessage('')
+    setChallengeShake(false)
   }
 
   const startSelect = (index: number) => {
@@ -420,6 +421,7 @@ export function WrappedGameExperience() {
     moveSelect(index)
   }
 
+
   const spinWheel = () => {
     if (wheelSpinning) return
     setWheelSpinning(true)
@@ -434,6 +436,33 @@ export function WrappedGameExperience() {
     }, 4100)
   }
 
+  const clearChallengeTimeouts = () => {
+    challengeTimeoutsRef.current.forEach((id) => window.clearTimeout(id))
+    challengeTimeoutsRef.current = []
+  }
+
+  const playChallengeSequence = (seq: number[]) => {
+    if (!seq.length) return
+    clearChallengeTimeouts()
+    let t = 0
+    const add = (fn: () => void, delay: number) => {
+      const id = window.setTimeout(fn, delay)
+      challengeTimeoutsRef.current.push(id)
+    }
+
+    add(() => setChallengeActiveStep(-1), t)
+    seq.forEach((step, index) => {
+      const flashes = index > 0 && seq[index - 1] === step ? 2 : 1
+      for (let f = 0; f < flashes; f += 1) {
+        add(() => setChallengeActiveStep(step), t)
+        t += 350
+        add(() => setChallengeActiveStep(-1), t)
+        t += 170
+      }
+      t += 120
+    })
+  }
+
   useEffect(() => {
     if (currentStory !== 's4') return
     const seqSize = difficulty === 'hard' ? 4 : 3
@@ -445,18 +474,10 @@ export function WrappedGameExperience() {
       setChallengeDone(false)
       setChallengeMessage('Memorize a sequência e repita.')
     }, 0)
-    let step = 0
-    const interval = window.setInterval(() => {
-      setChallengeActiveStep(seq[step])
-      step += 1
-      if (step >= seq.length) {
-        window.clearInterval(interval)
-        window.setTimeout(() => setChallengeActiveStep(-1), 450)
-      }
-    }, 700)
+    playChallengeSequence(seq)
     return () => {
       window.clearTimeout(boot)
-      window.clearInterval(interval)
+      clearChallengeTimeouts()
     }
   }, [currentStory, difficulty])
 
@@ -480,10 +501,25 @@ export function WrappedGameExperience() {
     window.setTimeout(() => setChallengeShake(false), 350)
   }
 
+  const replayChallenge = () => {
+    if (!challengeSequence.length) return
+    setChallengeActiveStep(-1)
+    setChallengeInputIdx(0)
+    setChallengeDone(false)
+    setChallengeMessage('Memorize a sequência e repita.')
+    playChallengeSequence(challengeSequence)
+  }
+
   const storyLabel = useMemo(() => `Story ${storyIdx + 1}/${stories.length}`, [storyIdx, stories.length])
   const searchDone = currentStory === 's2' && foundWords.length >= searchWords.length
   const wheelDone = currentStory === 's3' && Boolean(wheelResult)
   const challengeDoneCard = currentStory === 's4' && challengeDone
+  const canAdvance = useMemo(() => {
+    if (currentStory === 's2') return searchDone
+    if (currentStory === 's3') return wheelDone
+    if (currentStory === 's4') return challengeDone
+    return true
+  }, [challengeDone, currentStory, searchDone, wheelDone])
 
   useEffect(
     () => () => {
@@ -567,6 +603,28 @@ export function WrappedGameExperience() {
         <div className="game-content">
           <section className="game-story">
             <article className="game-card">
+              {currentStory !== 's2' && (
+                <>
+                  <button
+                    type="button"
+                    className="game-tap-zone game-tap-zone-left"
+                    aria-label="Voltar"
+                    onClick={() => {
+                      if (!canAdvance || storyIdx === 0) return
+                      goPrev()
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="game-tap-zone game-tap-zone-right"
+                    aria-label="Avançar"
+                    onClick={() => {
+                      if (!canAdvance) return
+                      goNext()
+                    }}
+                  />
+                </>
+              )}
               {currentStory === 's1' && (
                 <div className="game-center">
                   <p className="game-title">Game Start</p>
@@ -701,6 +759,9 @@ export function WrappedGameExperience() {
                     ))}
                   </div>
                   <p className="game-subtitle">{challengeMessage}</p>
+                  <button type="button" className="game-button" onClick={replayChallenge}>
+                    Mostrar sequência novamente
+                  </button>
                 </div>
               )}
 
@@ -735,9 +796,6 @@ export function WrappedGameExperience() {
                   ) : (
                     <div className="game-photo-frame game-photo-placeholder">Adicione fotos no chat para aparecer aqui</div>
                   )}
-                  <button type="button" className="game-button" onClick={goNext}>
-                    Próxima seção
-                  </button>
                 </div>
               )}
 
@@ -750,9 +808,6 @@ export function WrappedGameExperience() {
                   ) : (
                     <div className="game-photo-frame game-photo-placeholder">Envie ao menos 2 fotos no chat para completar</div>
                   )}
-                  <button type="button" className="game-button" onClick={goNext}>
-                    Próxima seção
-                  </button>
                 </div>
               )}
 
@@ -762,26 +817,6 @@ export function WrappedGameExperience() {
                   <p className="game-subtitle">Vivendo esse amor há</p>
                   <p className="game-time-counter">{minutesCounter.toLocaleString('pt-BR')} minutos</p>
                   <p className="game-subtitle">e contando a cada minuto ✨</p>
-                  <button type="button" className="game-button" onClick={goNext}>
-                    Próxima seção
-                  </button>
-                </div>
-              )}
-
-              {currentStory === 's9' && (
-                <div className="game-center">
-                  <p className="game-title" style={{ fontSize: 24 }}>Missões do Coração</p>
-                  <p className="game-subtitle">Resumo do que você contou no chat:</p>
-                  <div className="game-highlights">
-                    {romanceHighlights.map((text) => (
-                      <div key={text} className="game-highlight-item">
-                        {text}
-                      </div>
-                    ))}
-                  </div>
-                  <button type="button" className="game-button" onClick={goNext}>
-                    Ir para o final
-                  </button>
                 </div>
               )}
 
@@ -800,8 +835,8 @@ export function WrappedGameExperience() {
                     />
                   ))}
                   <p className="game-final-win">Fim do jogo. Você concluiu cada etapa com muito amor. 💖</p>
-                  <button type="button" className="game-button" onClick={() => navigate('/preview', { replace: true })}>
-                    Finalizar
+                  <button type="button" className="game-button" onClick={resetGameState}>
+                    Voltar
                   </button>
                 </div>
               )}
