@@ -17,7 +17,7 @@ function randomLetter() {
 
 function normalizeWords(_: string, difficulty: Difficulty) {
   const fallback = difficulty === 'hard'
-    ? ['SORRISO', 'CABELO', 'PIADAS', 'ABRACO', 'OLHAR']
+    ? ['SORRISO', 'CABELO', 'PIADAS', 'ABRAÇO', 'OLHAR']
     : ['SORRISO', 'CABELO', 'PIADAS']
   return fallback
 }
@@ -188,7 +188,7 @@ export function WrappedGameExperience() {
   const wheelOptions = useMemo(() => parseWheelOptions(loveData.atividadeJuntos || ''), [loveData.atividadeJuntos])
   const searchWords = useMemo(() => {
     const fixed = difficulty === 'hard'
-      ? ['SORRISO', 'CABELO', 'PIADAS', 'ABRACO', 'OLHAR']
+      ? ['SORRISO', 'CABELO', 'PIADAS', 'ABRAÇO', 'OLHAR']
       : ['SORRISO', 'CABELO', 'PIADAS']
     return Array.from(new Set([...fixed, ...wordsFromChat])).slice(0, difficulty === 'hard' ? 5 : 3)
   }, [wordsFromChat, difficulty])

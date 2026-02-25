@@ -7,7 +7,7 @@ import { readImageFileAsDataUrl } from '../utils/image'
 type NetflixStep = 'title' | 'counter' | 'description' | 'photo'
 
 const steps: { id: NetflixStep; label: string }[] = [
-  { id: 'title', label: 'Titulo' },
+  { id: 'title', label: 'Título' },
   { id: 'counter', label: 'Contador' },
   { id: 'description', label: 'Descricao' },
   { id: 'photo', label: 'Fotos' },
@@ -67,7 +67,7 @@ export default function ClassicNetflixBuilder() {
     const unsupportedMobileFormat =
       /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
     if (unsupportedMobileFormat) {
-      alert('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+      alert('Formato HEIC/HEIF ainda não é suportado aqui. Converta para JPG, PNG ou WEBP.')
       return
     }
     const dataUrl = await readImageFileAsDataUrl(file)
@@ -88,7 +88,7 @@ export default function ClassicNetflixBuilder() {
       const unsupportedMobileFormat =
         /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
       if (unsupportedMobileFormat) {
-        alert('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+        alert('Formato HEIC/HEIF ainda não é suportado aqui. Converta para JPG, PNG ou WEBP.')
         continue
       }
       const key = `${file.name}-${file.size}-${file.lastModified}`
@@ -176,7 +176,7 @@ export default function ClassicNetflixBuilder() {
                 value={loveData.comoConheceram}
                 onChange={(event) => setLoveData({ comoConheceram: event.target.value })}
                 className="h-44 w-full rounded-xl border border-zinc-700 bg-[#16161a] px-4 py-3 text-base outline-none focus:border-[#E50914]"
-                placeholder="Ex: Cada dia com voce e o meu capitulo favorito. Seu sorriso muda meu mundo e eu te escolheria em todas as vidas."
+                placeholder="Ex: Cada dia com você é o meu capítulo favorito. Seu sorriso muda meu mundo e eu te escolheria em todas as vidas."
               />
             </div>
           )}

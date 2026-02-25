@@ -295,7 +295,7 @@ export function ClassicNormal({ loveData }: ClassicNormalProps) {
         .map((item, index) => ({
           id: item.id ?? `legacy-${index}`,
           date: item.date ?? '',
-          title: item.title?.trim() || item.text || 'Memoria',
+          title: item.title?.trim() || item.text || 'Memória',
           message: item.message?.trim() || item.text || '',
           imageDataUrl: item.imageDataUrl,
         }))
@@ -642,7 +642,7 @@ export function ClassicNormal({ loveData }: ClassicNormalProps) {
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
         className="fixed bottom-6 right-6 rounded-full bg-pink-500 px-5 py-3 text-2xl shadow-[0_0_30px_rgba(255,47,122,0.6)]"
-        aria-label="Coracao"
+        aria-label="Coração"
       >
         ❤
       </motion.button>

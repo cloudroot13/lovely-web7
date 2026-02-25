@@ -29,7 +29,7 @@ const timelineBase = [
   { title: 'Primeiro beijo', caption: 'Nunca fiquei tao nervoso' },
   { title: 'Primeira viagem', caption: 'A nossa melhor aventura' },
   { title: 'Pedido de namoro', caption: 'O sim mais bonito da vida' },
-  { title: 'Momento especial', caption: 'Um capitulo que mora em mim' },
+  { title: 'Momento especial', caption: 'Um capítulo que mora em mim' },
 ]
 
 const monthNames = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
@@ -290,7 +290,7 @@ function StorySlide({ story, coupleName, onAdvance }: { story: JourneyStory; cou
         </div>
 
         <div className="story-bottom-zone px-6 text-center">
-          <p className="journey-story-quote">"Foi ali que o universo decidiu escrever nossa historia"</p>
+          <p className="journey-story-quote">"Foi ali que o universo decidiu escrever nossa história"</p>
           <p className="journey-small mt-3 uppercase tracking-[0.22em] text-zinc-300/85">Pires do Rio, GO, Brasil</p>
           <p className="journey-small mt-1 uppercase tracking-[0.18em] text-zinc-400">11 de Setembro de 2022</p>
           <button
@@ -298,7 +298,7 @@ function StorySlide({ story, coupleName, onAdvance }: { story: JourneyStory; cou
             onClick={onAdvance}
             className="mt-5 rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold text-black transition duration-300 ease-in-out hover:scale-105"
           >
-            Proxima secao
+            Próxima seção
           </button>
         </div>
       </div>
@@ -511,7 +511,7 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
       {
         id: 'journey-1',
         title: 'Constelacao',
-        text: 'Foi ali que o universo decidiu escrever nossa historia',
+        text: 'Foi ali que o universo decidiu escrever nossa história',
         kind: 'constellation',
       },
       {
@@ -758,7 +758,7 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
                     onClick={openStories}
                     className="mt-5 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-black transition duration-300 ease-in-out hover:scale-110 hover:shadow-[0_0_24px_rgba(255,255,255,0.35)]"
                   >
-                    Comecar Nossa Historia
+                    Começar Nossa História
                   </button>
                 </div>
               </div>

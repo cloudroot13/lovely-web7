@@ -9,15 +9,15 @@ interface ClassicNetflixProps {
 
 const netflixMoments = [
   'Nosso Amor, Nosso Para Sempre',
-  'Voce e meu lugar favorito',
-  'Com voce tudo faz sentido',
-  'Cada dia ao seu lado e especial',
-  'Voce e meu melhor capitulo',
-  'Nosso amor so cresce',
+  'Você é meu lugar favorito',
+  'Com você tudo faz sentido',
+  'Cada dia ao seu lado é especial',
+  'Você é meu melhor capítulo',
+  'Nosso amor só cresce',
   'Seu sorriso ilumina meu mundo',
   'Eu te escolheria de novo',
-  'Nossa historia e unica',
-  'Para sempre eu e voce',
+  'Nossa história é única',
+  'Para sempre eu e você',
 ]
 
 function buildRelationshipClock(data: LoveData, nowMs: number) {
@@ -66,12 +66,12 @@ export function ClassicNetflix({ loveData }: ClassicNetflixProps) {
 
   const relationshipClock = useMemo(() => buildRelationshipClock(loveData, nowMs), [loveData, nowMs])
   const progressPercent = Math.min(95, Math.max(8, Math.round((relationshipClock.totalDays % 1000) / 10)))
-  const starring = loveData.classicTitle || loveData.nomePessoa || 'quem voce ama'
-  const description = loveData.comoConheceram?.trim() || 'o destino juntou voces'
+  const starring = loveData.classicTitle || loveData.nomePessoa || 'quem você ama'
+  const description = loveData.comoConheceram?.trim() || 'o destino juntou vocês'
   const romanticLine =
     loveData.oQueMaisAmo?.trim() ||
     description ||
-    `Em cada capitulo, ${starring} faz seu coracao bater mais forte e transforma cada detalhe em lembranca inesquecivel.`
+    `Em cada capítulo, ${starring} faz seu coração bater mais forte e transforma cada detalhe em lembrança inesquecível.`
   const clientDescription = description
 
   const coverImage =
@@ -170,9 +170,9 @@ export function ClassicNetflix({ loveData }: ClassicNetflixProps) {
   }
 
   const seasonDescriptions = [
-    'O inicio de tudo: primeiras mensagens, primeiros olhares e o capitulo que mudou a historia.',
-    'A fase em que o amor ficou mais forte: cumplicidade, rotina e novas memorias juntos.',
-    'O futuro de voces: sonhos compartilhados, promessas e tudo que ainda vao viver.',
+    'O início de tudo: primeiras mensagens, primeiros olhares e o capítulo que mudou a história.',
+    'A fase em que o amor ficou mais forte: cumplicidade, rotina e novas memórias juntos.',
+    'O futuro de vocês: sonhos compartilhados, promessas e tudo que ainda vão viver.',
   ]
 
   return (
@@ -190,7 +190,7 @@ export function ClassicNetflix({ loveData }: ClassicNetflixProps) {
 
         <div className="absolute bottom-12 left-6 right-6 mx-auto max-w-6xl md:left-10 md:right-10">
           <p className="text-xs font-semibold tracking-[0.3em] text-[#E50914] [text-shadow:0_2px_10px_rgba(0,0,0,0.75)]">LOVELYFLIX ORIGINAL</p>
-          <h1 className="mt-3 text-4xl font-black uppercase leading-tight [text-shadow:0_6px_24px_rgba(0,0,0,0.78)] md:text-7xl">Uma Historia de Amor</h1>
+          <h1 className="mt-3 text-4xl font-black uppercase leading-tight [text-shadow:0_6px_24px_rgba(0,0,0,0.78)] md:text-7xl">Uma História de Amor</h1>
           <p className="mt-3 max-w-xl text-zinc-200 [text-shadow:0_3px_14px_rgba(0,0,0,0.85)]">Estrelando {starring} | {description}</p>
           <div className="mt-4 grid max-w-md grid-cols-3 gap-2 text-xs sm:text-sm">
             <div className="rounded-lg bg-black/55 p-2 text-center"><p className="text-lg font-bold text-[#ff5f67]">{relationshipClock.years}</p><p className="text-zinc-400">anos</p></div>
@@ -201,7 +201,7 @@ export function ClassicNetflix({ loveData }: ClassicNetflixProps) {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-10 md:px-10">
-        <h2 className="mb-4 text-xl font-bold">Episodios de Destaque</h2>
+        <h2 className="mb-4 text-xl font-bold">Episódios de Destaque</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
           {episodes.map((episode, index) => (
             <motion.button
@@ -241,7 +241,7 @@ export function ClassicNetflix({ loveData }: ClassicNetflixProps) {
         <h2 className="mb-3 text-xl font-bold">Continuar Assistindo</h2>
         <div className="rounded-xl border border-zinc-700 bg-[#1a1a1a] p-4">
           <div className="mb-2 flex items-center justify-between text-sm text-zinc-300">
-            <span>{starring || 'Nossa historia'} - Episodio atual</span>
+            <span>{starring || 'Nossa história'} - Episódio atual</span>
             <span>{progressPercent}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-zinc-700">

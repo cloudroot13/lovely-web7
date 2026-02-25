@@ -10,13 +10,13 @@ import '../styles/classic-stars-meteors-animation.css'
 import '../styles/classic-gallery-animation.css'
 
 const steps = [
-  { id: 'title', label: 'Titulo da pagina' },
+  { id: 'title', label: 'Título da página' },
   { id: 'message', label: 'Mensagem' },
   { id: 'counter', label: 'Contador' },
   { id: 'photos', label: 'Fotos' },
   { id: 'music', label: 'Iframe de musica' },
   { id: 'memories', label: 'Memórias' },
-  { id: 'background', label: 'Animacao de fundo' },
+  { id: 'background', label: 'Animação de fundo' },
 ] as const
 
 type BackgroundMode = 'none' | 'hearts' | 'stars_meteors' | 'clouds'
@@ -297,7 +297,7 @@ export default function ClassicNormalBuilder() {
     const unsupportedMobileFormat =
       /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
     if (unsupportedMobileFormat) {
-      setMemoryError('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+      setMemoryError('Formato HEIC/HEIF ainda não é suportado aqui. Converta para JPG, PNG ou WEBP.')
       return
     }
     const cappedExtras = loveData.storiesImagesDataUrls.slice(0, CLASSIC_MAX_EXTRA_PHOTOS)
@@ -319,7 +319,7 @@ export default function ClassicNormalBuilder() {
       const unsupportedMobileFormat =
         /(\.heic|\.heif)$/i.test(file.name) || file.type === 'image/heic' || file.type === 'image/heif'
       if (unsupportedMobileFormat) {
-        setMemoryError('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+        setMemoryError('Formato HEIC/HEIF ainda não é suportado aqui. Converta para JPG, PNG ou WEBP.')
         continue
       }
       const key = `${file.name}-${file.size}-${file.lastModified}`
@@ -351,7 +351,7 @@ export default function ClassicNormalBuilder() {
       const dataUrl = await readFileAsDataUrl(file)
       setLoveData({ classicMemoriesBannerDataUrl: dataUrl })
     } catch {
-      setMemoryError('Nao foi possivel ler a imagem do banner. Tente JPG, PNG ou WEBP.')
+      setMemoryError('Não foi possível ler a imagem do banner. Tente JPG, PNG ou WEBP.')
     }
   }
 
@@ -366,7 +366,7 @@ export default function ClassicNormalBuilder() {
     if (unsupportedMobileFormat) {
       setMemoryImageDataUrl('')
       setMemoryImageName('')
-      setMemoryError('Formato HEIC/HEIF ainda nao e suportado aqui. Converta para JPG, PNG ou WEBP.')
+      setMemoryError('Formato HEIC/HEIF ainda não é suportado aqui. Converta para JPG, PNG ou WEBP.')
       return
     }
 
@@ -378,7 +378,7 @@ export default function ClassicNormalBuilder() {
     } catch {
       setMemoryImageDataUrl('')
       setMemoryImageName('')
-      setMemoryError('Nao foi possivel ler essa imagem. Tente JPG, PNG ou WEBP.')
+      setMemoryError('Não foi possível ler essa imagem. Tente JPG, PNG ou WEBP.')
     }
   }
 
@@ -391,8 +391,8 @@ export default function ClassicNormalBuilder() {
       ''
     const missing: string[] = []
     if (!memoryDate) missing.push('data')
-    if (!memoryTitle.trim()) missing.push('titulo')
-    if (!resolvedMemoryImage) missing.push('foto da memoria (campo abaixo, banner, ou foto principal)')
+    if (!memoryTitle.trim()) missing.push('título')
+    if (!resolvedMemoryImage) missing.push('foto da memória (campo abaixo, banner, ou foto principal)')
     if (missing.length > 0) {
       setMemoryError(`Falta preencher: ${missing.join(', ')}.`)
       return
@@ -461,7 +461,7 @@ export default function ClassicNormalBuilder() {
 
           {current === 'title' && (
             <div className="space-y-4">
-              <p className="text-zinc-300">Escreva o titulo dedicatorio da sua pagina classica.</p>
+              <p className="text-zinc-300">Escreva o título dedicatório da sua página clássica.</p>
               <input
                 value={loveData.classicTitle}
                 onChange={(event) => setLoveData({ classicTitle: event.target.value })}
@@ -473,7 +473,7 @@ export default function ClassicNormalBuilder() {
 
           {current === 'message' && (
             <div className="space-y-4">
-              <p className="text-zinc-300">Mensagem principal da pagina.</p>
+              <p className="text-zinc-300">Mensagem principal da página.</p>
               <textarea
                 value={loveData.classicMessage}
                 onChange={(event) => setLoveData({ classicMessage: event.target.value })}
@@ -485,7 +485,7 @@ export default function ClassicNormalBuilder() {
 
           {current === 'counter' && (
             <div className="space-y-4">
-              <p className="text-zinc-300">Informe a data de inicio e o estilo do contador.</p>
+              <p className="text-zinc-300">Informe a data de início e o estilo do contador.</p>
               <input
                 type="date"
                 value={loveData.startDate}
@@ -517,7 +517,7 @@ export default function ClassicNormalBuilder() {
               </label>
 
               <label className="block rounded-xl border border-dashed border-zinc-600 bg-[#16161a] p-4">
-                <p className="text-sm text-zinc-300">Fotos extras (ate {CLASSIC_MAX_EXTRA_PHOTOS}, total da pagina: {CLASSIC_MAX_TOTAL_PHOTOS})</p>
+                <p className="text-sm text-zinc-300">Fotos extras (até {CLASSIC_MAX_EXTRA_PHOTOS}, total da página: {CLASSIC_MAX_TOTAL_PHOTOS})</p>
                 <input type="file" accept="image/*" multiple onChange={onExtraPhotos} className="mt-3 block w-full text-xs" />
                 <p className="mt-2 text-xs text-zinc-400">
                   {loveData.storiesImagesDataUrls.length}/{CLASSIC_MAX_EXTRA_PHOTOS} adicionadas
@@ -582,12 +582,12 @@ export default function ClassicNormalBuilder() {
           {current === 'memories' && (
             <div className="space-y-4">
               <div>
-                <p className="text-zinc-300">Titulo das memorias</p>
+                <p className="text-zinc-300">Título das memórias</p>
                 <input
                   value={loveData.classicMemoriesTitle}
                   onChange={(event) => setLoveData({ classicMemoriesTitle: event.target.value })}
                   className="mt-2 w-full rounded-xl border border-zinc-700 bg-[#16161a] px-4 py-3 text-base outline-none focus:border-pink-400"
-                  placeholder="Ex: Nossa historia"
+                  placeholder="Ex: Nossa história"
                 />
               </div>
 
@@ -597,7 +597,7 @@ export default function ClassicNormalBuilder() {
               </label>
 
               <div className="rounded-xl border border-dashed border-zinc-600 bg-[#111216] p-4">
-                <p className="text-sm text-zinc-300">Adicionar memoria</p>
+                <p className="text-sm text-zinc-300">Adicionar memória</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   <input
                     type="date"
@@ -614,7 +614,7 @@ export default function ClassicNormalBuilder() {
                       setMemoryTitle(event.target.value)
                       setMemoryError('')
                     }}
-                    placeholder="Titulo"
+                    placeholder="Título"
                     className="rounded-lg border border-zinc-700 bg-[#16161a] px-3 py-2 text-sm outline-none focus:border-pink-400"
                   />
                 </div>
@@ -633,29 +633,29 @@ export default function ClassicNormalBuilder() {
                   onChange={onMemoryImage}
                   className="mt-2 block w-full text-xs"
                 />
-                <p className="mt-1 text-[11px] text-zinc-400">Se nao escolher aqui, o banner sera usado automaticamente.</p>
+                <p className="mt-1 text-[11px] text-zinc-400">Se não escolher aqui, o banner será usado automaticamente.</p>
                 {memoryImageDataUrl && (
                   <div className="mt-2 flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-900/60 p-2">
-                    <img src={memoryImageDataUrl} alt="Preview memoria" className="h-10 w-10 rounded object-cover" />
+                    <img src={memoryImageDataUrl} alt="Preview memória" className="h-10 w-10 rounded object-cover" />
                     <p className="truncate text-xs text-zinc-300">{memoryImageName || 'Foto selecionada'}</p>
                   </div>
                 )}
                 {!memoryImageDataUrl && loveData.classicMemoriesBannerDataUrl && (
-                  <p className="mt-2 text-xs text-zinc-300">Usando foto do banner para esta memoria.</p>
+                  <p className="mt-2 text-xs text-zinc-300">Usando foto do banner para esta memória.</p>
                 )}
                 {!memoryImageDataUrl && !loveData.classicMemoriesBannerDataUrl && loveData.fotoCasalDataUrl && (
-                  <p className="mt-2 text-xs text-zinc-300">Usando foto principal para esta memoria.</p>
+                  <p className="mt-2 text-xs text-zinc-300">Usando foto principal para esta memória.</p>
                 )}
                 {memoryError && <p className="mt-2 text-xs text-amber-300">{memoryError}</p>}
                 <div className="mt-3 flex items-center justify-between">
-                  <p className="text-xs text-zinc-400">{loveData.momentHighlights.length}/{CLASSIC_MAX_MEMORIES} memorias</p>
+                  <p className="text-xs text-zinc-400">{loveData.momentHighlights.length}/{CLASSIC_MAX_MEMORIES} memórias</p>
                   <button
                     type="button"
                     onClick={addMemory}
                     disabled={loveData.momentHighlights.length >= CLASSIC_MAX_MEMORIES}
                     className="rounded-lg border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm font-semibold text-zinc-100 transition hover:border-pink-400 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    + Adicionar memoria
+                    + Adicionar memória
                   </button>
                 </div>
               </div>
@@ -668,7 +668,7 @@ export default function ClassicNormalBuilder() {
                       onClick={clearAllMemories}
                       className="rounded border border-zinc-600 bg-zinc-900 px-3 py-1 text-xs text-zinc-200 transition hover:border-pink-400"
                     >
-                      Limpar memorias
+                      Limpar memórias
                     </button>
                   </div>
                   <div className="grid max-h-60 gap-2 overflow-y-auto rounded-xl border border-zinc-700 bg-[#111216] p-3">
@@ -676,7 +676,7 @@ export default function ClassicNormalBuilder() {
                       <div key={item.id ?? `legacy-${index}`} className="flex items-center gap-3 rounded-lg border border-zinc-700 bg-[#17181d] p-2">
                         <img src={item.imageDataUrl} alt={item.title ?? item.text ?? 'Memoria'} className="h-12 w-12 rounded-md object-cover" />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-zinc-100">{item.title ?? item.text ?? 'Memoria'}</p>
+                          <p className="truncate text-sm font-semibold text-zinc-100">{item.title ?? item.text ?? 'Memória'}</p>
                           <p className="text-xs text-zinc-400">{item.date ?? ''}</p>
                         </div>
                         <button type="button" onClick={() => removeMemoryAt(index)} className="rounded bg-black/60 px-2 py-1 text-xs">x</button>
@@ -690,7 +690,7 @@ export default function ClassicNormalBuilder() {
 
           {current === 'background' && (
             <div className="space-y-4">
-              <p className="text-zinc-300">Escolha a animacao de fundo da pagina.</p>
+              <p className="text-zinc-300">Escolha a animação de fundo da página.</p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {[
                   { key: 'none', label: 'Nenhuma' },
@@ -718,7 +718,7 @@ export default function ClassicNormalBuilder() {
               Voltar etapa
             </button>
             <button type="button" onClick={next} className="w-full rounded-xl bg-[#ffd7e9] px-4 py-3 font-semibold text-[#111]">
-              {stepIndex === steps.length - 1 ? 'Gerar pagina' : 'Proxima etapa'}
+              {stepIndex === steps.length - 1 ? 'Gerar página' : 'Próxima etapa'}
             </button>
           </div>
         </section>
@@ -780,7 +780,7 @@ export default function ClassicNormalBuilder() {
                     type="button"
                     className="mx-auto mt-5 rounded-full bg-gradient-to-r from-[#ff4e8d] to-[#ff6a5a] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(255,90,150,0.5)]"
                   >
-                    ✨ Ver memorias
+                    ✨ Ver memórias
                   </button>
                 )}
               </div>
