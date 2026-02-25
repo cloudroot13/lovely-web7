@@ -9,7 +9,7 @@ type StoryId = 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's10'
 type Difficulty = 'easy' | 'hard'
 
 const SEARCH_SIZE = 10
-const MOBILE_SEARCH_SIZE = 7
+const MOBILE_SEARCH_SIZE = 6
 
 function randomLetter() {
   const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
