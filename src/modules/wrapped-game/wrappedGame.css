@@ -220,6 +220,15 @@
   gap: var(--gap);
 }
 
+.game-word-grid--8 {
+  --grid: min(90vw, 248px);
+  --gap: 4px;
+  width: var(--grid);
+  max-width: var(--grid);
+  grid-template-columns: repeat(8, 1fr);
+  gap: var(--gap);
+}
+
 .game-cell {
   width: 40px;
   height: 40px;
@@ -235,6 +244,15 @@
   height: calc((var(--grid) - (var(--gap) * 9)) / 10);
   border-radius: 7px;
   font-size: calc(((var(--grid) - (var(--gap) * 9)) / 10) * 0.42);
+  touch-action: none;
+  user-select: none;
+}
+
+.game-cell--8 {
+  width: calc((var(--grid) - (var(--gap) * 7)) / 8);
+  height: calc((var(--grid) - (var(--gap) * 7)) / 8);
+  border-radius: 8px;
+  font-size: calc(((var(--grid) - (var(--gap) * 7)) / 8) * 0.42);
   touch-action: none;
   user-select: none;
 }
@@ -754,6 +772,11 @@
     padding: 62px 14px 14px;
   }
 
+  .game-word-grid--8 {
+    --grid: min(84vw, 220px);
+    --gap: 3px;
+  }
+
   .game-word-grid--10 {
     --grid: min(80vw, 230px);
     --gap: 2px;
@@ -852,5 +875,9 @@
 }
   .game-word-grid--10 {
     --grid: min(74vw, 210px);
+    --gap: 2px;
+  }
+  .game-word-grid--8 {
+    --grid: min(78vw, 200px);
     --gap: 2px;
   }

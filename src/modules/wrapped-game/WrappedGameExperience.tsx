@@ -9,6 +9,7 @@ type StoryId = 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's10'
 type Difficulty = 'easy' | 'hard'
 
 const SEARCH_SIZE = 10
+const MOBILE_SEARCH_SIZE = 7
 
 function randomLetter() {
   const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -37,21 +38,21 @@ function toGridWords(words: string[]) {
   return words.map((word) => word.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z]/g, '').slice(0, 10)).filter(Boolean)
 }
 
-function idxToRC(idx: number) {
-  return { r: Math.floor(idx / SEARCH_SIZE), c: idx % SEARCH_SIZE }
+function idxToRC(idx: number, size: number) {
+  return { r: Math.floor(idx / size), c: idx % size }
 }
 
-function rcToIdx(r: number, c: number) {
-  return r * SEARCH_SIZE + c
+function rcToIdx(r: number, c: number, size: number) {
+  return r * size + c
 }
 
-function inBounds(r: number, c: number) {
-  return r >= 0 && r < SEARCH_SIZE && c >= 0 && c < SEARCH_SIZE
+function inBounds(r: number, c: number, size: number) {
+  return r >= 0 && r < size && c >= 0 && c < size
 }
 
-function lineCells(start: number, end: number) {
-  const a = idxToRC(start)
-  const b = idxToRC(end)
+function lineCells(start: number, end: number, size: number) {
+  const a = idxToRC(start, size)
+  const b = idxToRC(end, size)
   const dr = b.r - a.r
   const dc = b.c - a.c
   const stepR = dr === 0 ? 0 : dr / Math.abs(dr)
@@ -63,13 +64,13 @@ function lineCells(start: number, end: number) {
   const len = Math.max(absR, absC)
   const cells: number[] = []
   for (let i = 0; i <= len; i += 1) {
-    cells.push(rcToIdx(a.r + stepR * i, a.c + stepC * i))
+    cells.push(rcToIdx(a.r + stepR * i, a.c + stepC * i, size))
   }
   return cells
 }
 
-function buildWordSearch(words: string[]) {
-  const grid = Array.from({ length: SEARCH_SIZE * SEARCH_SIZE }, () => '')
+function buildWordSearch(words: string[], size: number) {
+  const grid = Array.from({ length: size * size }, () => '')
   const dirs: Array<[number, number]> = [
     [0, 1],
     [1, 0],
@@ -84,22 +85,22 @@ function buildWordSearch(words: string[]) {
   const placements = words.map((word) => {
     let cells: number[] = []
     let placed = false
-    for (let guard = 0; guard < 280 && !placed; guard += 1) {
-      const [dr, dc] = dirs[Math.floor(Math.random() * dirs.length)]
-      const r = Math.floor(Math.random() * SEARCH_SIZE)
-      const c = Math.floor(Math.random() * SEARCH_SIZE)
-      const test: number[] = []
-      let ok = true
-      for (let i = 0; i < word.length; i += 1) {
-        const rr = r + dr * i
-        const cc = c + dc * i
-        if (!inBounds(rr, cc)) {
-          ok = false
-          break
-        }
-        const idx = rcToIdx(rr, cc)
-        const ch = grid[idx]
-        if (ch && ch !== word[i]) {
+      for (let guard = 0; guard < 280 && !placed; guard += 1) {
+        const [dr, dc] = dirs[Math.floor(Math.random() * dirs.length)]
+        const r = Math.floor(Math.random() * size)
+        const c = Math.floor(Math.random() * size)
+        const test: number[] = []
+        let ok = true
+        for (let i = 0; i < word.length; i += 1) {
+          const rr = r + dr * i
+          const cc = c + dc * i
+          if (!inBounds(rr, cc, size)) {
+            ok = false
+            break
+          }
+          const idx = rcToIdx(rr, cc, size)
+          const ch = grid[idx]
+          if (ch && ch !== word[i]) {
           ok = false
           break
         }
@@ -113,11 +114,11 @@ function buildWordSearch(words: string[]) {
       placed = true
     }
     if (!placed) {
-      const row = Math.floor(Math.random() * SEARCH_SIZE)
-      const startCol = Math.max(0, Math.floor(Math.random() * (SEARCH_SIZE - word.length)))
+      const row = Math.floor(Math.random() * size)
+      const startCol = Math.max(0, Math.floor(Math.random() * (size - word.length)))
       cells = []
       word.split('').forEach((ch, i) => {
-        const idx = rcToIdx(row, startCol + i)
+        const idx = rcToIdx(row, startCol + i, size)
         grid[idx] = ch
         cells.push(idx)
       })
@@ -192,7 +193,16 @@ export function WrappedGameExperience() {
       : ['SORRISO', 'CABELO', 'PIADAS']
     return Array.from(new Set([...fixed, ...wordsFromChat])).slice(0, difficulty === 'hard' ? 5 : 3)
   }, [wordsFromChat, difficulty])
-  const searchData = useMemo(() => buildWordSearch(searchWords), [searchWords])
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 420px)')
+    const apply = () => setIsSmallScreen(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+  const searchSize = isSmallScreen ? MOBILE_SEARCH_SIZE : SEARCH_SIZE
+  const searchData = useMemo(() => buildWordSearch(searchWords, searchSize), [searchWords, searchSize])
   const galleryImages = useMemo(() => {
     const items = [
       loveData.fotoCasalDataUrl,
@@ -344,14 +354,14 @@ export function WrappedGameExperience() {
   const moveSelect = (index: number) => {
     if (dragStart === null) return
     setDragEnd(index)
-    setSelectedCells(lineCells(dragStart, index))
+    setSelectedCells(lineCells(dragStart, index, searchSize))
   }
 
   const endSelect = () => {
     if (dragStart === null || dragEnd === null) {
       return
     }
-    const line = lineCells(dragStart, dragEnd)
+    const line = lineCells(dragStart, dragEnd, searchSize)
     const candidate = line.map((idx) => searchData.grid[idx]).join('')
     const reverse = candidate.split('').reverse().join('')
     const hit = searchData.placements.find((item) => (item.word === candidate || item.word === reverse) && !foundWords.includes(item.word))
@@ -663,7 +673,7 @@ export function WrappedGameExperience() {
                   <p className="game-counter">{foundWords.length}/{searchWords.length} palavras</p>
                   {difficulty === 'easy' && <p className="game-subtitle">Dica: letras iniciais destacadas.</p>}
                   <div
-                    className="game-word-grid game-word-grid--10"
+                    className={`game-word-grid game-word-grid--${searchSize}`}
                     onPointerUp={() => {
                       if (!tapSelectionMode) {
                         endSelect()
@@ -682,7 +692,7 @@ export function WrappedGameExperience() {
                         <button
                           key={`cell-${index}`}
                           type="button"
-                          className={`game-cell game-cell--10 ${found ? 'game-cell-found' : ''} ${selecting ? 'game-cell-selecting' : ''} ${hintCells.has(index) ? 'game-cell-hint' : ''}`}
+                          className={`game-cell game-cell--${searchSize} ${found ? 'game-cell-found' : ''} ${selecting ? 'game-cell-selecting' : ''} ${hintCells.has(index) ? 'game-cell-hint' : ''}`}
                           onPointerDown={(event) => handleCellPointerDown(event, index)}
                           onPointerEnter={(event) => handleCellPointerEnter(event, index)}
                           onClick={() => {
