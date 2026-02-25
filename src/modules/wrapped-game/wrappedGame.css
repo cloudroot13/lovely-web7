@@ -212,10 +212,10 @@
 }
 
 .game-word-grid--10 {
-  --cell: clamp(18px, 6vmin, 26px);
-  --gap: clamp(1px, 0.5vmin, 4px);
-  width: calc((var(--cell) * 10) + (var(--gap) * 9));
-  max-width: 100%;
+  --grid: min(92vw, 308px);
+  --gap: 4px;
+  width: var(--grid);
+  max-width: var(--grid);
   grid-template-columns: repeat(10, 1fr);
   gap: var(--gap);
 }
@@ -231,11 +231,10 @@
 }
 
 .game-cell--10 {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1;
+  width: calc((var(--grid) - (var(--gap) * 9)) / 10);
+  height: calc((var(--grid) - (var(--gap) * 9)) / 10);
   border-radius: 7px;
-  font-size: calc(var(--cell) * 0.4);
+  font-size: calc(((var(--grid) - (var(--gap) * 9)) / 10) * 0.42);
   touch-action: none;
   user-select: none;
 }
@@ -755,6 +754,11 @@
     padding: 62px 14px 14px;
   }
 
+  .game-word-grid--10 {
+    --grid: min(80vw, 230px);
+    --gap: 2px;
+  }
+
   .game-wheel-wrap {
     width: 232px;
     height: 232px;
@@ -846,3 +850,7 @@
     transition: none !important;
   }
 }
+  .game-word-grid--10 {
+    --grid: min(74vw, 210px);
+    --gap: 2px;
+  }
