@@ -1,4 +1,5 @@
 import cupidoCoracao from '../assets/mascote_cupido/coracao.png'
+import { Link } from 'react-router-dom'
 
 interface HomeFooterProps {
   isDark: boolean
@@ -15,9 +16,13 @@ export function HomeFooter({ isDark }: HomeFooterProps) {
           <p className={`mt-2 text-base ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>Descubra outras formas de surpreender quem você ama.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {footerGiftLinks.map((item) => (
-              <span key={item} className={`rounded-full border px-4 py-2 text-sm ${isDark ? 'border-zinc-600 bg-zinc-900 text-zinc-200' : 'border-pink-200 bg-pink-50 text-zinc-700'}`}>
+              <Link
+                to="/choose-mode"
+                key={item}
+                className={`rounded-full border px-4 py-2 text-sm transition ${isDark ? 'border-zinc-600 bg-zinc-900 text-zinc-200 hover:border-pink-400/70' : 'border-pink-200 bg-pink-50 text-zinc-700 hover:border-pink-400/70'}`}
+              >
                 {item}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
@@ -38,30 +43,30 @@ export function HomeFooter({ isDark }: HomeFooterProps) {
           <div>
             <p className="text-lg font-bold sm:text-xl">Produto</p>
             <ul className={`mt-3 space-y-2 text-sm sm:text-base ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-              <li>Como funciona</li>
-              <li>Recursos</li>
-              <li>Preços</li>
-              <li>Exemplos</li>
-              <li>Criar presente</li>
+              <li><Link to="/como-funciona">Como funciona</Link></li>
+              <li><Link to="/recursos">Recursos</Link></li>
+              <li><Link to="/precos">Preços</Link></li>
+              <li><Link to="/exemplos">Exemplos</Link></li>
+              <li><Link to="/choose-mode">Criar presente</Link></li>
             </ul>
           </div>
 
           <div>
             <p className="text-lg font-bold sm:text-xl">Empresa</p>
             <ul className={`mt-3 space-y-2 text-sm sm:text-base ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-              <li>Sobre nós</li>
-              <li>Blog</li>
-              <li>Contato</li>
-              <li>FAQ</li>
+              <li><Link to="/sobre">Sobre nós</Link></li>
+              <li><Link to="/blog">Blog</Link></li>
+              <li><Link to="/contato">Contato</Link></li>
+              <li><Link to="/faq">FAQ</Link></li>
             </ul>
           </div>
 
           <div>
             <p className="text-lg font-bold sm:text-xl">Legal</p>
             <ul className={`mt-3 space-y-2 text-sm sm:text-base ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-              <li>Termos de uso</li>
-              <li>Política de privacidade</li>
-              <li>Política de cookies</li>
+              <li><Link to="/termos-de-uso">Termos de uso</Link></li>
+              <li><Link to="/politica-de-privacidade">Política de privacidade</Link></li>
+              <li><Link to="/politica-de-cookies">Política de cookies</Link></li>
             </ul>
           </div>
         </div>

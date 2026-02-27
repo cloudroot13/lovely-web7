@@ -4,10 +4,13 @@ import './HomeHeader.css'
 interface HomeHeaderProps {
   isDark: boolean
   onToggleTheme: () => void
+  onLogin: () => void
   onCreate: () => void
+  onFaq: () => void
+  onAbout: () => void
 }
 
-export function HomeHeader({ isDark, onToggleTheme, onCreate }: HomeHeaderProps) {
+export function HomeHeader({ isDark, onToggleTheme, onLogin, onCreate, onFaq, onAbout }: HomeHeaderProps) {
   return (
     <header className={`home-header ${isDark ? 'home-header-dark' : 'home-header-light'}`}>
       <div className="home-header-brand">
@@ -16,10 +19,10 @@ export function HomeHeader({ isDark, onToggleTheme, onCreate }: HomeHeaderProps)
       </div>
 
       <nav className="home-header-nav" aria-label="Menu principal">
-        <button type="button" className="home-header-link">Login</button>
+        <button type="button" className="home-header-link" onClick={onLogin}>Login</button>
         <button type="button" className="home-header-link home-header-link-primary" onClick={onCreate}>Criar</button>
-        <button type="button" className="home-header-link">FAQ</button>
-        <button type="button" className="home-header-link">Sobre nós</button>
+        <button type="button" className="home-header-link" onClick={onFaq}>FAQ</button>
+        <button type="button" className="home-header-link" onClick={onAbout}>Sobre nós</button>
       </nav>
 
       <button type="button" onClick={onToggleTheme} className="home-header-theme" aria-label="Alternar tema claro e escuro">

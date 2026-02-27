@@ -33,6 +33,13 @@ export default function LovelyflixProfileSelect() {
       return
     }
 
+    const isLoggedIn = typeof window !== 'undefined' && window.localStorage.getItem('lovely-auth') === '1'
+    const hasPaid = typeof window !== 'undefined' && window.localStorage.getItem('lovely-paid') === '1'
+    if (!isLoggedIn || !hasPaid) {
+      navigate(`/login?returnTo=${encodeURIComponent(`/checkout?returnTo=${encodeURIComponent('/lovelyflix-profile')}`)}`, { replace: true })
+      return
+    }
+
     if (!(config.mode === 'wrapped' && config.variant === 'stories')) {
       navigate('/choose-mode', { replace: true })
       return

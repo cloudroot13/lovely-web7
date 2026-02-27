@@ -19,10 +19,6 @@ import classicNormalVideo from '../assets/classico-normal/classico-normal.mp4'
 import classicLovelyflixVideo from '../assets/classico-lovelyflix/classico-lovelyflix.mp4'
 import lovelyflixDemoImage1 from '../assets/lovelyflix/demo1.jpeg'
 import lovelyflixDemoImage2 from '../assets/lovelyflix/demo2.jpeg'
-import lovelyflixDemoImage3 from '../assets/lovelyflix/demo3.jpeg'
-import lovelyflixDemoImage4 from '../assets/lovelyflix/demo4.jpeg'
-import lovelyflixDemoImage5 from '../assets/lovelyflix/demo5.jpeg'
-import lovelyflixDemoImage6 from '../assets/lovelyflix/demo6.jpeg'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -43,6 +39,9 @@ export default function Home() {
   const [isExperienceVideoPlaying, setIsExperienceVideoPlaying] = useState(false)
   const [isDataSaver, setIsDataSaver] = useState(false)
   const [openFaqId, setOpenFaqId] = useState<string | null>('faq1')
+  const [isMobileViewport, setIsMobileViewport] = useState(false)
+  const [isLiteMode, setIsLiteMode] = useState(false)
+  const [allowCommentMarquee, setAllowCommentMarquee] = useState(true)
   const [isFeaturesInView, setIsFeaturesInView] = useState(false)
   const [isDemoBannerInView, setIsDemoBannerInView] = useState(false)
   const [isTestimonialsInView, setIsTestimonialsInView] = useState(false)
@@ -125,42 +124,42 @@ export default function Home() {
       name: 'Ana Clara',
       when: '3 semanas atrás',
       text: 'Fiz para o meu noivo e ele chorou no capítulo final. Ficou com cara de streaming de verdade.',
-      avatar: lovelyflixDemoImage1,
+      avatar: 'https://i.pravatar.cc/120?img=12',
     },
     {
       id: 'ts2',
       name: 'João e Mari',
       when: '1 mês atrás',
       text: 'A demo já convenceu a gente. A experiência interativa deixou todo mundo em choque.',
-      avatar: lovelyflixDemoImage2,
+      avatar: 'https://i.pravatar.cc/120?img=18',
     },
     {
       id: 'ts3',
       name: 'Carla',
       when: '2 semanas atrás',
       text: 'Usei no aniversário da minha mãe. Ela reviu as fotos antigas e ficou emocionada.',
-      avatar: lovelyflixDemoImage3,
+      avatar: 'https://i.pravatar.cc/120?img=32',
     },
     {
       id: 'ts4',
       name: 'Lucas',
       when: '1 mês atrás',
       text: 'A estética preta e rosa ficou perfeita no celular. Parece app premium mesmo.',
-      avatar: lovelyflixDemoImage4,
+      avatar: 'https://i.pravatar.cc/120?img=52',
     },
     {
       id: 'ts5',
       name: 'Rafaela',
       when: '5 dias atrás',
       text: 'Montei em poucos minutos e o resultado ficou muito acima do que eu esperava.',
-      avatar: lovelyflixDemoImage5,
+      avatar: 'https://i.pravatar.cc/120?img=44',
     },
     {
       id: 'ts6',
       name: 'Bruno',
       when: '2 meses atrás',
       text: 'O formato de episódios com história do casal foi o que mais chamou atenção aqui em casa.',
-      avatar: lovelyflixDemoImage6,
+      avatar: 'https://i.pravatar.cc/120?img=61',
     },
   ]
   const testimonialsRowA = testimonials.slice(0, 3)
@@ -290,6 +289,36 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    const media = window.matchMedia('(max-width: 768px)')
+    const apply = () => setIsMobileViewport(media.matches)
+    apply()
+    media.addEventListener('change', apply)
+    return () => media.removeEventListener('change', apply)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const lowCpu = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4
+    const lowMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory
+      ? ((navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8) <= 4
+      : false
+    setIsLiteMode(Boolean(reducedMotion || isDataSaver || lowCpu || lowMemory || isMobileViewport))
+  }, [isDataSaver, isMobileViewport])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const apply = () => setAllowCommentMarquee(!media.matches)
+    apply()
+    media.addEventListener('change', apply)
+    return () => media.removeEventListener('change', apply)
+  }, [])
+
+  const shouldAnimate = !isLiteMode
+
+  useEffect(() => {
     const targets = [
       { element: featuresSectionRef.current, key: 'features' as const },
       { element: demoBannerSectionRef.current, key: 'demo' as const },
@@ -332,7 +361,7 @@ export default function Home() {
 
   return (
     <main
-      className={`relative min-h-[100dvh] overflow-x-hidden px-3 pt-6 pb-0 transition-colors sm:px-6 sm:pt-10 sm:pb-0 ${
+      className={`relative min-h-[100dvh] overflow-x-hidden px-3 pt-24 pb-0 transition-colors sm:px-6 sm:pt-28 sm:pb-0 ${
         isDark ? 'bg-[#0f0f0f] text-[#f5f5f5]' : 'bg-[#fff6fb] text-[#2d1222]'
       }`}
     >
@@ -345,18 +374,21 @@ export default function Home() {
         aria-hidden
       />
       <motion.div
-        animate={{ opacity: [0.25, 0.45, 0.25] }}
-        transition={{ duration: 9, repeat: Infinity }}
+        animate={shouldAnimate ? { opacity: [0.25, 0.45, 0.25] } : undefined}
+        transition={shouldAnimate ? { duration: 9, repeat: Infinity } : undefined}
         className={`absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full blur-3xl ${
           isDark ? 'bg-pink-500/30' : 'bg-pink-400/35'
         }`}
       />
 
-      <div className="sticky top-3 z-[60]">
+      <div className="fixed inset-x-0 top-3 z-[80] px-3 sm:px-6">
         <HomeHeader
           isDark={isDark}
           onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+          onLogin={() => navigate('/login')}
           onCreate={() => navigate('/choose-mode')}
+          onFaq={() => navigate('/faq')}
+          onAbout={() => navigate('/sobre')}
         />
       </div>
 
@@ -389,8 +421,8 @@ export default function Home() {
 
         <section className="relative h-[420px] sm:h-[520px] md:h-[620px]">
           <motion.div
-            animate={{ rotate: [-13, -10, -13], y: [0, -5, 0] }}
-            transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+            animate={shouldAnimate ? { rotate: [-13, -10, -13], y: [0, -5, 0] } : undefined}
+            transition={shouldAnimate ? { duration: 7, repeat: Infinity, ease: 'easeInOut' } : undefined}
             className="absolute bottom-10 left-2 z-10 h-[300px] w-[155px] rounded-[32px] border-[5px] border-zinc-800 bg-[#171717] p-2 sm:h-[390px] sm:w-[200px] sm:rounded-[36px] sm:border-[6px]"
           >
             <div className="h-full w-full overflow-hidden rounded-[26px]">
@@ -399,8 +431,8 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            animate={{ rotate: [12, 9, 12], y: [0, -6, 0] }}
-            transition={{ duration: 7.4, repeat: Infinity, ease: 'easeInOut' }}
+            animate={shouldAnimate ? { rotate: [12, 9, 12], y: [0, -6, 0] } : undefined}
+            transition={shouldAnimate ? { duration: 7.4, repeat: Infinity, ease: 'easeInOut' } : undefined}
             className="absolute bottom-10 right-2 z-10 h-[300px] w-[155px] rounded-[32px] border-[5px] border-zinc-800 bg-[#171717] p-2 sm:h-[390px] sm:w-[200px] sm:rounded-[36px] sm:border-[6px]"
           >
             <div className="h-full w-full overflow-hidden rounded-[26px]">
@@ -409,8 +441,8 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 6.2, repeat: Infinity, ease: 'easeInOut' }}
+            animate={shouldAnimate ? { y: [0, -10, 0] } : undefined}
+            transition={shouldAnimate ? { duration: 6.2, repeat: Infinity, ease: 'easeInOut' } : undefined}
             className="absolute bottom-0 left-1/2 z-30 h-[370px] w-[190px] -translate-x-1/2 rounded-[36px] border-[6px] border-zinc-800 bg-[#191625] p-2 shadow-2xl sm:h-[470px] sm:w-[245px] sm:rounded-[42px] sm:border-[7px]"
           >
             <div className="h-full w-full overflow-hidden rounded-[30px]">
@@ -420,7 +452,7 @@ export default function Home() {
         </section>
       </div>
 
-      <section className="relative mx-auto mt-10 w-full max-w-6xl pb-8">
+      <section id="como-funciona" className="relative mx-auto mt-10 w-full max-w-6xl pb-8">
         <div className={`rounded-[2rem] border p-5 sm:p-7 ${isDark ? 'border-zinc-800 bg-[#131318]/85' : 'border-pink-200 bg-white/85'}`}>
           <div className="mx-auto max-w-4xl text-center">
             <p className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${isDark ? 'border-pink-500/35 bg-pink-500/10 text-pink-300' : 'border-pink-300 bg-pink-50 text-pink-700'}`}>
@@ -657,7 +689,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={featuresSectionRef} className="relative mx-auto mt-8 w-full max-w-6xl pb-10 sm:mt-10">
+      <section id="recursos" ref={featuresSectionRef} className="relative mx-auto mt-8 w-full max-w-6xl pb-10 sm:mt-10">
         <div className="mx-auto max-w-4xl text-center">
           <p className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${isDark ? 'border-pink-500/35 bg-pink-500/10 text-pink-300' : 'border-pink-300 bg-pink-50 text-pink-700'}`}>
             Recursos
@@ -699,7 +731,7 @@ export default function Home() {
             </p>
             <div className="mx-auto mt-6 w-full max-w-[230px] rounded-[2rem] border-[5px] border-zinc-800 bg-[#191622] p-2 shadow-2xl">
               <div className="h-[380px] overflow-hidden rounded-[1.6rem] bg-black">
-                {isFeaturesInView ? (
+                {isFeaturesInView && !isLiteMode ? (
                   <video
                     key="features-video-active"
                     src={wrappedLovelyfyVideo}
@@ -729,8 +761,8 @@ export default function Home() {
             </p>
             <div className="relative mx-auto mt-6 h-[260px] w-full max-w-[420px]">
               <motion.div
-                animate={isFeaturesInView ? { rotate: [-12, -9, -12], y: [0, -4, 0] } : { rotate: -12, y: 0 }}
-                transition={isFeaturesInView ? { duration: 6.8, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+                animate={isFeaturesInView && shouldAnimate ? { rotate: [-12, -9, -12], y: [0, -4, 0] } : { rotate: -12, y: 0 }}
+                transition={isFeaturesInView && shouldAnimate ? { duration: 6.8, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
                 className={`absolute left-2 top-8 z-10 h-[180px] w-[96px] rounded-[1.4rem] border-[4px] p-1.5 sm:left-6 sm:h-[210px] sm:w-[112px] ${isDark ? 'border-zinc-700 bg-[#14141b]' : 'border-zinc-400 bg-[#18181f]'}`}
               >
                 <div className="h-full w-full overflow-hidden rounded-[1rem]">
@@ -739,8 +771,8 @@ export default function Home() {
               </motion.div>
 
               <motion.div
-                animate={isFeaturesInView ? { y: [0, -9, 0] } : { y: 0 }}
-                transition={isFeaturesInView ? { duration: 6.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+                animate={isFeaturesInView && shouldAnimate ? { y: [0, -9, 0] } : { y: 0 }}
+                transition={isFeaturesInView && shouldAnimate ? { duration: 6.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
                 className={`absolute left-1/2 top-1 z-20 h-[220px] w-[116px] -translate-x-1/2 rounded-[1.7rem] border-[4px] p-1.5 shadow-2xl sm:h-[250px] sm:w-[132px] ${isDark ? 'border-zinc-800 bg-[#171725]' : 'border-zinc-700 bg-[#191622]'}`}
               >
                 <div className="h-full w-full overflow-hidden rounded-[1.25rem]">
@@ -749,8 +781,8 @@ export default function Home() {
               </motion.div>
 
               <motion.div
-                animate={isFeaturesInView ? { rotate: [12, 9, 12], y: [0, -4, 0] } : { rotate: 12, y: 0 }}
-                transition={isFeaturesInView ? { duration: 7.1, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+                animate={isFeaturesInView && shouldAnimate ? { rotate: [12, 9, 12], y: [0, -4, 0] } : { rotate: 12, y: 0 }}
+                transition={isFeaturesInView && shouldAnimate ? { duration: 7.1, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
                 className={`absolute right-2 top-8 z-10 h-[180px] w-[96px] rounded-[1.4rem] border-[4px] p-1.5 sm:right-6 sm:h-[210px] sm:w-[112px] ${isDark ? 'border-zinc-700 bg-[#14141b]' : 'border-zinc-400 bg-[#18181f]'}`}
               >
                 <div className="h-full w-full overflow-hidden rounded-[1rem]">
@@ -767,8 +799,8 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.06)_48%,transparent_100%)]" />
 
           <motion.div
-            animate={isDemoBannerInView ? { rotate: [-11, -9, -11], y: [0, -4, 0] } : { rotate: -11, y: 0 }}
-            transition={isDemoBannerInView ? { duration: 7, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+            animate={isDemoBannerInView && shouldAnimate ? { rotate: [-11, -9, -11], y: [0, -4, 0] } : { rotate: -11, y: 0 }}
+            transition={isDemoBannerInView && shouldAnimate ? { duration: 7, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
             className="absolute -left-4 bottom-[-36px] hidden h-[260px] w-[140px] rounded-[1.8rem] border-[4px] border-zinc-800 bg-[#171717] p-1.5 sm:block"
           >
             <div className="h-full w-full overflow-hidden rounded-[1.4rem]">
@@ -777,8 +809,8 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            animate={isDemoBannerInView ? { rotate: [11, 9, 11], y: [0, -4, 0] } : { rotate: 11, y: 0 }}
-            transition={isDemoBannerInView ? { duration: 7.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+            animate={isDemoBannerInView && shouldAnimate ? { rotate: [11, 9, 11], y: [0, -4, 0] } : { rotate: 11, y: 0 }}
+            transition={isDemoBannerInView && shouldAnimate ? { duration: 7.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
             className="absolute -right-4 bottom-[-40px] hidden h-[280px] w-[150px] rounded-[1.9rem] border-[4px] border-zinc-800 bg-[#171717] p-1.5 sm:block"
           >
             <div className="h-full w-full overflow-hidden rounded-[1.45rem]">
@@ -831,8 +863,8 @@ export default function Home() {
 
           <motion.div
             className="flex w-max gap-4"
-            animate={isTestimonialsInView ? { x: ['0%', '-50%'] } : { x: '0%' }}
-            transition={isTestimonialsInView ? { duration: 30, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
+            animate={isTestimonialsInView && allowCommentMarquee ? { x: ['0%', '-50%'] } : { x: '0%' }}
+            transition={isTestimonialsInView && allowCommentMarquee ? { duration: 30, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
           >
             {[...testimonialsRowA, ...testimonialsRowA].map((item, index) => (
               <article
@@ -854,8 +886,8 @@ export default function Home() {
 
           <motion.div
             className="flex w-max gap-4"
-            animate={isTestimonialsInView ? { x: ['-50%', '0%'] } : { x: '-10%' }}
-            transition={isTestimonialsInView ? { duration: 32, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
+            animate={isTestimonialsInView && allowCommentMarquee ? { x: ['-50%', '0%'] } : { x: '-10%' }}
+            transition={isTestimonialsInView && allowCommentMarquee ? { duration: 32, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
           >
             {[...testimonialsRowB, ...testimonialsRowB].map((item, index) => (
               <article
@@ -877,7 +909,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative mx-auto mt-2 w-full max-w-6xl pb-16 sm:mt-6">
+      <section id="planos" className="relative mx-auto mt-2 w-full max-w-6xl pb-16 sm:mt-6">
         <div className={`rounded-[2rem] border p-6 sm:p-8 ${isDark ? 'border-zinc-700 bg-[#121219]' : 'border-pink-200 bg-white/90'}`}>
           <div className="mx-auto max-w-4xl text-center">
             <p className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${isDark ? 'border-pink-500/35 bg-pink-500/10 text-pink-300' : 'border-pink-300 bg-pink-50 text-pink-700'}`}>
