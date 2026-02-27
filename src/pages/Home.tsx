@@ -144,7 +144,7 @@ export default function Home() {
 
   return (
     <main
-      className={`relative min-h-[100dvh] overflow-hidden px-4 py-8 transition-colors sm:px-6 sm:py-10 ${
+      className={`relative min-h-[100dvh] overflow-hidden px-3 py-6 transition-colors sm:px-6 sm:py-10 ${
         isDark ? 'bg-[#0f0f0f] text-[#f5f5f5]' : 'bg-[#fff6fb] text-[#2d1222]'
       }`}
     >
@@ -170,12 +170,12 @@ export default function Home() {
         onCreate={() => navigate('/choose-mode')}
       />
 
-      <div className="relative mx-auto mt-8 grid min-h-[78vh] w-full max-w-6xl gap-6 md:grid-cols-[1.2fr_0.8fr] md:items-center">
+      <div className="relative mx-auto mt-8 grid w-full max-w-6xl gap-6 md:min-h-[78vh] md:grid-cols-[1.2fr_0.8fr] md:items-center">
         <section className="text-left md:pr-6">
           <p className={`mb-4 text-xs uppercase tracking-[0.28em] ${isDark ? 'text-pink-300' : 'text-pink-700'}`}>
             Seja bem vindo ao Lovelyfy, onde não construimos apenas presentes, mas experiências e sonhos
           </p>
-          <h1 className="max-w-3xl font-serif text-4xl leading-tight md:text-6xl">
+          <h1 className="max-w-3xl font-serif text-3xl leading-tight sm:text-4xl md:text-6xl">
             Crie sua experiência
             <span className={`ml-2 inline-block ${isDark ? 'text-pink-400' : 'text-pink-600'}`}>
               {typedHighlight}
@@ -197,11 +197,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="relative h-[520px] md:h-[620px]">
+        <section className="relative h-[420px] sm:h-[520px] md:h-[620px]">
           <motion.div
             animate={{ rotate: [-13, -10, -13], y: [0, -5, 0] }}
             transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute bottom-10 left-2 z-10 h-[390px] w-[200px] rounded-[36px] border-[6px] border-zinc-800 bg-[#171717] p-2"
+            className="absolute bottom-10 left-2 z-10 h-[300px] w-[155px] rounded-[32px] border-[5px] border-zinc-800 bg-[#171717] p-2 sm:h-[390px] sm:w-[200px] sm:rounded-[36px] sm:border-[6px]"
           >
             <div className="h-full w-full overflow-hidden rounded-[26px]">
               <img src={frameMedia[0]} alt="Preview lovelyfy 1" className="h-full w-full object-cover" />
@@ -211,7 +211,7 @@ export default function Home() {
           <motion.div
             animate={{ rotate: [12, 9, 12], y: [0, -6, 0] }}
             transition={{ duration: 7.4, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute bottom-10 right-2 z-10 h-[390px] w-[200px] rounded-[36px] border-[6px] border-zinc-800 bg-[#171717] p-2"
+            className="absolute bottom-10 right-2 z-10 h-[300px] w-[155px] rounded-[32px] border-[5px] border-zinc-800 bg-[#171717] p-2 sm:h-[390px] sm:w-[200px] sm:rounded-[36px] sm:border-[6px]"
           >
             <div className="h-full w-full overflow-hidden rounded-[26px]">
               <img src={frameMedia[2]} alt="Preview lovelyfy 3" className="h-full w-full object-cover" />
@@ -221,7 +221,7 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 6.2, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute bottom-0 left-1/2 z-30 h-[470px] w-[245px] -translate-x-1/2 rounded-[42px] border-[7px] border-zinc-800 bg-[#191625] p-2 shadow-2xl"
+            className="absolute bottom-0 left-1/2 z-30 h-[370px] w-[190px] -translate-x-1/2 rounded-[36px] border-[6px] border-zinc-800 bg-[#191625] p-2 shadow-2xl sm:h-[470px] sm:w-[245px] sm:rounded-[42px] sm:border-[7px]"
           >
             <div className="h-full w-full overflow-hidden rounded-[30px]">
               <img src={frameMedia[1]} alt="Preview lovelyfy 2" className="h-full w-full object-cover" />
@@ -286,16 +286,16 @@ export default function Home() {
       <section className="relative mx-auto mt-10 w-full max-w-6xl pb-10">
         <div className={`rounded-[2rem] border p-5 sm:p-7 ${isDark ? 'border-zinc-800 bg-[#131318]/85' : 'border-pink-200 bg-white/90'}`}>
           <div className="grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="relative mx-auto flex h-[540px] w-full max-w-[360px] items-center justify-center">
+            <div className="relative mx-auto flex h-[460px] w-full max-w-[320px] items-center justify-center sm:h-[540px] sm:max-w-[360px]">
               <motion.div
                 key={`left-${prevExperience.id}`}
                 initial={{ opacity: 0.25, x: -20 }}
                 animate={{ opacity: 0.38, x: 0 }}
                 transition={{ duration: 0.35 }}
-                className={`absolute left-0 top-1/2 h-[420px] w-[205px] -translate-y-1/2 rotate-[-12deg] rounded-[2rem] border p-2 ${isDark ? 'border-zinc-700 bg-[#0f0f14]/75' : 'border-pink-200 bg-[#f7f1ff]/80'}`}
+                className={`absolute left-0 top-1/2 h-[340px] w-[168px] -translate-y-1/2 rotate-[-12deg] rounded-[2rem] border p-2 sm:h-[420px] sm:w-[205px] ${isDark ? 'border-zinc-700 bg-[#0f0f14]/75' : 'border-pink-200 bg-[#f7f1ff]/80'}`}
               >
                 <div className="h-full w-full overflow-hidden rounded-[1.5rem]">
-                  <img src={prevExperience.fallbackImage} alt={prevExperience.title} className="h-full w-full object-cover opacity-90" />
+                  <img src={prevExperience.fallbackImage} alt={prevExperience.title} loading="lazy" className="h-full w-full object-cover opacity-90" />
                 </div>
               </motion.div>
 
@@ -304,10 +304,10 @@ export default function Home() {
                 initial={{ opacity: 0.25, x: 20 }}
                 animate={{ opacity: 0.38, x: 0 }}
                 transition={{ duration: 0.35 }}
-                className={`absolute right-0 top-1/2 h-[420px] w-[205px] -translate-y-1/2 rotate-[12deg] rounded-[2rem] border p-2 ${isDark ? 'border-zinc-700 bg-[#0f0f14]/75' : 'border-pink-200 bg-[#f7f1ff]/80'}`}
+                className={`absolute right-0 top-1/2 h-[340px] w-[168px] -translate-y-1/2 rotate-[12deg] rounded-[2rem] border p-2 sm:h-[420px] sm:w-[205px] ${isDark ? 'border-zinc-700 bg-[#0f0f14]/75' : 'border-pink-200 bg-[#f7f1ff]/80'}`}
               >
                 <div className="h-full w-full overflow-hidden rounded-[1.5rem]">
-                  <img src={nextExperience.fallbackImage} alt={nextExperience.title} className="h-full w-full object-cover opacity-90" />
+                  <img src={nextExperience.fallbackImage} alt={nextExperience.title} loading="lazy" className="h-full w-full object-cover opacity-90" />
                 </div>
               </motion.div>
 
@@ -316,7 +316,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 24, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.45, ease: 'easeOut' }}
-                className={`relative z-20 h-[500px] w-[250px] rounded-[2.5rem] border-[7px] p-2 shadow-2xl ${isDark ? 'border-zinc-800 bg-[#171725]' : 'border-zinc-800 bg-[#191622]'}`}
+                className={`relative z-20 h-[420px] w-[212px] rounded-[2.2rem] border-[6px] p-2 shadow-2xl sm:h-[500px] sm:w-[250px] sm:rounded-[2.5rem] sm:border-[7px] ${isDark ? 'border-zinc-800 bg-[#171725]' : 'border-zinc-800 bg-[#191622]'}`}
               >
                 <div className="absolute left-1/2 top-2 h-1.5 w-18 -translate-x-1/2 rounded-full bg-black/70" />
                 <div className="h-full w-full overflow-hidden rounded-[2rem] bg-black">
@@ -332,7 +332,7 @@ export default function Home() {
                     />
                   ) : (
                     <div className="relative h-full w-full">
-                      <img src={activeExperience.fallbackImage} alt={activeExperience.title} className="h-full w-full object-cover opacity-60" />
+                      <img src={activeExperience.fallbackImage} alt={activeExperience.title} loading="lazy" className="h-full w-full object-cover opacity-60" />
                       <div className="absolute inset-0 grid place-items-center bg-black/35">
                         <p className="max-w-[12rem] text-center text-sm font-semibold text-white">
                           Adicione um video em <span className="text-pink-300">videoSrc</span> deste item
@@ -413,7 +413,7 @@ export default function Home() {
         <motion.span
           key={`heart-${heart.left}-${heart.top}`}
           aria-hidden
-          className={`pointer-events-none absolute select-none ${isDark ? 'text-pink-300/40' : 'text-pink-400/55'}`}
+          className={`pointer-events-none absolute hidden select-none sm:block ${isDark ? 'text-pink-300/40' : 'text-pink-400/55'}`}
           style={{ left: heart.left, top: heart.top, fontSize: heart.size, rotate: heart.rotate }}
           animate={{ y: [0, -10, 0], scale: [1, 1.08, 1] }}
           transition={{ duration: 6.8 + idx, repeat: Infinity, delay: heart.delay, ease: 'easeInOut' }}

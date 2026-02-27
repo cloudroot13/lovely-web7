@@ -5,6 +5,20 @@
   pointer-events: none;
 }
 
+.rootLite .stage {
+  animation: none;
+}
+
+.rootLite .heartPixel {
+  box-shadow: 0 0 4px rgba(29, 185, 84, 0.26);
+  filter: none;
+  animation-duration: calc(var(--p-duration) + 1.4s);
+}
+
+.rootLite .centerPixel {
+  box-shadow: none;
+}
+
 .bg {
   position: absolute;
   inset: 0;
@@ -107,5 +121,9 @@
 
   .heartPixel {
     box-shadow: 0 0 6px rgba(29, 185, 84, 0.36), 0 0 11px rgba(29, 185, 84, 0.2);
+  }
+
+  .rootLite .heartPixel {
+    box-shadow: 0 0 3px rgba(29, 185, 84, 0.24);
   }
 }

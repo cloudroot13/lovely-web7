@@ -44,13 +44,16 @@ const CENTER_PIXELS = [
   { x: 53, y: 55, size: 3, delay: 1.7, duration: 3.9 },
 ]
 
-export default function HeartBackground() {
+export default function HeartBackground({ lite = false }) {
+  const heartPixels = lite ? HEART_PIXELS.filter((_, index) => index % 2 === 0) : HEART_PIXELS
+  const centerPixels = lite ? CENTER_PIXELS.slice(0, 2) : CENTER_PIXELS
+
   return (
-    <div className={styles.root} aria-hidden>
+    <div className={`${styles.root} ${lite ? styles.rootLite : ''}`} aria-hidden>
       <div className={styles.bg} />
 
       <div className={styles.stage}>
-        {HEART_PIXELS.map((pixel, index) => (
+        {heartPixels.map((pixel, index) => (
           <span
             key={`heart-${index}`}
             className={styles.heartPixel}
@@ -69,7 +72,7 @@ export default function HeartBackground() {
       </div>
 
       <div className={styles.centerParticles}>
-        {CENTER_PIXELS.map((pixel, index) => (
+        {centerPixels.map((pixel, index) => (
           <span
             key={`center-${index}`}
             className={styles.centerPixel}
