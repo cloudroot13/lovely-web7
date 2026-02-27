@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { useInViewAnimations } from './hooks/useInViewAnimations'
 import cupidoAtirandoVideo from './assets/mascote_cupido/atirando.mov'
+import cupidoRosto from './assets/mascote_cupido/rosto.png'
 
 const Home = lazy(() => import('./pages/Home'))
 const ChooseMode = lazy(() => import('./pages/ChooseMode'))
@@ -17,6 +18,7 @@ const LovelyflixProfileSelect = lazy(() => import('./modules/lovelyflix/Lovelyfl
 export default function App() {
   useInViewAnimations()
   const [showLoading, setShowLoading] = useState(true)
+  const [loadingVideoBlocked, setLoadingVideoBlocked] = useState(false)
   const loadingVideoRef = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
@@ -33,28 +35,48 @@ export default function App() {
     video.muted = true
     video.defaultMuted = true
     video.playsInline = true
+    video.autoplay = true
+    video.loop = true
+    video.setAttribute('muted', '')
+    video.setAttribute('autoplay', '')
+    video.setAttribute('playsinline', '')
+    video.setAttribute('webkit-playsinline', 'true')
+    video.controls = false
+    video.load()
 
     const tryPlay = () => {
       video.play().catch(() => {
-        // Alguns navegadores mobile bloqueiam a primeira tentativa; o retry trata isso.
+        // Continua tentando autoplay no mobile sem trocar para fallback.
       })
     }
+
+    const onPlay = () => setLoadingVideoBlocked(false)
+    const onError = () => setLoadingVideoBlocked(true)
 
     tryPlay()
     video.addEventListener('loadeddata', tryPlay)
     video.addEventListener('canplay', tryPlay)
+    video.addEventListener('playing', onPlay)
+    video.addEventListener('error', onError)
     const retry = window.setInterval(tryPlay, 700)
 
     return () => {
       window.clearInterval(retry)
       video.removeEventListener('loadeddata', tryPlay)
       video.removeEventListener('canplay', tryPlay)
+      video.removeEventListener('playing', onPlay)
+      video.removeEventListener('error', onError)
     }
   }, [showLoading])
 
-  if (showLoading) {
-    return (
-      <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-black text-white">
+  const loadingVisual = (
+    <>
+      {loadingVideoBlocked ? (
+        <div className="relative grid h-[210px] w-[210px] place-items-center overflow-hidden rounded-2xl border border-pink-300/30 bg-zinc-900">
+          <img src={cupidoRosto} alt="Cupido" className="h-24 w-24 animate-pulse object-contain" />
+          <span className="absolute bottom-3 text-[11px] uppercase tracking-[0.18em] text-pink-200">carregando...</span>
+        </div>
+      ) : (
         <video
           ref={loadingVideoRef}
           className="h-[210px] w-[210px] rounded-2xl object-cover"
@@ -64,7 +86,22 @@ export default function App() {
           muted
           playsInline
           preload="auto"
+          controls={false}
         />
+      )}
+    </>
+  )
+  const loadingFallbackVisual = (
+    <div className="relative grid h-[210px] w-[210px] place-items-center overflow-hidden rounded-2xl border border-pink-300/30 bg-zinc-900">
+      <img src={cupidoRosto} alt="Cupido" className="h-24 w-24 animate-pulse object-contain" />
+      <span className="absolute bottom-3 text-[11px] uppercase tracking-[0.18em] text-pink-200">carregando...</span>
+    </div>
+  )
+
+  if (showLoading) {
+    return (
+      <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-black text-white">
+        {loadingVisual}
       </main>
     )
   }
@@ -73,15 +110,7 @@ export default function App() {
     <Suspense
       fallback={
         <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-black text-white">
-          <video
-            className="h-[210px] w-[210px] rounded-2xl object-cover"
-            src={cupidoAtirandoVideo}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-          />
+          {loadingFallbackVisual}
         </main>
       }
     >
