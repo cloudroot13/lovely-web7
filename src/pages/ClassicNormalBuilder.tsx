@@ -493,11 +493,11 @@ export default function ClassicNormalBuilder() {
                 className="w-full rounded-xl border border-zinc-700 bg-[#16161a] px-4 py-3 text-base outline-none focus:border-pink-400"
               />
               <div className="grid gap-2 sm:grid-cols-3">
-                {['default', 'classic', 'simple'].map((item) => (
+                {['default', 'classic'].map((item) => (
                   <button
                     key={item}
                     type="button"
-                    onClick={() => setLoveData({ classicCounterStyle: item as 'default' | 'classic' | 'simple' })}
+                    onClick={() => setLoveData({ classicCounterStyle: item as 'default' | 'classic' })}
                     className={`rounded-xl border px-4 py-3 text-left capitalize transition ${
                       loveData.classicCounterStyle === item ? 'border-pink-400 bg-pink-500/15 text-pink-100' : 'border-zinc-700 bg-[#16161a] text-zinc-200'
                     }`}
@@ -737,12 +737,6 @@ export default function ClassicNormalBuilder() {
                   <div className="mt-8 w-full">
                     {loveData.classicCounterStyle === 'classic' && (
                       <p className="text-base font-semibold text-zinc-100">Juntos ha {clock.years} anos, {clock.months} meses e {clock.days} dias</p>
-                    )}
-                    {loveData.classicCounterStyle === 'simple' && (
-                      <div>
-                        <p className="text-5xl font-black text-pink-300">{clock.days}</p>
-                        <p className="text-xs uppercase tracking-[0.14em] text-zinc-400">dias</p>
-                      </div>
                     )}
                     {loveData.classicCounterStyle === 'default' && (
                       <div className="grid grid-cols-3 gap-2 text-sm">

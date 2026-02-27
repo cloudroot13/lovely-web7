@@ -383,11 +383,6 @@ export function ClassicNormal({ loveData }: ClassicNormalProps) {
         <div className="mt-8 w-full max-w-3xl rounded-2xl border border-pink-500/30 bg-black/45 p-4 backdrop-blur-sm">
           {loveData.classicCounterStyle === 'classic' ? (
             <p className="text-2xl font-semibold text-pink-200">{clock.years} anos, {clock.months} meses e {clock.days} dias juntos</p>
-          ) : loveData.classicCounterStyle === 'simple' ? (
-            <>
-              <p className="text-6xl font-black text-pink-300">{clock.days}</p>
-              <p className="text-sm uppercase tracking-[0.16em] text-zinc-400">dias compartilhados</p>
-            </>
           ) : (
             <div className="grid grid-cols-3 gap-2 text-sm">
               <div className="rounded-xl bg-black/60 p-2"><p className="text-xl font-bold text-pink-200">{clock.years}</p><p className="text-zinc-400">anos</p></div>

@@ -56,7 +56,12 @@ function buildExperienceKey(config: AppConfig) {
 }
 
 function normalizeLoveData(data?: LoveData) {
-  return { ...initialLoveData, ...(data ?? {}) }
+  const normalized = { ...initialLoveData, ...(data ?? {}) }
+  const rawCounterStyle = (data as { classicCounterStyle?: string } | undefined)?.classicCounterStyle
+  if (rawCounterStyle === 'simple') {
+    normalized.classicCounterStyle = 'default'
+  }
+  return normalized
 }
 
 function getStoredState(): StoredState {

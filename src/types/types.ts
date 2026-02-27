@@ -19,7 +19,7 @@ export interface LoveData {
   apelido: string
   classicTitle: string
   classicMessage: string
-  classicCounterStyle: 'default' | 'classic' | 'simple'
+  classicCounterStyle: 'default' | 'classic'
   classicPhotoDisplay: 'coverflow' | 'cube' | 'cards' | 'flip'
   classicBackgroundAnimation: 'none' | 'hearts' | 'stars_meteors' | 'clouds'
   classicMemoriesTitle: string
