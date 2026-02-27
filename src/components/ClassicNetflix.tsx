@@ -217,23 +217,23 @@ export function ClassicNetflix({ loveData, showBootIntro = true }: ClassicNetfli
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 md:px-10">
         <h2 className="mb-4 text-xl font-bold">Top 10 em séries no EUA hoje</h2>
-        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" aria-label="Lista horizontal de episódios">
+        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pr-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" aria-label="Lista horizontal de episódios">
           {episodes.map((episode, index) => (
             <motion.button
               whileHover={{ y: -4 }}
               type="button"
               onClick={() => setSelectedEpisode(index)}
               key={`${episode.title}-${index}`}
-              className="group relative min-w-[170px] snap-start pl-9 text-left sm:min-w-[182px]"
+              className="group relative h-56 w-40 shrink-0 snap-start text-left sm:h-60 sm:w-44"
             >
-              <span className="pointer-events-none absolute bottom-0 left-0 z-0 text-[94px] leading-[0.8] font-black text-zinc-200/28 transition group-hover:text-zinc-100/35">
+              <span className="pointer-events-none absolute -left-1 top-1/2 z-0 -translate-y-1/2 text-[108px] leading-none font-black text-white/20">
                 {index + 1}
               </span>
-              <div className="relative z-10 overflow-hidden rounded-lg border border-zinc-700 bg-[#1a1a1a] transition group-hover:border-[#E50914] group-hover:shadow-[0_0_22px_rgba(229,9,20,0.45)]">
-                <div className="relative aspect-[3/4] w-[128px] sm:w-[138px]">
+              <div className="absolute bottom-0 right-0 z-10 w-[84%] overflow-hidden rounded-lg border border-white/15 bg-[#1b1b1b] shadow-[0_8px_26px_rgba(0,0,0,0.45)] transition group-hover:border-[#E50914]">
+                <div className="relative h-36 w-full bg-black sm:h-40">
                   <img src={episode.image} alt={episode.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/18 to-transparent" />
-                  <p className="absolute inset-x-2 bottom-2 text-xs font-semibold leading-tight text-zinc-100">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <p className="absolute inset-x-2 bottom-2 truncate text-xs font-semibold leading-tight text-zinc-100">
                     {episode.title}
                   </p>
                 </div>
