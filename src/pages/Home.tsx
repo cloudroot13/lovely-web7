@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { HomeHeader } from '../components/HomeHeader'
+import { HomeFooter } from '../components/HomeFooter'
 import ilustrativo1 from '../assets/lovelyfy/ilustrativo1.jpeg'
 import ilustrativo2 from '../assets/lovelyfy/ilustrativo2.jpeg'
 import ilustrativo3 from '../assets/lovelyfy/ilustrativo3.jpeg'
@@ -9,12 +10,19 @@ import cupidoPrancheta from '../assets/mascote_cupido/prancheta.png'
 import cupidoPincel from '../assets/mascote_cupido/pincel.png'
 import cupidoQrcode from '../assets/mascote_cupido/qrcode.png'
 import cupidoSurpreso from '../assets/mascote_cupido/surpreso.png'
+import cupidoCoracao from '../assets/mascote_cupido/coracao.png'
 import wrappedLovelyflixVideo from '../assets/lovelyflix/lovelyflix.mp4'
 import wrappedLovelyfyVideo from '../assets/lovelyfy/lovelyfy.mp4'
 import wrappedJornadaVideo from '../assets/jornada/jornada.mp4'
 import wrappedGameVideo from '../assets/game/game.mp4'
 import classicNormalVideo from '../assets/classico-normal/classico-normal.mp4'
 import classicLovelyflixVideo from '../assets/classico-lovelyflix/classico-lovelyflix.mp4'
+import lovelyflixDemoImage1 from '../assets/lovelyflix/demo1.jpeg'
+import lovelyflixDemoImage2 from '../assets/lovelyflix/demo2.jpeg'
+import lovelyflixDemoImage3 from '../assets/lovelyflix/demo3.jpeg'
+import lovelyflixDemoImage4 from '../assets/lovelyflix/demo4.jpeg'
+import lovelyflixDemoImage5 from '../assets/lovelyflix/demo5.jpeg'
+import lovelyflixDemoImage6 from '../assets/lovelyflix/demo6.jpeg'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -34,6 +42,13 @@ export default function Home() {
   const [activeExperienceIdx, setActiveExperienceIdx] = useState(0)
   const [isExperienceVideoPlaying, setIsExperienceVideoPlaying] = useState(false)
   const [isDataSaver, setIsDataSaver] = useState(false)
+  const [openFaqId, setOpenFaqId] = useState<string | null>('faq1')
+  const [isFeaturesInView, setIsFeaturesInView] = useState(false)
+  const [isDemoBannerInView, setIsDemoBannerInView] = useState(false)
+  const [isTestimonialsInView, setIsTestimonialsInView] = useState(false)
+  const featuresSectionRef = useRef<HTMLElement | null>(null)
+  const demoBannerSectionRef = useRef<HTMLElement | null>(null)
+  const testimonialsSectionRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -86,6 +101,105 @@ export default function Home() {
       title: 'Emocione quem você ama',
       description: 'Envie o presente e transforme esse instante em uma lembrança eterna.',
       image: howItWorksImages[3],
+    },
+  ]
+  const featureCards = [
+    {
+      id: 'always-online',
+      title: 'Para sempre no ar',
+      description: 'Seu presente fica online para acessar quando quiser, em qualquer dispositivo.',
+      icon: '☁',
+      image: cupidoCoracao,
+    },
+    {
+      id: 'fully-custom',
+      title: '100% personalizável',
+      description: 'Combine fotos, vídeos, músicas e textos para criar algo único de verdade.',
+      icon: '✦',
+      image: cupidoPincel,
+    },
+  ]
+  const testimonials = [
+    {
+      id: 'ts1',
+      name: 'Ana Clara',
+      when: '3 semanas atrás',
+      text: 'Fiz para o meu noivo e ele chorou no capítulo final. Ficou com cara de streaming de verdade.',
+      avatar: lovelyflixDemoImage1,
+    },
+    {
+      id: 'ts2',
+      name: 'João e Mari',
+      when: '1 mês atrás',
+      text: 'A demo já convenceu a gente. A experiência interativa deixou todo mundo em choque.',
+      avatar: lovelyflixDemoImage2,
+    },
+    {
+      id: 'ts3',
+      name: 'Carla',
+      when: '2 semanas atrás',
+      text: 'Usei no aniversário da minha mãe. Ela reviu as fotos antigas e ficou emocionada.',
+      avatar: lovelyflixDemoImage3,
+    },
+    {
+      id: 'ts4',
+      name: 'Lucas',
+      when: '1 mês atrás',
+      text: 'A estética preta e rosa ficou perfeita no celular. Parece app premium mesmo.',
+      avatar: lovelyflixDemoImage4,
+    },
+    {
+      id: 'ts5',
+      name: 'Rafaela',
+      when: '5 dias atrás',
+      text: 'Montei em poucos minutos e o resultado ficou muito acima do que eu esperava.',
+      avatar: lovelyflixDemoImage5,
+    },
+    {
+      id: 'ts6',
+      name: 'Bruno',
+      when: '2 meses atrás',
+      text: 'O formato de episódios com história do casal foi o que mais chamou atenção aqui em casa.',
+      avatar: lovelyflixDemoImage6,
+    },
+  ]
+  const testimonialsRowA = testimonials.slice(0, 3)
+  const testimonialsRowB = testimonials.slice(3)
+  const faqItems = [
+    {
+      id: 'faq1',
+      question: 'O que é a Lovelyfy?',
+      answer: 'A Lovelyfy é uma plataforma para criar presentes digitais personalizados com fotos, vídeos, textos e experiências interativas.',
+    },
+    {
+      id: 'faq2',
+      question: 'Para quem posso criar um presente?',
+      answer: 'Você pode criar para namorada(o), mãe, pai, avó, amiga(o) e para qualquer pessoa especial.',
+    },
+    {
+      id: 'faq3',
+      question: 'Como funciona? Preciso saber editar?',
+      answer: 'Não. Você só preenche os dados, envia as mídias e a plataforma monta tudo para você automaticamente.',
+    },
+    {
+      id: 'faq4',
+      question: 'O site fica no ar para sempre?',
+      answer: 'Depende do plano escolhido. Temos opções de 24h, anual e vitalício.',
+    },
+    {
+      id: 'faq5',
+      question: 'Como entrego a surpresa?',
+      answer: 'Você recebe um link para compartilhar e pode transformar em QR Code para entregar de forma criativa.',
+    },
+    {
+      id: 'faq6',
+      question: 'O acesso é imediato após o pagamento?',
+      answer: 'Sim. Assim que o pagamento é confirmado, o acesso ao presente é liberado.',
+    },
+    {
+      id: 'faq7',
+      question: 'Se eu errar algo, posso editar depois?',
+      answer: 'Sim. Você pode editar conteúdo e atualizar informações conforme o plano contratado.',
     },
   ]
   // Edite somente os campos fallbackImage e videoSrc para trocar a midia de cada estilo.
@@ -175,9 +289,50 @@ export default function Home() {
     return () => connection.removeEventListener?.('change', apply)
   }, [])
 
+  useEffect(() => {
+    const targets = [
+      { element: featuresSectionRef.current, key: 'features' as const },
+      { element: demoBannerSectionRef.current, key: 'demo' as const },
+      { element: testimonialsSectionRef.current, key: 'testimonials' as const },
+    ].filter((item): item is { element: HTMLElement; key: 'features' | 'demo' | 'testimonials' } => Boolean(item.element))
+
+    if (targets.length === 0) return
+
+    const markVisible = (key: 'features' | 'demo' | 'testimonials') => {
+      if (key === 'features') setIsFeaturesInView(true)
+      if (key === 'demo') setIsDemoBannerInView(true)
+      if (key === 'testimonials') setIsTestimonialsInView(true)
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const key = (entry.target as HTMLElement).dataset.observeKey as 'features' | 'demo' | 'testimonials'
+          if (entry.isIntersecting || entry.intersectionRatio > 0) {
+            markVisible(key)
+          }
+        })
+      },
+      { threshold: [0, 0.01, 0.08], rootMargin: '180px 0px 180px 0px' },
+    )
+
+    targets.forEach(({ element, key }) => {
+      element.dataset.observeKey = key
+      observer.observe(element)
+
+      const rect = element.getBoundingClientRect()
+      const vh = window.innerHeight || document.documentElement.clientHeight
+      if (rect.top < vh * 0.95 && rect.bottom > vh * 0.05) {
+        markVisible(key)
+      }
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <main
-      className={`relative min-h-[100dvh] overflow-hidden px-3 py-6 transition-colors sm:px-6 sm:py-10 ${
+      className={`relative min-h-[100dvh] overflow-x-hidden px-3 pt-6 pb-0 transition-colors sm:px-6 sm:pt-10 sm:pb-0 ${
         isDark ? 'bg-[#0f0f0f] text-[#f5f5f5]' : 'bg-[#fff6fb] text-[#2d1222]'
       }`}
     >
@@ -197,11 +352,13 @@ export default function Home() {
         }`}
       />
 
-      <HomeHeader
-        isDark={isDark}
-        onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-        onCreate={() => navigate('/choose-mode')}
-      />
+      <div className="sticky top-3 z-[60]">
+        <HomeHeader
+          isDark={isDark}
+          onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+          onCreate={() => navigate('/choose-mode')}
+        />
+      </div>
 
       <div className="relative mx-auto mt-8 grid w-full max-w-6xl gap-6 md:min-h-[78vh] md:grid-cols-[1.2fr_0.8fr] md:items-center">
         <section className="text-left md:pr-6">
@@ -499,6 +656,343 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <section ref={featuresSectionRef} className="relative mx-auto mt-8 w-full max-w-6xl pb-10 sm:mt-10">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${isDark ? 'border-pink-500/35 bg-pink-500/10 text-pink-300' : 'border-pink-300 bg-pink-50 text-pink-700'}`}>
+            Recursos
+          </p>
+          <h2 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">
+            Crie um presente <span className={isDark ? 'text-pink-400' : 'text-pink-600'}>memorável e único</span>
+          </h2>
+          <p className={`mx-auto mt-3 max-w-3xl text-sm sm:text-lg ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+            Cada card destaca um diferencial para emocionar com visual premium e desempenho leve.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {featureCards.map((card) => (
+            <motion.article
+              key={card.id}
+              whileHover={{ y: -6, scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+              className={`rounded-3xl border p-5 transition ${isDark ? 'border-zinc-700 bg-[#14141c] hover:border-pink-500/70 hover:shadow-[0_0_28px_rgba(255,47,122,0.22)]' : 'border-pink-200 bg-white/90 hover:border-pink-400 hover:shadow-[0_0_24px_rgba(255,79,163,0.2)]'}`}
+            >
+              <span className={`inline-grid h-10 w-10 place-items-center rounded-xl text-lg ${isDark ? 'bg-pink-500/15 text-pink-300' : 'bg-pink-50 text-pink-600'}`}>{card.icon}</span>
+              <h3 className="mt-4 text-3xl font-bold leading-tight">{card.title}</h3>
+              <p className={`mt-3 text-base leading-relaxed ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>{card.description}</p>
+              <div className="mt-5 overflow-hidden rounded-2xl border border-white/10">
+                <img src={card.image} alt={card.title} loading="lazy" className="h-44 w-full object-contain p-3 transition duration-300 hover:scale-105" />
+              </div>
+            </motion.article>
+          ))}
+
+          <motion.article
+            whileHover={{ y: -6, scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+            className={`rounded-3xl border p-5 transition md:row-span-2 ${isDark ? 'border-zinc-700 bg-[#14141c] hover:border-pink-500/70 hover:shadow-[0_0_28px_rgba(255,47,122,0.22)]' : 'border-pink-200 bg-white/90 hover:border-pink-400 hover:shadow-[0_0_24px_rgba(255,79,163,0.2)]'}`}
+          >
+            <span className={`inline-grid h-10 w-10 place-items-center rounded-xl text-lg ${isDark ? 'bg-pink-500/15 text-pink-300' : 'bg-pink-50 text-pink-600'}`}>♫</span>
+            <h3 className="mt-4 text-3xl font-bold leading-tight">Com retrospectiva única</h3>
+            <p className={`mt-3 text-base leading-relaxed ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+              Uma retrospectiva animada para reviver sua história com ritmo, emoção e impacto visual.
+            </p>
+            <div className="mx-auto mt-6 w-full max-w-[230px] rounded-[2rem] border-[5px] border-zinc-800 bg-[#191622] p-2 shadow-2xl">
+              <div className="h-[380px] overflow-hidden rounded-[1.6rem] bg-black">
+                {isFeaturesInView ? (
+                  <video
+                    key="features-video-active"
+                    src={wrappedLovelyfyVideo}
+                    className="h-full w-full object-cover"
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <img src={lovelyflixDemoImage1} alt="Prévia retrospectiva" className="h-full w-full object-cover opacity-80" loading="lazy" />
+                )}
+              </div>
+            </div>
+          </motion.article>
+
+          <motion.article
+            whileHover={{ y: -6, scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+            className={`rounded-3xl border p-5 transition md:col-span-2 ${isDark ? 'border-zinc-700 bg-[#14141c] hover:border-pink-500/70 hover:shadow-[0_0_28px_rgba(255,47,122,0.22)]' : 'border-pink-200 bg-white/90 hover:border-pink-400 hover:shadow-[0_0_24px_rgba(255,79,163,0.2)]'}`}
+          >
+            <span className={`inline-grid h-10 w-10 place-items-center rounded-xl text-lg ${isDark ? 'bg-pink-500/15 text-pink-300' : 'bg-pink-50 text-pink-600'}`}>📷</span>
+            <h3 className="mt-4 text-3xl font-bold leading-tight">Relembre seus melhores momentos</h3>
+            <p className={`mt-3 text-base leading-relaxed ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+              Monte uma narrativa afetiva com suas melhores fotos, criando uma lembrança digital que fica para sempre.
+            </p>
+            <div className="relative mx-auto mt-6 h-[260px] w-full max-w-[420px]">
+              <motion.div
+                animate={isFeaturesInView ? { rotate: [-12, -9, -12], y: [0, -4, 0] } : { rotate: -12, y: 0 }}
+                transition={isFeaturesInView ? { duration: 6.8, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+                className={`absolute left-2 top-8 z-10 h-[180px] w-[96px] rounded-[1.4rem] border-[4px] p-1.5 sm:left-6 sm:h-[210px] sm:w-[112px] ${isDark ? 'border-zinc-700 bg-[#14141b]' : 'border-zinc-400 bg-[#18181f]'}`}
+              >
+                <div className="h-full w-full overflow-hidden rounded-[1rem]">
+                  <img src={ilustrativo1} alt="Momento especial 1" loading="lazy" className="h-full w-full object-cover" />
+                </div>
+              </motion.div>
+
+              <motion.div
+                animate={isFeaturesInView ? { y: [0, -9, 0] } : { y: 0 }}
+                transition={isFeaturesInView ? { duration: 6.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+                className={`absolute left-1/2 top-1 z-20 h-[220px] w-[116px] -translate-x-1/2 rounded-[1.7rem] border-[4px] p-1.5 shadow-2xl sm:h-[250px] sm:w-[132px] ${isDark ? 'border-zinc-800 bg-[#171725]' : 'border-zinc-700 bg-[#191622]'}`}
+              >
+                <div className="h-full w-full overflow-hidden rounded-[1.25rem]">
+                  <img src={ilustrativo2} alt="Momento especial 2" loading="lazy" className="h-full w-full object-cover" />
+                </div>
+              </motion.div>
+
+              <motion.div
+                animate={isFeaturesInView ? { rotate: [12, 9, 12], y: [0, -4, 0] } : { rotate: 12, y: 0 }}
+                transition={isFeaturesInView ? { duration: 7.1, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+                className={`absolute right-2 top-8 z-10 h-[180px] w-[96px] rounded-[1.4rem] border-[4px] p-1.5 sm:right-6 sm:h-[210px] sm:w-[112px] ${isDark ? 'border-zinc-700 bg-[#14141b]' : 'border-zinc-400 bg-[#18181f]'}`}
+              >
+                <div className="h-full w-full overflow-hidden rounded-[1rem]">
+                  <img src={ilustrativo3} alt="Momento especial 3" loading="lazy" className="h-full w-full object-cover" />
+                </div>
+              </motion.div>
+            </div>
+          </motion.article>
+        </div>
+      </section>
+
+      <section ref={demoBannerSectionRef} className="relative mx-auto mt-6 w-full max-w-6xl pb-10 sm:mt-10">
+        <div className="relative overflow-hidden rounded-[2rem] border border-pink-500/45 bg-[radial-gradient(circle_at_20%_20%,rgba(255,47,122,0.34),transparent_38%),radial-gradient(circle_at_82%_75%,rgba(255,90,160,0.2),transparent_36%),linear-gradient(135deg,#130b14,#09070d_55%,#180914)] px-5 py-10 sm:px-8">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.06)_48%,transparent_100%)]" />
+
+          <motion.div
+            animate={isDemoBannerInView ? { rotate: [-11, -9, -11], y: [0, -4, 0] } : { rotate: -11, y: 0 }}
+            transition={isDemoBannerInView ? { duration: 7, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+            className="absolute -left-4 bottom-[-36px] hidden h-[260px] w-[140px] rounded-[1.8rem] border-[4px] border-zinc-800 bg-[#171717] p-1.5 sm:block"
+          >
+            <div className="h-full w-full overflow-hidden rounded-[1.4rem]">
+              <img src={lovelyflixDemoImage2} alt="Prévia demo 1" className="h-full w-full object-cover" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            animate={isDemoBannerInView ? { rotate: [11, 9, 11], y: [0, -4, 0] } : { rotate: 11, y: 0 }}
+            transition={isDemoBannerInView ? { duration: 7.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
+            className="absolute -right-4 bottom-[-40px] hidden h-[280px] w-[150px] rounded-[1.9rem] border-[4px] border-zinc-800 bg-[#171717] p-1.5 sm:block"
+          >
+            <div className="h-full w-full overflow-hidden rounded-[1.45rem]">
+              <img src={lovelyflixDemoImage1} alt="Prévia demo 2" className="h-full w-full object-cover" />
+            </div>
+          </motion.div>
+
+          <div className="relative z-10 mx-auto max-w-2xl text-center">
+            <h2 className="text-4xl font-black leading-tight text-white sm:text-6xl">
+              Teste Nossa
+              <br />
+              Demo Interativa
+            </h2>
+            <button
+              type="button"
+              onClick={() => navigate('/demo/wrapped-lovelyflix')}
+              className="mt-6 rounded-2xl border border-pink-400/50 bg-pink-500 px-6 py-3 text-base font-semibold text-black shadow-[0_8px_30px_rgba(255,47,122,0.35)] transition hover:scale-[1.02] hover:brightness-110"
+            >
+              Explorar a Demo
+            </button>
+            <p className="mt-3 text-sm font-medium text-pink-100/90">Demo pronta com dados mockados, sem edição.</p>
+          </div>
+        </div>
+      </section>
+
+      <section ref={testimonialsSectionRef} className="relative mx-auto mt-4 w-full max-w-6xl pb-14 sm:mt-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${isDark ? 'border-pink-500/35 bg-pink-500/10 text-pink-300' : 'border-pink-300 bg-pink-50 text-pink-700'}`}>
+            Depoimentos
+          </p>
+          <h2 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">
+            O que nossos <span className={isDark ? 'text-pink-400' : 'text-pink-600'}>clientes dizem</span>
+          </h2>
+          <p className={`mx-auto mt-3 max-w-3xl text-sm sm:text-lg ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+            Histórias reais com visual emocional e experiência premium no celular.
+          </p>
+        </div>
+
+        <div className="relative left-1/2 mt-8 w-screen -translate-x-1/2 space-y-4 overflow-hidden">
+          <div
+            className={`pointer-events-none absolute inset-y-0 left-0 z-20 w-16 bg-gradient-to-r to-transparent sm:w-24 ${
+              isDark ? 'from-[#0f0f0f]' : 'from-[#fff6fb]'
+            }`}
+          />
+          <div
+            className={`pointer-events-none absolute inset-y-0 right-0 z-20 w-16 bg-gradient-to-l to-transparent sm:w-24 ${
+              isDark ? 'from-[#0f0f0f]' : 'from-[#fff6fb]'
+            }`}
+          />
+
+          <motion.div
+            className="flex w-max gap-4"
+            animate={isTestimonialsInView ? { x: ['0%', '-50%'] } : { x: '0%' }}
+            transition={isTestimonialsInView ? { duration: 30, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
+          >
+            {[...testimonialsRowA, ...testimonialsRowA].map((item, index) => (
+              <article
+                key={`${item.id}-a-${index}`}
+                className={`w-[280px] shrink-0 rounded-2xl border p-4 sm:w-[360px] ${isDark ? 'border-zinc-700 bg-[#14141b]' : 'border-pink-200 bg-white/90'}`}
+              >
+                <p className="text-sm tracking-[0.16em] text-pink-400">★★★★★</p>
+                <p className={`mt-3 text-base leading-relaxed ${isDark ? 'text-zinc-200' : 'text-zinc-700'}`}>"{item.text}"</p>
+                <div className={`mt-4 flex items-center gap-3 border-t pt-3 ${isDark ? 'border-zinc-700' : 'border-pink-100'}`}>
+                  <img src={item.avatar} alt={item.name} className="h-10 w-10 rounded-full object-cover" loading="lazy" />
+                  <div>
+                    <p className="text-sm font-semibold">{item.name}</p>
+                    <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{item.when}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </motion.div>
+
+          <motion.div
+            className="flex w-max gap-4"
+            animate={isTestimonialsInView ? { x: ['-50%', '0%'] } : { x: '-10%' }}
+            transition={isTestimonialsInView ? { duration: 32, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
+          >
+            {[...testimonialsRowB, ...testimonialsRowB].map((item, index) => (
+              <article
+                key={`${item.id}-b-${index}`}
+                className={`w-[280px] shrink-0 rounded-2xl border p-4 sm:w-[360px] ${isDark ? 'border-zinc-700 bg-[#14141b]' : 'border-pink-200 bg-white/90'}`}
+              >
+                <p className="text-sm tracking-[0.16em] text-pink-400">★★★★★</p>
+                <p className={`mt-3 text-base leading-relaxed ${isDark ? 'text-zinc-200' : 'text-zinc-700'}`}>"{item.text}"</p>
+                <div className={`mt-4 flex items-center gap-3 border-t pt-3 ${isDark ? 'border-zinc-700' : 'border-pink-100'}`}>
+                  <img src={item.avatar} alt={item.name} className="h-10 w-10 rounded-full object-cover" loading="lazy" />
+                  <div>
+                    <p className="text-sm font-semibold">{item.name}</p>
+                    <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{item.when}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="relative mx-auto mt-2 w-full max-w-6xl pb-16 sm:mt-6">
+        <div className={`rounded-[2rem] border p-6 sm:p-8 ${isDark ? 'border-zinc-700 bg-[#121219]' : 'border-pink-200 bg-white/90'}`}>
+          <div className="mx-auto max-w-4xl text-center">
+            <p className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${isDark ? 'border-pink-500/35 bg-pink-500/10 text-pink-300' : 'border-pink-300 bg-pink-50 text-pink-700'}`}>
+              Planos e Preços
+            </p>
+            <h2 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">
+              Escolha o plano <span className={isDark ? 'text-pink-400' : 'text-pink-600'}>ideal</span> para você
+            </h2>
+            <p className={`mx-auto mt-3 max-w-3xl text-sm sm:text-lg ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+              Pagamento único, sem mensalidade. Crie seu presente digital agora.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-8 grid max-w-5xl gap-4 md:grid-cols-3">
+            {[
+              { id: '24h', title: 'Só Hoje (24h)', oldPrice: 'R$ 25,00', price: 'R$ 15,00', badge: 'Econômico', highlight: false },
+              { id: 'anual', title: 'Plano Anual', oldPrice: 'R$ 45,00', price: 'R$ 20,00', badge: 'Mais Popular', highlight: true },
+              { id: 'vitalicio', title: 'Para Sempre (Vitalício)', oldPrice: 'R$ 67,00', price: 'R$ 27,00', badge: 'Melhor Custo-benefício', highlight: false },
+            ].map((plan) => (
+              <article
+                key={plan.id}
+                className={`relative rounded-3xl border p-5 ${plan.highlight ? isDark ? 'border-pink-500 bg-pink-500/10 shadow-[0_0_30px_rgba(255,47,122,0.22)]' : 'border-pink-400 bg-pink-50/80 shadow-[0_0_24px_rgba(255,79,163,0.2)]' : isDark ? 'border-zinc-700 bg-[#17171f]' : 'border-pink-200 bg-white'}`}
+              >
+                <span className={`absolute -top-3 left-4 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${plan.highlight ? isDark ? 'border-pink-400 bg-pink-500 text-black' : 'border-pink-300 bg-pink-500 text-white' : isDark ? 'border-zinc-600 bg-zinc-900 text-zinc-200' : 'border-pink-200 bg-pink-50 text-pink-700'}`}>
+                  {plan.badge}
+                </span>
+                <h3 className="mt-4 text-2xl font-bold">{plan.title}</h3>
+                <p className={`mt-4 text-sm line-through ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{plan.oldPrice}</p>
+                <p className="text-4xl font-black">{plan.price}</p>
+                <ul className={`mt-4 space-y-2 text-sm ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  <li>• Acesso imediato</li>
+                  <li>• Edições ilimitadas</li>
+                  <li>• Fotos e seções ilimitadas</li>
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => navigate('/choose-mode')}
+                  className={`mt-6 w-full rounded-xl px-4 py-3 text-sm font-semibold transition ${plan.highlight ? 'bg-pink-500 text-black hover:brightness-110' : isDark ? 'border border-zinc-600 bg-zinc-900 text-zinc-100 hover:border-pink-400' : 'border border-pink-200 bg-white text-zinc-700 hover:border-pink-400'}`}
+                >
+                  Escolher plano
+                </button>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative mx-auto mt-2 w-full max-w-6xl pb-12 sm:mt-6">
+        <div className="grid gap-6 p-1 sm:p-2 lg:grid-cols-[0.95fr_1.05fr]">
+          <div>
+            <p className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${isDark ? 'border-pink-500/35 bg-pink-500/10 text-pink-300' : 'border-pink-300 bg-pink-50 text-pink-700'}`}>
+              Perguntas Frequentes
+            </p>
+            <h2 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">
+              Tire suas <span className={isDark ? 'text-pink-400' : 'text-pink-600'}>Dúvidas</span>
+            </h2>
+            <p className={`mt-3 max-w-lg text-base leading-relaxed ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+              Separamos as perguntas mais comuns. Se a sua não estiver aqui, entre em contato.
+            </p>
+
+            <p className="mt-8 text-lg font-bold sm:text-xl">Não encontrou sua pergunta?</p>
+            <div className="mt-4 space-y-3">
+              <a
+                href="#"
+                className={`flex items-center justify-between rounded-2xl border px-4 py-3 transition ${isDark ? 'border-zinc-700 bg-[#17171f] hover:border-pink-400/70' : 'border-pink-200 bg-white hover:border-pink-400/70'}`}
+              >
+                <div>
+                  <p className="text-base font-semibold sm:text-lg">Instagram</p>
+                  <p className={`text-sm sm:text-base ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>@lovelyfy.oficial</p>
+                </div>
+                <span className="text-2xl">›</span>
+              </a>
+              <a
+                href="#"
+                className={`flex items-center justify-between rounded-2xl border px-4 py-3 transition ${isDark ? 'border-zinc-700 bg-[#17171f] hover:border-pink-400/70' : 'border-pink-200 bg-white hover:border-pink-400/70'}`}
+              >
+                <div>
+                  <p className="text-base font-semibold sm:text-lg">E-mail</p>
+                  <p className={`text-sm sm:text-base ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>suporte@lovelyfy.com.br</p>
+                </div>
+                <span className="text-2xl">›</span>
+              </a>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate('/choose-mode')}
+              className="mt-5 w-full rounded-2xl bg-emerald-500 px-6 py-4 text-lg font-semibold text-white transition hover:brightness-110"
+            >
+              Criar meu presente ↗
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {faqItems.map((item) => {
+              const isOpen = openFaqId === item.id
+              return (
+                <article key={item.id} className={`rounded-2xl border ${isDark ? 'border-zinc-700 bg-[#17171f]' : 'border-pink-200 bg-white'}`}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqId((prev) => (prev === item.id ? null : item.id))}
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                  >
+                    <span className="text-lg font-semibold leading-snug sm:text-xl">{item.question}</span>
+                    <span className={`text-2xl transition ${isOpen ? 'rotate-180' : ''}`}>⌄</span>
+                  </button>
+                  {isOpen && <p className={`px-5 pb-4 text-sm leading-relaxed sm:text-base ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>{item.answer}</p>}
+                </article>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      <HomeFooter isDark={isDark} />
 
       {hearts.map((heart, idx) => (
         <motion.span

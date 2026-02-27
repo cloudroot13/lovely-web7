@@ -56,12 +56,12 @@
 .home-header-link {
   border: 1px solid transparent;
   border-radius: 999px;
-  padding: 0.4rem 0.75rem;
+  padding: 0.5rem 0.8rem;
   background: transparent;
   color: inherit;
   font-size: 0.8rem;
   font-weight: 600;
-  min-height: 0;
+  min-height: 2.75rem;
   min-width: 0;
 }
 
@@ -91,7 +91,7 @@
   color: inherit;
   font-size: 0.8rem;
   font-weight: 700;
-  min-height: 0;
+  min-height: 2.75rem;
   min-width: 0;
 }
 
@@ -137,7 +137,40 @@
   .home-header-nav {
     order: 3;
     width: 100%;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+    scrollbar-width: none;
+  }
+
+  .home-header-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-header-theme {
+    width: 100%;
     justify-content: center;
-    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 560px) {
+  .home-header {
+    gap: 0.45rem;
+  }
+
+  .home-header-brand-text {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+  }
+
+  .home-header-link {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .home-header-theme-chip {
+    font-size: 0.72rem;
+    padding: 0.32rem 0.52rem;
   }
 }

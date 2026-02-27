@@ -7,6 +7,7 @@ import type { LoveData } from '../types/types'
 interface WrappedStoriesProps {
   loveData: LoveData
   theme: string
+  demoMode?: boolean
 }
 
 type StoryKind = 'intro-player' | 'highlight' | 'connection' | 'memory' | 'stats' | 'final'
@@ -91,8 +92,8 @@ const emotionalPhrases = [
   'Foi aqui que tudo fez sentido.',
 ]
 
-export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
-  const [started, setStarted] = useState(false)
+export function WrappedStories({ loveData, theme, demoMode = false }: WrappedStoriesProps) {
+  const [started, setStarted] = useState(demoMode)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [elapsedMs, setElapsedMs] = useState(0)
 
@@ -256,18 +257,22 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
                     <img src={currentStory.image} alt="Capa principal" className="aspect-square w-full object-cover" />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStarted(true)
-                      setElapsedMs(0)
-                    }}
-                    className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl text-black shadow-[0_0_30px_rgba(255,47,122,0.45)]"
-                    aria-label="Iniciar experiência"
-                  >
-                    ▶
-                  </button>
-                  <p className="mt-2 text-xs uppercase tracking-[0.16em] text-zinc-400">Iniciar Experiência</p>
+                  {!demoMode && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStarted(true)
+                          setElapsedMs(0)
+                        }}
+                        className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl text-black shadow-[0_0_30px_rgba(255,47,122,0.45)]"
+                        aria-label="Iniciar experiência"
+                      >
+                        ▶
+                      </button>
+                      <p className="mt-2 text-xs uppercase tracking-[0.16em] text-zinc-400">Iniciar Experiência</p>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -341,7 +346,7 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
           </motion.div>
         </AnimatePresence>
 
-        {started && (
+        {started && !demoMode && (
           <div className="absolute bottom-4 left-4 right-4 z-30 flex items-center justify-between gap-2">
             <button type="button" onClick={prevSlide} className="rounded-full border border-zinc-500 bg-black/45 px-4 py-2 text-xs uppercase tracking-[0.14em] text-white">
               Voltar

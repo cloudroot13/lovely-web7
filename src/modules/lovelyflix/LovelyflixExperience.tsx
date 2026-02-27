@@ -16,6 +16,11 @@ interface Tile {
   image: string
 }
 
+interface LovelyflixExperienceProps {
+  demoData?: LoveData
+  demoMode?: boolean
+}
+
 interface HeartNote {
   id: number
   text: string
@@ -287,9 +292,10 @@ function buildContent(data: LoveData, metrics: ReturnType<typeof getRelationship
   return { fallback, heroTitle, heroPhrase, continueWatching, top5, stories, metrics }
 }
 
-export default function LovelyflixExperience() {
+export default function LovelyflixExperience({ demoData, demoMode = false }: LovelyflixExperienceProps) {
   const navigate = useNavigate()
-  const { config, loveData, setConfig } = useAppContext()
+  const { config, loveData: contextLoveData, setConfig } = useAppContext()
+  const loveData = demoMode && demoData ? demoData : contextLoveData
   const [screen, setScreen] = useState<Screen>('home')
   const [selected, setSelected] = useState<Tile | null>(null)
   const [storyIndex, setStoryIndex] = useState(0)
@@ -313,6 +319,7 @@ export default function LovelyflixExperience() {
   const statsAnimatedForRef = useRef<number | null>(null)
 
   useEffect(() => {
+    if (demoMode) return
     if (!(config.mode === 'wrapped' && config.variant === 'stories')) {
       setConfig({ mode: 'wrapped', variant: 'stories' })
       return
@@ -323,7 +330,7 @@ export default function LovelyflixExperience() {
       setStoryIndex(0)
       return
     }
-  }, [config.mode, config.variant, loveData, navigate])
+  }, [config.mode, config.variant, loveData, navigate, demoMode, setConfig])
 
   useEffect(() => {
     const interval = window.setInterval(() => setNowMs(Date.now()), 1000)

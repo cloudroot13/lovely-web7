@@ -12,6 +12,7 @@ const Preview = lazy(() => import('./pages/Preview'))
 const Login = lazy(() => import('./pages/Login'))
 const Checkout = lazy(() => import('./pages/Checkout'))
 const NotFound = lazy(() => import('./pages/NotFound'))
+const WrappedLovelyflixDemo = lazy(() => import('./pages/WrappedLovelyflixDemo'))
 const LovelyflixExperience = lazy(() => import('./modules/lovelyflix/LovelyflixExperience'))
 const LovelyflixProfileSelect = lazy(() => import('./modules/lovelyflix/LovelyflixProfileSelect'))
 
@@ -124,6 +125,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/preview" element={<Preview />} />
+        <Route path="/demo/wrapped-lovelyflix" element={<WrappedLovelyflixDemo />} />
         <Route path="/lovelyflix" element={<LovelyflixExperience />} />
         <Route path="/netflix" element={<LovelyflixExperience />} />
         <Route path="*" element={<NotFound />} />
