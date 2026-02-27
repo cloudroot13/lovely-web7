@@ -388,8 +388,8 @@
 
 .game-wheel-wrap {
   margin-top: 10px;
-  width: 320px;
-  height: 320px;
+  width: 352px;
+  height: 352px;
   border-radius: 999px;
   border: 2px solid rgba(214, 159, 190, 0.24);
   overflow: hidden;
@@ -427,10 +427,10 @@
 
 .game-wheel-item {
   position: absolute;
-  width: 122px;
-  max-width: 122px;
+  width: 132px;
+  max-width: 132px;
   padding: 0 4px;
-  font-size: clamp(11px, 2.7vw, 14px);
+  font-size: clamp(12px, 2.9vw, 15px);
   font-weight: 800;
   text-align: center;
   color: #ffffff;
@@ -909,13 +909,13 @@
   }
 
   .game-wheel-wrap {
-    width: 276px;
-    height: 276px;
+    width: 300px;
+    height: 300px;
   }
 
   .game-wheel-item {
-    width: 94px;
-    max-width: 94px;
+    width: 108px;
+    max-width: 108px;
     font-size: 12px;
   }
 
@@ -960,14 +960,14 @@
   }
 
   .game-wheel-wrap {
-    width: 236px;
-    height: 236px;
+    width: 248px;
+    height: 248px;
   }
 
   .game-wheel-item {
-    width: 78px;
-    max-width: 78px;
-    font-size: 10px;
+    width: 86px;
+    max-width: 86px;
+    font-size: 11px;
   }
 
   .game-choice-grid-2 {

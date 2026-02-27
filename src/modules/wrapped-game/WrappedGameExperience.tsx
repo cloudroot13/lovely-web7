@@ -173,6 +173,7 @@ export function WrappedGameExperience() {
   const [challengeShake, setChallengeShake] = useState(false)
   const [minutesCounter, setMinutesCounter] = useState(0)
   const challengeTimeoutsRef = useRef<number[]>([])
+  const [isVerySmallScreen, setIsVerySmallScreen] = useState(false)
 
   const stories: StoryId[] = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12']
   const currentStory = stories[storyIdx]
@@ -210,10 +211,17 @@ export function WrappedGameExperience() {
   const [isSmallScreen, setIsSmallScreen] = useState(false)
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 420px)')
+    const tinyMq = window.matchMedia('(max-width: 360px), (max-height: 680px)')
     const apply = () => setIsSmallScreen(mq.matches)
+    const applyTiny = () => setIsVerySmallScreen(tinyMq.matches)
     apply()
+    applyTiny()
     mq.addEventListener('change', apply)
-    return () => mq.removeEventListener('change', apply)
+    tinyMq.addEventListener('change', applyTiny)
+    return () => {
+      mq.removeEventListener('change', apply)
+      tinyMq.removeEventListener('change', applyTiny)
+    }
   }, [])
   const searchSize = isSmallScreen ? MOBILE_SEARCH_SIZE : SEARCH_SIZE
   const searchData = useMemo(() => buildWordSearch(searchWords, searchSize), [searchWords, searchSize])
@@ -253,7 +261,7 @@ export function WrappedGameExperience() {
   const wheelLabelPoints = useMemo(() => {
     const count = wheelSegments.length || 1
     const step = 360 / count
-    const radius = 130
+    const radius = isVerySmallScreen ? 94 : isSmallScreen ? 116 : 146
     return wheelSegments.map((_, index) => {
       const angle = -90 + index * step + step / 2
       const rad = (angle * Math.PI) / 180
@@ -262,7 +270,7 @@ export function WrappedGameExperience() {
         y: Math.sin(rad) * radius,
       }
     })
-  }, [wheelSegments])
+  }, [wheelSegments, isSmallScreen, isVerySmallScreen])
 
   useEffect(() => {
     const media = window.matchMedia('(hover: none), (pointer: coarse)')

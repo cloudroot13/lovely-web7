@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { useInViewAnimations } from './hooks/useInViewAnimations'
 import cupidoAtirandoVideo from './assets/mascote_cupido/atirando.mov'
@@ -17,16 +17,46 @@ const LovelyflixProfileSelect = lazy(() => import('./modules/lovelyflix/Lovelyfl
 export default function App() {
   useInViewAnimations()
   const [showLoading, setShowLoading] = useState(true)
+  const loadingVideoRef = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setShowLoading(false), 5000)
     return () => window.clearTimeout(timeout)
   }, [])
 
+  useEffect(() => {
+    if (!showLoading) return
+
+    const video = loadingVideoRef.current
+    if (!video) return
+
+    video.muted = true
+    video.defaultMuted = true
+    video.playsInline = true
+
+    const tryPlay = () => {
+      video.play().catch(() => {
+        // Alguns navegadores mobile bloqueiam a primeira tentativa; o retry trata isso.
+      })
+    }
+
+    tryPlay()
+    video.addEventListener('loadeddata', tryPlay)
+    video.addEventListener('canplay', tryPlay)
+    const retry = window.setInterval(tryPlay, 700)
+
+    return () => {
+      window.clearInterval(retry)
+      video.removeEventListener('loadeddata', tryPlay)
+      video.removeEventListener('canplay', tryPlay)
+    }
+  }, [showLoading])
+
   if (showLoading) {
     return (
       <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-black text-white">
         <video
+          ref={loadingVideoRef}
           className="h-[210px] w-[210px] rounded-2xl object-cover"
           src={cupidoAtirandoVideo}
           autoPlay
