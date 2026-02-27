@@ -216,20 +216,33 @@ export function ClassicNetflix({ loveData, showBootIntro = true }: ClassicNetfli
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 md:px-10">
-        <h2 className="mb-4 text-xl font-bold">Episódios de Destaque</h2>
-        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" aria-label="Lista horizontal de episódios">
+        <h2 className="mb-4 text-xl font-bold">Top 10 em séries no EUA hoje</h2>
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" aria-label="Lista horizontal de episódios">
           {episodes.map((episode, index) => (
             <motion.button
-              whileHover={{ y: -5 }}
+              whileHover={{ y: -4 }}
               type="button"
               onClick={() => setSelectedEpisode(index)}
               key={`${episode.title}-${index}`}
-              className="group relative min-w-[76vw] snap-start overflow-hidden rounded-lg border border-zinc-700 bg-[#1a1a1a] p-4 text-left transition hover:border-[#E50914] hover:shadow-[0_0_22px_rgba(229,9,20,0.45)] sm:min-w-60"
+              className="group relative min-w-[170px] snap-start pl-9 text-left sm:min-w-[182px]"
             >
-              <img src={episode.image} alt={episode.title} className="absolute inset-0 h-full w-full object-cover opacity-55 transition duration-300 group-hover:opacity-72" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/20" />
-              <span className="pointer-events-none absolute -left-2 -top-7 text-8xl font-black text-white/12">{index + 1}</span>
-              <p className="relative z-10 mt-10 text-base font-semibold text-zinc-100">{episode.title}</p>
+              <span className="pointer-events-none absolute bottom-0 left-0 z-0 text-[94px] leading-[0.8] font-black text-zinc-200/28 transition group-hover:text-zinc-100/35">
+                {index + 1}
+              </span>
+              <div className="relative z-10 overflow-hidden rounded-lg border border-zinc-700 bg-[#1a1a1a] transition group-hover:border-[#E50914] group-hover:shadow-[0_0_22px_rgba(229,9,20,0.45)]">
+                <div className="relative aspect-[3/4] w-[128px] sm:w-[138px]">
+                  <img src={episode.image} alt={episode.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/18 to-transparent" />
+                  <p className="absolute inset-x-2 bottom-2 text-xs font-semibold leading-tight text-zinc-100">
+                    {episode.title}
+                  </p>
+                </div>
+                <div className="px-2 py-1.5">
+                  <span className="rounded bg-[#E50914] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
+                    {index === 1 ? 'Nova temporada' : 'Novidade'}
+                  </span>
+                </div>
+              </div>
             </motion.button>
           ))}
         </div>
