@@ -79,10 +79,6 @@ export function ClassicNetflix({ loveData, showBootIntro = true }: ClassicNetfli
   const progressPercent = Math.min(95, Math.max(8, Math.round((relationshipClock.totalDays % 1000) / 10)))
   const starring = loveData.classicTitle || loveData.nomePessoa || 'quem você ama'
   const description = loveData.comoConheceram?.trim() || 'o destino juntou vocês'
-  const romanticLine =
-    loveData.oQueMaisAmo?.trim() ||
-    description ||
-    `Em cada capítulo, ${starring} faz seu coração bater mais forte e transforma cada detalhe em lembrança inesquecível.`
   const clientDescription = description
 
   const coverImage =
@@ -177,7 +173,6 @@ export function ClassicNetflix({ loveData, showBootIntro = true }: ClassicNetfli
               <span className="rounded border border-zinc-300/50 px-1">HD</span>
             </div>
             <p className="mt-3 inline-block max-w-3xl rounded-lg bg-black/45 px-3 py-2 text-sm text-zinc-100 md:text-base">{clientDescription}</p>
-            <p className="mt-2 inline-block max-w-3xl rounded-lg bg-black/45 px-3 py-2 text-xs italic text-zinc-200 md:text-sm">{romanticLine}</p>
           </div>
         </section>
       </div>
@@ -238,15 +233,7 @@ export function ClassicNetflix({ loveData, showBootIntro = true }: ClassicNetfli
                   </p>
                 </div>
                 <div className="px-2 py-1.5">
-                  <span
-                    className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${
-                      index % 3 === 0
-                        ? 'border border-cyan-300/35 bg-cyan-500/20 text-cyan-100'
-                        : index % 3 === 1
-                          ? 'border border-emerald-300/35 bg-emerald-500/20 text-emerald-100'
-                          : 'border border-amber-300/35 bg-amber-500/20 text-amber-100'
-                    }`}
-                  >
+                  <span className="inline-flex max-w-full items-center rounded border border-[#ff8e94]/45 bg-[#E50914] px-2 py-0.5 text-[9px] leading-none font-semibold uppercase tracking-[0.06em] whitespace-nowrap text-white">
                     {index === 1 ? 'Nova temporada' : 'Novidade'}
                   </span>
                 </div>
