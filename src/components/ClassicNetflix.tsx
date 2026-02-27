@@ -176,8 +176,8 @@ export function ClassicNetflix({ loveData, showBootIntro = true }: ClassicNetfli
               </span>
               <span className="rounded border border-zinc-300/50 px-1">HD</span>
             </div>
-            <p className="mt-3 max-w-3xl text-sm text-zinc-100 md:text-base">{clientDescription}</p>
-            <p className="mt-2 max-w-3xl text-xs italic text-rose-200 md:text-sm">{romanticLine}</p>
+            <p className="mt-3 inline-block max-w-3xl rounded-lg bg-black/45 px-3 py-2 text-sm text-zinc-100 md:text-base">{clientDescription}</p>
+            <p className="mt-2 inline-block max-w-3xl rounded-lg bg-black/45 px-3 py-2 text-xs italic text-zinc-200 md:text-sm">{romanticLine}</p>
           </div>
         </section>
       </div>
@@ -233,12 +233,20 @@ export function ClassicNetflix({ loveData, showBootIntro = true }: ClassicNetfli
                 <div className="relative h-36 w-full bg-black sm:h-40">
                   <img src={episode.image} alt={episode.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <p className="absolute inset-x-2 bottom-2 truncate text-xs font-semibold leading-tight text-zinc-100">
+                  <p className="absolute inset-x-2 bottom-2 truncate rounded-md bg-black/60 px-2 py-1 text-xs font-semibold leading-tight text-zinc-100 backdrop-blur-[1px]">
                     {episode.title}
                   </p>
                 </div>
                 <div className="px-2 py-1.5">
-                  <span className="rounded bg-[#E50914] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
+                  <span
+                    className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${
+                      index % 3 === 0
+                        ? 'border border-cyan-300/35 bg-cyan-500/20 text-cyan-100'
+                        : index % 3 === 1
+                          ? 'border border-emerald-300/35 bg-emerald-500/20 text-emerald-100'
+                          : 'border border-amber-300/35 bg-amber-500/20 text-amber-100'
+                    }`}
+                  >
                     {index === 1 ? 'Nova temporada' : 'Novidade'}
                   </span>
                 </div>
