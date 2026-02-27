@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import { netflixAssets } from '../assets/themes/themeAssets'
+import NetflixBootIntro from './NetflixBootIntro'
 import type { LoveData } from '../types/types'
 
 interface ClassicNetflixProps {
   loveData: LoveData
+  showBootIntro?: boolean
 }
 
 const netflixMoments = [
@@ -55,14 +57,19 @@ function buildRelationshipClock(data: LoveData, nowMs: number) {
   }
 }
 
-export function ClassicNetflix({ loveData }: ClassicNetflixProps) {
+export function ClassicNetflix({ loveData, showBootIntro = true }: ClassicNetflixProps) {
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null)
+  const [showIntro, setShowIntro] = useState(showBootIntro)
 
   useEffect(() => {
     const interval = window.setInterval(() => setNowMs(Date.now()), 1000)
     return () => window.clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    setShowIntro(showBootIntro)
+  }, [showBootIntro])
 
   const relationshipClock = useMemo(() => buildRelationshipClock(loveData, nowMs), [loveData, nowMs])
   const progressPercent = Math.min(95, Math.max(8, Math.round((relationshipClock.totalDays % 1000) / 10)))
@@ -127,6 +134,10 @@ export function ClassicNetflix({ loveData }: ClassicNetflixProps) {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [episodes.length, selectedEpisode])
+
+  if (showIntro) {
+    return <NetflixBootIntro onDone={() => setShowIntro(false)} label="LOVELYFLIX" />
+  }
 
   if (activeEpisode) {
     return (

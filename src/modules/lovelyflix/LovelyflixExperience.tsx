@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { netflixAssets as lovelyflixAssets } from '../../assets/themes/themeAssets'
 import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
 import { useAppContext } from '../../context/appStore'
@@ -524,17 +524,6 @@ export default function LovelyflixExperience() {
               <span>{Math.max(0, Math.ceil((WRAPPED_STORY_DURATION_MS - storyElapsedMs) / 1000))}s</span>
             </div>
 
-            <button
-              aria-label="Fechar stories"
-              className="absolute right-3 top-2 z-30 flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-black/60 text-lg leading-none text-zinc-100 transition duration-300 hover:border-white"
-              onClick={() => {
-                setScreen('home')
-                setStoryIndex(0)
-              }}
-            >
-              x
-            </button>
-
             <article className="relative flex-1 overflow-hidden rounded-3xl border border-white/10">
               <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
                 {isChapterFour ? (
@@ -877,7 +866,7 @@ export default function LovelyflixExperience() {
       <main className="min-h-screen bg-black px-3 py-4 text-white">
         <div className="mx-auto h-[calc(100vh-2rem)] w-full max-w-[390px] overflow-hidden rounded-[28px] border border-zinc-800 bg-[#141414] shadow-[0_26px_70px_rgba(0,0,0,0.75)] transition-all duration-300">
           <div className="flex h-full flex-col p-4">
-            <button onClick={() => setScreen('home')} className="w-fit rounded-full border border-white/25 bg-black/40 px-4 py-2 text-xs uppercase tracking-[0.18em] text-zinc-200 transition duration-300 hover:border-[#46d369]">
+            <button onClick={() => setScreen('home')} className="app-nav-btn app-nav-btn-main w-fit">
               Voltar
             </button>
 
@@ -904,9 +893,6 @@ export default function LovelyflixExperience() {
           <section className="px-4 pt-4">
             <div className="mb-4 flex items-center justify-between">
               <h1 className="text-[2rem] font-black leading-none">Para {loveData.nomePessoa || 'você'}</h1>
-              <Link to="/" className="rounded-full border border-white/30 bg-black/35 px-3 py-1.5 text-xs uppercase tracking-[0.12em] text-zinc-100">
-                Sair
-              </Link>
             </div>
 
             <article className="relative overflow-hidden rounded-3xl border border-white/15 bg-black/35">

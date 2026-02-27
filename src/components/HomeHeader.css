@@ -1,0 +1,143 @@
+.home-header {
+  position: relative;
+  margin: 0 auto;
+  max-width: 72rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid;
+  backdrop-filter: blur(8px);
+}
+
+.home-header-dark {
+  border-color: rgba(255, 133, 180, 0.25);
+  background: rgba(21, 23, 33, 0.7);
+}
+
+.home-header-light {
+  border-color: rgba(255, 133, 180, 0.4);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.home-header-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  min-width: 0;
+}
+
+.home-header-logo {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.home-header-brand-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.home-header-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.home-header-link {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  color: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-height: 0;
+  min-width: 0;
+}
+
+.home-header-dark .home-header-link:hover {
+  border-color: rgba(255, 166, 204, 0.35);
+  background: rgba(45, 47, 62, 0.65);
+}
+
+.home-header-light .home-header-link:hover {
+  border-color: rgba(240, 122, 171, 0.5);
+  background: rgba(255, 240, 247, 0.9);
+}
+
+.home-header-link-primary {
+  background: #ff4ea5;
+  color: #13080f;
+}
+
+.home-header-theme {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  border: 1px solid;
+  padding: 0.2rem;
+  background: transparent;
+  color: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-height: 0;
+  min-width: 0;
+}
+
+.home-header-theme-chip {
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid transparent;
+  opacity: 0.68;
+}
+
+.home-header-theme-chip-active {
+  opacity: 1;
+}
+
+.home-header-dark .home-header-theme {
+  border-color: rgba(214, 220, 247, 0.32);
+  background: rgba(25, 27, 39, 0.65);
+}
+
+.home-header-light .home-header-theme {
+  border-color: rgba(226, 143, 183, 0.6);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.home-header-dark .home-header-theme-chip-active {
+  border-color: rgba(255, 174, 214, 0.3);
+  background: rgba(255, 87, 164, 0.2);
+}
+
+.home-header-light .home-header-theme-chip-active {
+  border-color: rgba(230, 114, 170, 0.35);
+  background: rgba(255, 129, 189, 0.22);
+}
+
+@media (max-width: 880px) {
+  .home-header {
+    border-radius: 1rem;
+    padding: 0.55rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .home-header-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}

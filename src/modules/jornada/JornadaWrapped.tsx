@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useLocation } from 'react-router-dom'
 import flocoImage from '../../assets/floco.png'
 import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
 import type { LoveData } from '../../types/types'
@@ -230,7 +231,19 @@ function FinalLoveBurstSlide() {
   )
 }
 
-function StorySlide({ story, coupleName, loveData, onAdvance }: { story: JourneyStory; coupleName: string; loveData: LoveData; onAdvance: () => void }) {
+function StorySlide({
+  story,
+  coupleName,
+  loveData,
+  onAdvance,
+  isBuilderPreview,
+}: {
+  story: JourneyStory
+  coupleName: string
+  loveData: LoveData
+  onAdvance: () => void
+  isBuilderPreview: boolean
+}) {
   if (story.kind === 'constellation') {
     const field = Array.from({ length: 56 }).map((_, idx) => {
       const angle = `${Math.round(randomFromSeed(idx + 2.1) * 360)}deg`
@@ -326,11 +339,15 @@ function StorySlide({ story, coupleName, loveData, onAdvance }: { story: Journey
           </p>
           <button
             type="button"
-            onClick={onAdvance}
+            onClick={() => {
+              if (isBuilderPreview) return
+              onAdvance()
+            }}
             className="mt-5 rounded-full bg-zinc-200 px-6 py-2 text-sm font-semibold text-black transition duration-300 ease-in-out hover:scale-105"
           >
             Próxima seção
           </button>
+          {isBuilderPreview && <p className="mt-3 text-xs text-zinc-300">Conclua os passos para ter acesso.</p>}
         </div>
       </div>
     )
@@ -509,6 +526,8 @@ function StorySlide({ story, coupleName, loveData, onAdvance }: { story: Journey
 }
 
 export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
+  const location = useLocation()
+  const isBuilderPreview = new URLSearchParams(location.search).get('builderPreview') === '1'
   const [showStories, setShowStories] = useState(false)
   const [storyIndex, setStoryIndex] = useState(0)
   const [storyProgress, setStoryProgress] = useState(0)
@@ -814,7 +833,7 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
                 <div className="flex h-full transition-transform duration-[400ms] ease-in-out" style={{ transform: `translateX(-${storyIndex * 100}%)` }}>
                   {stories.map((slide) => (
                     <div key={slide.id} className="h-full min-w-full px-1">
-                      <StorySlide story={slide} coupleName={coupleName} loveData={loveData} onAdvance={nextStory} />
+                      <StorySlide story={slide} coupleName={coupleName} loveData={loveData} onAdvance={nextStory} isBuilderPreview={isBuilderPreview} />
                     </div>
                   ))}
                 </div>
@@ -836,14 +855,6 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
                         </span>
                       ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowStories(false)}
-                      className="pointer-events-auto rounded-full border border-white/25 bg-black/70 px-2.5 py-1 text-sm font-semibold leading-none text-white"
-                      aria-label="Fechar stories da Jornada"
-                    >
-                      X
-                    </button>
                   </div>
                   <div className="pt-2 text-xs uppercase tracking-[0.2em] text-zinc-300">Story {storyIndex + 1}/{stories.length}</div>
                 </header>

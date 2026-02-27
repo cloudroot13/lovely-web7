@@ -232,7 +232,7 @@ export default function ClassicNetflixBuilder() {
         <aside className="sticky top-4 hidden lg:block">
           <div className="mx-auto w-[392px] overflow-hidden rounded-[44px] border border-zinc-700 bg-[#08080b] p-2 shadow-[0_0_50px_rgba(0,0,0,0.6)]">
             <div className="relative h-[720px] overflow-hidden rounded-[34px] border border-zinc-800">
-              <ClassicNetflix loveData={loveData} />
+              <ClassicNetflix loveData={loveData} showBootIntro={false} />
             </div>
           </div>
         </aside>

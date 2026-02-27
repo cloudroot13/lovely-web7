@@ -57,16 +57,6 @@ const animationVariants: Record<StoryAnimation, { opacity: number[]; scale?: num
   },
 }
 
-function extractTrackId(url: string) {
-  try {
-    const parsed = new URL(url)
-    const match = parsed.pathname.match(/track\/([a-zA-Z0-9]+)/)
-    return match ? match[1] : null
-  } catch {
-    return null
-  }
-}
-
 function useAnimatedCount(target: number, enabled: boolean) {
   const [value, setValue] = useState(0)
 
@@ -103,7 +93,6 @@ const emotionalPhrases = [
 
 export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
   const [started, setStarted] = useState(false)
-  const [playRequested, setPlayRequested] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [elapsedMs, setElapsedMs] = useState(0)
 
@@ -113,16 +102,12 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
   const fallbackPool = Object.values(wrappedStoriesThemes).flatMap((item) => [item.bg, item.accent])
   const uniqueImages = Array.from(new Set([...allImages, ...fallbackPool]))
 
-  const trackId = extractTrackId(loveData.musicaSpotifyUrl)
-  const embedUrl = trackId ? `https://open.spotify.com/embed/track/${trackId}` : null
-  const introEmbedUrl = embedUrl ? `${embedUrl}?utm_source=generator${playRequested ? '&autoplay=1' : ''}` : null
-
   const stories = useMemo<StoryItem[]>(() => {
     const introPlayer: StoryItem = {
       id: 'intro-player',
       kind: 'intro-player',
       title: 'Sua retrospectiva começa agora...',
-      subtitle: 'Aperte iniciar e viva sua experiência Lovelyfy Wrapped.',
+      subtitle: 'Aperte iniciar e viva sua experiência Lovelyflix Wrapped.',
       animation: 'cinematic',
       image: uniqueImages[0] || selectedTheme.bg,
     }
@@ -228,9 +213,9 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
       <motion.div
         animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
         transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
-        className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(circle_at_center,rgba(29,185,84,0.22),#000_70%)]"
+        className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(circle_at_center,rgba(255,47,122,0.22),#000_70%)]"
       />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_80%,rgba(29,185,84,0.14),transparent_45%),radial-gradient(circle_at_75%_15%,rgba(29,185,84,0.22),transparent_38%)] blur-xl" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_80%,rgba(255,47,122,0.14),transparent_45%),radial-gradient(circle_at_75%_15%,rgba(255,47,122,0.22),transparent_38%)] blur-xl" />
 
       <div className="relative h-[94dvh] w-full max-w-[430px] overflow-hidden rounded-[24px] border border-zinc-700/70 bg-black shadow-[0_20px_65px_rgba(0,0,0,0.7)] sm:h-[90vh]">
         <div className="absolute left-0 right-0 top-0 z-30 px-3 pt-3">
@@ -242,7 +227,7 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
 
               return (
                 <div key={story.id} className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/30">
-                  <div className="h-full rounded-full bg-[#1DB954] transition-all duration-100" style={{ width }} />
+                  <div className="h-full rounded-full bg-pink-500 transition-all duration-100" style={{ width }} />
                 </div>
               )
             })}
@@ -261,9 +246,9 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
           >
             {currentStory.kind === 'intro-player' && (
               <div className="relative flex h-full flex-col justify-center px-6 pb-12 pt-14 text-center">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(29,185,84,0.2),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(29,185,84,0.16),transparent_40%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,47,122,0.2),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(255,47,122,0.16),transparent_40%)]" />
                 <div className="relative z-10 rounded-[20px] border border-zinc-700 bg-[#121212]/85 p-5 shadow-2xl">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#1DB954]">LOVELYFY WRAPPED</p>
+                  <p className="text-xs uppercase tracking-[0.24em] text-pink-400">LOVELYFLIX WRAPPED</p>
                   <h2 className="mt-4 text-4xl font-black text-white">{currentStory.title}</h2>
                   <p className="mt-3 text-zinc-300">{currentStory.subtitle}</p>
 
@@ -274,31 +259,15 @@ export function WrappedStories({ loveData, theme }: WrappedStoriesProps) {
                   <button
                     type="button"
                     onClick={() => {
-                      setPlayRequested(true)
                       setStarted(true)
                       setElapsedMs(0)
                     }}
-                    className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl text-black shadow-[0_0_30px_rgba(29,185,84,0.45)]"
+                    className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl text-black shadow-[0_0_30px_rgba(255,47,122,0.45)]"
                     aria-label="Iniciar experiência"
                   >
                     ▶
                   </button>
                   <p className="mt-2 text-xs uppercase tracking-[0.16em] text-zinc-400">Iniciar Experiência</p>
-
-                  {introEmbedUrl ? (
-                    <iframe
-                      src={introEmbedUrl}
-                      title="Prévia da música escolhida no Spotify"
-                      width="100%"
-                      height="152"
-                      frameBorder="0"
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                      loading="lazy"
-                      style={{ borderRadius: '16px', marginTop: '18px' }}
-                    />
-                  ) : (
-                    <p className="mt-5 text-sm text-zinc-400">Link Lovelyfy inválido. Volte e adicione uma URL de track válida.</p>
-                  )}
                 </div>
               </div>
             )}

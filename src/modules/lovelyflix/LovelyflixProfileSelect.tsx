@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/appStore'
+import NetflixBootIntro from '../../components/NetflixBootIntro'
 
 function getProfileName(nomePessoa: string) {
   return nomePessoa.trim() || 'Perfil Principal'
@@ -19,11 +20,19 @@ function hasLovelyData(data: ReturnType<typeof useAppContext>['loveData']) {
 }
 
 export default function LovelyflixProfileSelect() {
+  const location = useLocation()
   const navigate = useNavigate()
   const { config, loveData } = useAppContext()
   const [leaving, setLeaving] = useState(false)
+  const params = new URLSearchParams(location.search)
+  const isBuilderPreview = params.get('builderPreview') === '1'
+  const [showIntro, setShowIntro] = useState(!isBuilderPreview)
 
   useEffect(() => {
+    if (isBuilderPreview) {
+      return
+    }
+
     if (!(config.mode === 'wrapped' && config.variant === 'stories')) {
       navigate('/choose-mode', { replace: true })
       return
@@ -37,8 +46,17 @@ export default function LovelyflixProfileSelect() {
   const profileName = useMemo(() => getProfileName(loveData.nomePessoa), [loveData.nomePessoa])
   const profileInitials = useMemo(() => getCoupleInitials(loveData.nomeCriador, loveData.nomePessoa), [loveData.nomeCriador, loveData.nomePessoa])
   const handleEnter = () => {
+    if (isBuilderPreview) {
+      return
+    }
     setLeaving(true)
-    window.setTimeout(() => navigate('/lovelyflix'), 320)
+    window.setTimeout(() => {
+      navigate('/lovelyflix')
+    }, 320)
+  }
+
+  if (showIntro) {
+    return <NetflixBootIntro onDone={() => setShowIntro(false)} label="LOVELYFLIX" />
   }
 
   return (

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/appStore'
 import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
 import './wrappedGame.css'
 
 type Step = 'intro' | 'stories'
-type StoryId = 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's10'
+type StoryId = 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's9' | 's10' | 's11' | 's12'
 type Difficulty = 'easy' | 'hard'
 
 const SEARCH_SIZE = 10
@@ -24,7 +24,16 @@ function normalizeWords(_: string, difficulty: Difficulty) {
 }
 
 function parseWheelOptions(_: string) {
-  const fallback = ['Seu abraço', 'Seu sorriso', 'Ver filmes com você', 'Seu olhar', 'Seu jeitinho', 'Seu carinho', 'Nossas risadas', 'Nossos planos']
+  const fallback = [
+    'Ver um filme juntos',
+    'Fazer um passeio especial',
+    'Preparar algo gostoso juntos',
+    'Tirar uma foto em dupla',
+    'Escrever uma mensagem carinhosa',
+    'Relembrar um momento feliz',
+    'Dar um abraço bem apertado',
+    'Planejar o próximo encontro',
+  ]
   return fallback
 }
 
@@ -135,6 +144,7 @@ function buildWordSearch(words: string[], size: number) {
 
 export function WrappedGameExperience() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { config, loveData } = useAppContext()
   const [step, setStep] = useState<Step>('intro')
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
@@ -164,8 +174,12 @@ export function WrappedGameExperience() {
   const [minutesCounter, setMinutesCounter] = useState(0)
   const challengeTimeoutsRef = useRef<number[]>([])
 
-  const stories: StoryId[] = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's10']
+  const stories: StoryId[] = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12']
   const currentStory = stories[storyIdx]
+  const isBuilderPreview = new URLSearchParams(location.search).get('builderPreview') === '1'
+  const isLoggedIn = typeof window !== 'undefined' && window.localStorage.getItem('lovely-auth') === '1'
+  const hasPaid = typeof window !== 'undefined' && window.localStorage.getItem('lovely-paid') === '1'
+  const isAccessLocked = isBuilderPreview || !isLoggedIn || !hasPaid
 
   useEffect(() => {
     if (config.mode !== 'wrapped' || config.variant !== 'game') {
@@ -222,7 +236,7 @@ export function WrappedGameExperience() {
     return hints
   }, [difficulty, searchData.placements, foundWords])
   const wheelSegments = useMemo(() => {
-    const palette = ['#E50914', '#1E3A8A']
+    const palette = ['#5a354a', '#1a171b']
     return wheelOptions.map((label, index) => ({
       label,
       displayLabel: formatWheelLabel(label),
@@ -239,7 +253,7 @@ export function WrappedGameExperience() {
   const wheelLabelPoints = useMemo(() => {
     const count = wheelSegments.length || 1
     const step = 360 / count
-    const radius = 102
+    const radius = 130
     return wheelSegments.map((_, index) => {
       const angle = -90 + index * step + step / 2
       const rad = (angle * Math.PI) / 180
@@ -288,7 +302,7 @@ export function WrappedGameExperience() {
   }, [loveData.startDate, loveData.anos, loveData.meses, loveData.dias])
 
   useEffect(() => {
-    if (currentStory !== 's8') return
+    if (currentStory !== 's11') return
     const target = computeMinutesTogether
     let raf = 0
     const start = performance.now()
@@ -521,6 +535,19 @@ export function WrappedGameExperience() {
   }
 
   const storyLabel = useMemo(() => `Story ${storyIdx + 1}/${stories.length}`, [storyIdx, stories.length])
+  const receiverName = useMemo(() => loveData.nomePessoa?.trim() || 'meu amor', [loveData.nomePessoa])
+  const photoSlides = useMemo(
+    () => [
+      { id: 's6', title: 'Capítulo 1', subtitle: `Nosso começo foi lindo, ${receiverName}.` },
+      { id: 's7', title: 'Capítulo 2', subtitle: `Seu sorriso ilumina tudo por aqui, ${receiverName}.` },
+      { id: 's8', title: 'Capítulo 3', subtitle: `Um registro fofo da nossa história.` },
+      { id: 's9', title: 'Capítulo 4', subtitle: `Mais uma memória que mora no meu coração.` },
+      { id: 's10', title: 'Capítulo 5', subtitle: `Você é meu pedacinho favorito do mundo.` },
+    ] as Array<{ id: StoryId; title: string; subtitle: string }>,
+    [receiverName],
+  )
+  const activePhotoSlideIndex = photoSlides.findIndex((slide) => slide.id === currentStory)
+  const activePhotoImage = activePhotoSlideIndex >= 0 ? galleryImages[activePhotoSlideIndex] : null
   const searchDone = currentStory === 's2' && foundWords.length >= searchWords.length
   const wheelDone = currentStory === 's3' && Boolean(wheelResult)
   const challengeDoneCard = currentStory === 's4' && challengeDone
@@ -560,14 +587,24 @@ export function WrappedGameExperience() {
             <div className="game-story">
               <div className="game-card">
                 <div className="game-center">
-                  <p className="game-title">Está pronta para começar a melhor experiência?</p>
+                  <p className="game-title">A pessoa que eu mais amo nessa vida é você, {receiverName}.</p>
                   <p className="game-subtitle">
                     {typedStart}
                     <span style={{ opacity: 0.7 }}> |</span>
                   </p>
-                  <button type="button" className="game-button" onClick={() => setStep('stories')}>
+                  <button
+                    type="button"
+                    className="game-button"
+                    onClick={() => {
+                      if (isAccessLocked) return
+                      setStep('stories')
+                    }}
+                    disabled={isAccessLocked}
+                    aria-disabled={isAccessLocked}
+                  >
                     Começar Jogo
                   </button>
+                  {isAccessLocked && <p className="game-subtitle">Conclua os passos para ter acesso.</p>}
                 </div>
               </div>
             </div>
@@ -580,10 +617,6 @@ export function WrappedGameExperience() {
   return (
     <main className="game-root">
       <div className="game-shell">
-        <button className="game-close" onClick={() => navigate('/preview', { replace: true })} aria-label="Fechar">
-          X
-        </button>
-
         <header className="game-progress">
           <div className="game-progress-row">
             {stories.map((id, idx) => (
@@ -592,22 +625,23 @@ export function WrappedGameExperience() {
               </span>
             ))}
           </div>
-          <div style={{ marginTop: 7, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(224,233,255,0.8)' }}>{storyLabel}</div>
+          <div style={{ marginTop: 7, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(228,220,228,0.78)' }}>{storyLabel}</div>
         </header>
 
         <div className="game-layer">
-          {Array.from({ length: 18 }).map((_, idx) => (
-            <span
-              key={`story-dot-${idx}`}
-              className="game-dot"
-              style={{
-                left: `${8 + (idx % 6) * 15}%`,
-                top: `${10 + Math.floor(idx / 6) * 27}%`,
-                ['--dur' as string]: `${2.4 + (idx % 5) * 0.4}s`,
-                ['--delay' as string]: `${idx * 0.09}s`,
-              }}
-            />
-          ))}
+          {activePhotoSlideIndex < 0 &&
+            Array.from({ length: 18 }).map((_, idx) => (
+              <span
+                key={`story-dot-${idx}`}
+                className="game-dot"
+                style={{
+                  left: `${8 + (idx % 6) * 15}%`,
+                  top: `${10 + Math.floor(idx / 6) * 27}%`,
+                  ['--dur' as string]: `${2.4 + (idx % 5) * 0.4}s`,
+                  ['--delay' as string]: `${idx * 0.09}s`,
+                }}
+              />
+            ))}
         </div>
 
         <div className="game-content">
@@ -637,8 +671,8 @@ export function WrappedGameExperience() {
               )}
               {currentStory === 's1' && (
                 <div className="game-center">
-                  <p className="game-title">Game Start</p>
-                  <p className="game-subtitle">Modo romance ativado. Prepare-se para os próximos desafios.</p>
+                  <p className="game-title">Sua aventura começa agora, {receiverName}</p>
+                  <p className="game-subtitle">Um game fofo e romântico feito para vocês dois.</p>
                   <div className="game-mode-row">
                     <button type="button" className={`game-mode-btn ${difficulty === 'easy' ? 'game-mode-btn-active' : ''}`} onClick={() => setDifficulty('easy')}>
                       Fácil
@@ -668,7 +702,7 @@ export function WrappedGameExperience() {
               {currentStory === 's2' && (
                 <div className="game-center game-center-tight game-center-search">
                   <p className="game-title" style={{ fontSize: 24 }}>Caça-Palavras Premium</p>
-                  <p className="game-subtitle">{themeFromChat || 'Ache as coisas que mais amo em você'}</p>
+                  <p className="game-subtitle">{themeFromChat || `Ache as coisas que mais amo em você, ${receiverName}`}</p>
                   <p className="game-word-obs">Obs: quando você clicar na palavra correta, ela ficará em azul.</p>
                   <p className="game-counter">{foundWords.length}/{searchWords.length} palavras</p>
                   {difficulty === 'easy' && <p className="game-subtitle">Dica: letras iniciais destacadas.</p>}
@@ -722,7 +756,7 @@ export function WrappedGameExperience() {
               {currentStory === 's3' && (
                 <div className="game-center" style={{ justifyContent: 'flex-start', paddingTop: 18 }}>
                   <p className="game-title" style={{ fontSize: 24 }}>Roleta Romântica</p>
-                  <p className="game-subtitle">Gire e descubra coisas que eu amo em você.</p>
+                  <p className="game-subtitle">Gire e descubra mais um motivo para amar você, {receiverName}.</p>
                   <div className="game-wheel-pointer" />
                   <div className="game-wheel-wrap">
                     <div className={`game-wheel ${wheelSpinning ? 'game-wheel-spinning' : ''}`} style={{ transform: `rotate(${wheelRotation}deg)`, background: wheelGradient }}>
@@ -755,7 +789,7 @@ export function WrappedGameExperience() {
               {currentStory === 's4' && (
                 <div className="game-center">
                   <p className="game-title" style={{ fontSize: 24 }}>Desafio de Memória</p>
-                  <p className="game-subtitle">Repita a sequência de toques.</p>
+                  <p className="game-subtitle">Repita a sequência e prove que conhece nosso ritmo, {receiverName}.</p>
                   <div className={`game-choice-grid-2 ${challengeShake ? 'game-choice-grid-2-shake' : ''}`}>
                     {Array.from({ length: 6 }).map((_, idx) => (
                       <button
@@ -784,53 +818,51 @@ export function WrappedGameExperience() {
                       style={{
                         left: `${8 + (idx % 8) * 11}%`,
                         top: `${-6 + Math.floor(idx / 8) * 2}%`,
-                        background: idx % 2 === 0 ? '#8fd7ff' : idx % 3 === 0 ? '#ff9ecb' : '#ffffff',
+                        background: idx % 2 === 0 ? '#ff5ca8' : idx % 3 === 0 ? '#ff86be' : '#ffe6f2',
                         ['--dur' as string]: `${2 + (idx % 5) * 0.4}s`,
                         animationDelay: `${(idx % 7) * 0.18}s`,
                       }}
                     />
                   ))}
-                  <p className="game-final-win">Parabéns, concluiu as missões do presente especial com sucesso.</p>
+                  <p className="game-final-win">Você venceu as missões, {receiverName}. Agora vem a parte mais linda.</p>
                   <button type="button" className="game-button" onClick={goNext}>
                     Continuar história
                   </button>
                 </div>
               )}
 
-              {currentStory === 's6' && (
+              {activePhotoSlideIndex >= 0 && (
                 <div className="game-center">
-                  <p className="game-title" style={{ fontSize: 24 }}>Capítulo de Fotos 1</p>
-                  <p className="game-subtitle">Nosso momento especial em destaque.</p>
-                  {galleryImages[0] ? (
-                    <img src={galleryImages[0]} alt="Momento do casal" className="game-photo-frame game-photo-frame-a" />
+                  <p className="game-title" style={{ fontSize: 24 }}>{photoSlides[activePhotoSlideIndex].title}</p>
+                  <p className="game-subtitle">{photoSlides[activePhotoSlideIndex].subtitle}</p>
+                  {activePhotoImage ? (
+                    <div className="game-photo-story">
+                      <img
+                        src={activePhotoImage}
+                        alt={`Memória ${activePhotoSlideIndex + 1} do casal`}
+                        className="game-photo-story-bg"
+                      />
+                      <div className="game-photo-story-overlay" />
+                      <div className="game-photo-story-content">
+                        <p className="game-photo-story-badge">Memória {activePhotoSlideIndex + 1}</p>
+                      </div>
+                    </div>
                   ) : (
-                    <div className="game-photo-frame game-photo-placeholder">Adicione fotos no chat para aparecer aqui</div>
+                    <div className="game-photo-frame game-photo-placeholder">Adicione fotos no builder para completar este capítulo.</div>
                   )}
                 </div>
               )}
 
-              {currentStory === 's7' && (
-                <div className="game-center">
-                  <p className="game-title" style={{ fontSize: 24 }}>Capítulo de Fotos 2</p>
-                  <p className="game-subtitle">Mais um registro lindo da nossa história.</p>
-                  {galleryImages[1] ? (
-                    <img src={galleryImages[1]} alt="Outro momento do casal" className="game-photo-frame game-photo-frame-b" />
-                  ) : (
-                    <div className="game-photo-frame game-photo-placeholder">Envie ao menos 2 fotos no chat para completar</div>
-                  )}
-                </div>
-              )}
-
-              {currentStory === 's8' && (
+              {currentStory === 's11' && (
                 <div className="game-center">
                   <p className="game-title" style={{ fontSize: 24 }}>Contador da Nossa História</p>
-                  <p className="game-subtitle">Vivendo esse amor há</p>
+                  <p className="game-subtitle">Você e {receiverName} juntos há</p>
                   <p className="game-time-counter">{minutesCounter.toLocaleString('pt-BR')} minutos</p>
                   <p className="game-subtitle">e contando a cada minuto ✨</p>
                 </div>
               )}
 
-              {currentStory === 's10' && (
+              {currentStory === 's12' && (
                 <div className="game-center">
                   {Array.from({ length: 26 }).map((_, idx) => (
                     <span
@@ -839,12 +871,12 @@ export function WrappedGameExperience() {
                       style={{
                         left: `${8 + (idx % 7) * 12}%`,
                         top: `${-4 + Math.floor(idx / 7) * 2}%`,
-                        background: idx % 2 === 0 ? '#8fd7ff' : idx % 3 === 0 ? '#ff9ecb' : '#ffffff',
+                        background: idx % 2 === 0 ? '#ff5ca8' : idx % 3 === 0 ? '#ff86be' : '#ffe6f2',
                         ['--dur' as string]: `${2 + (idx % 5) * 0.45}s`,
                       }}
                     />
                   ))}
-                  <p className="game-final-win">Fim do jogo. Você concluiu cada etapa com muito amor. 💖</p>
+                  <p className="game-final-win">Fim do jogo, {receiverName}. Te amaria em todas as fases. 💖</p>
                   <button type="button" className="game-button" onClick={resetGameState}>
                     Voltar
                   </button>

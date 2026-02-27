@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { memo } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useLocation } from 'react-router-dom'
 import { LovelyfyCinematicIntro } from './LovelyfyCinematicIntro'
 import { spotifyAssets as lovelyfyAssets } from '../../assets/themes/themeAssets'
 import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
@@ -234,6 +235,8 @@ function IntroScreen({ onStart, creatorName }: { onStart: () => void; creatorNam
 }
 
 export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
+  const location = useLocation()
+  const isBuilderPreview = new URLSearchParams(location.search).get('builderPreview') === '1'
   const [showIntro, setShowIntro] = useState(true)
   const [started, setStarted] = useState(false)
   const [step, setStep] = useState(0)
@@ -648,16 +651,20 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
             >
               {current.type === 'player' && (
                 <div className="story-safe relative flex min-h-full flex-col justify-start overflow-y-auto px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-14">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_15%,rgba(29,185,84,0.24),transparent_45%)]" />
+                  {current.image && (
+                    <img
+                      src={current.image}
+                      alt="Fundo do casal"
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.62)_0%,rgba(0,0,0,0.74)_40%,rgba(0,0,0,0.9)_100%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_15%,rgba(29,185,84,0.16),transparent_45%)]" />
                   <div className="relative z-10 h-full min-h-full box-border">
                     <p className="text-center text-sm font-medium text-zinc-200">
                       {loveData.nomeCriador || 'Alguém especial'} para {loveData.nomePessoa || 'meu amor'}
                       {loveData.apelido ? ` • ${loveData.apelido}` : ''}
                     </p>
-
-                    <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/60 shadow-2xl">
-                      <img src={current.image} alt="Capa do casal" className="h-56 w-full object-cover sm:h-72" />
-                    </div>
 
                     <div className="mt-4">
                       <p className="text-2xl font-black leading-tight text-white sm:text-3xl">{loveData.musicaNome?.trim() || 'Nossa música especial'}</p>
@@ -668,11 +675,11 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                       <iframe
                         src={embedUrl}
                         width="100%"
-                        height="152"
+                        height={isBuilderPreview ? '112' : '152'}
                         frameBorder="0"
                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                         loading="eager"
-                        style={{ borderRadius: '16px', marginTop: '20px' }}
+                        style={{ borderRadius: '16px', marginTop: isBuilderPreview ? '14px' : '20px' }}
                       />
                     ) : (
                       <div className="mt-5 rounded-2xl border border-zinc-700 bg-zinc-900 p-4 text-sm text-zinc-400">
@@ -684,6 +691,9 @@ export function LovelyfyWrapped({ loveData }: LovelyfyWrappedProps) {
                       <button
                         type="button"
                         onClick={() => {
+                          if (isBuilderPreview) {
+                            return
+                          }
                           if (isNavigationLocked()) {
                             return
                           }

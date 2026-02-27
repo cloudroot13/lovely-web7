@@ -64,6 +64,50 @@ select {
   outline-offset: 2px;
 }
 
+.app-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(238, 215, 255, 0.36);
+  background:
+    linear-gradient(145deg, rgba(33, 23, 55, 0.92), rgba(15, 12, 30, 0.9)),
+    radial-gradient(circle at 20% 20%, rgba(255, 123, 177, 0.3), transparent 45%);
+  color: #f4ecff;
+  box-shadow: 0 8px 20px rgba(6, 4, 18, 0.45), inset 0 0 0 1px rgba(255, 196, 230, 0.08);
+  backdrop-filter: blur(8px);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, filter 180ms ease;
+}
+
+.app-nav-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 182, 225, 0.66);
+  box-shadow: 0 11px 22px rgba(8, 6, 24, 0.52), 0 0 20px rgba(255, 98, 175, 0.2);
+  filter: saturate(1.06);
+}
+
+.app-nav-btn:active {
+  transform: translateY(0);
+}
+
+.app-nav-btn-main {
+  padding: 0.58rem 1rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.app-nav-btn-close {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 0.96rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
 .anim-pausable {
   animation-play-state: paused !important;
 }
