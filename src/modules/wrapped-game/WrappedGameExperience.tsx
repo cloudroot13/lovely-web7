@@ -261,7 +261,7 @@ export function WrappedGameExperience() {
   const wheelLabelPoints = useMemo(() => {
     const count = wheelSegments.length || 1
     const step = 360 / count
-    const radius = isVerySmallScreen ? 94 : isSmallScreen ? 116 : 146
+    const radius = isVerySmallScreen ? 78 : isSmallScreen ? 96 : 122
     return wheelSegments.map((_, index) => {
       const angle = -90 + index * step + step / 2
       const rad = (angle * Math.PI) / 180
