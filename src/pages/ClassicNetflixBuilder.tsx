@@ -4,14 +4,108 @@ import { ClassicNetflix } from '../components/ClassicNetflix'
 import { useAppContext } from '../context/appStore'
 import { readImageFileAsDataUrl } from '../utils/image'
 
-type NetflixStep = 'title' | 'counter' | 'description' | 'photo'
+type NetflixStep = 'recipient' | 'title' | 'counter' | 'description' | 'photo'
+type GiftIconKey = 'heart' | 'users' | 'flower' | 'sparkle' | 'star' | 'crown'
+interface GiftTypePreset {
+  id: string
+  label: string
+  description: string
+  iconKey: GiftIconKey
+  featured?: boolean
+}
 
 const steps: { id: NetflixStep; label: string }[] = [
+  { id: 'recipient', label: 'Para quem e o presente?' },
   { id: 'title', label: 'Título' },
   { id: 'counter', label: 'Contador' },
   { id: 'description', label: 'Descricao' },
   { id: 'photo', label: 'Fotos' },
 ]
+
+const giftTypePresets: GiftTypePreset[] = [
+  { id: 'amor', label: 'Presente de Amor', description: 'Para namorado(a), noivo(a) ou conjuge.', iconKey: 'heart', featured: true },
+  { id: 'melhor-amiga', label: 'Presente para Amiga', description: 'Surpreenda sua melhor amiga.', iconKey: 'users' },
+  { id: 'dia-da-mulher', label: 'Dia da Mulher', description: 'Homenagem para uma mulher especial.', iconKey: 'flower' },
+  { id: 'mae', label: 'Mae', description: 'Agradecimento cheio de carinho.', iconKey: 'sparkle' },
+  { id: 'avo', label: 'Avo', description: 'Memorias e amor em cada detalhe.', iconKey: 'star' },
+  { id: 'irma', label: 'Irma', description: 'Para quem sempre esteve ao seu lado.', iconKey: 'users' },
+  { id: 'esposa', label: 'Esposa', description: 'Para celebrar o amor todos os dias.', iconKey: 'crown' },
+  { id: 'filha', label: 'Filha', description: 'Uma homenagem afetiva e especial.', iconKey: 'heart' },
+]
+
+function getGiftReceiverLabel(presetId: string | undefined) {
+  switch (presetId) {
+    case 'melhor-amiga':
+      return 'sua amiga'
+    case 'mae':
+      return 'sua mae'
+    case 'avo':
+      return 'sua avo'
+    case 'irma':
+      return 'sua irma'
+    case 'esposa':
+      return 'sua esposa'
+    case 'filha':
+      return 'sua filha'
+    case 'dia-da-mulher':
+      return 'essa mulher especial'
+    default:
+      return 'sua pessoa amada'
+  }
+}
+
+function GiftTypeIcon({ iconKey }: { iconKey: GiftIconKey }) {
+  const base = 'h-5 w-5 text-[#ff5f67]'
+  if (iconKey === 'users') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1" />
+        <circle cx="9.5" cy="7" r="3" />
+        <path d="M22 19v-1a4 4 0 0 0-3-3.87" />
+        <path d="M16 4.13a3 3 0 0 1 0 5.75" />
+      </svg>
+    )
+  }
+  if (iconKey === 'flower') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="M12 14.2c-2.3 0-4.2-1.6-4.2-3.7 0-1.7 1.3-3 3-3 0 .7.5 1.2 1.2 1.2.7 0 1.2-.5 1.2-1.2 1.7 0 3 1.3 3 3 0 2.1-1.9 3.7-4.2 3.7Z" />
+        <path d="M12 14.2V21" />
+        <path d="M12 18.2c-1.7 0-2.8-1-3.4-2" />
+        <path d="M12 19.2c1.6 0 2.7-.8 3.3-1.8" />
+        <path d="M10.1 7.9c-.9-1.6-.6-3.2.8-4.4 1.4 1.2 1.7 2.8.8 4.4" />
+      </svg>
+    )
+  }
+  if (iconKey === 'sparkle') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="m12 3 1.6 3.9L18 8.5l-4.4 1.6L12 14l-1.6-3.9L6 8.5l4.4-1.6L12 3Z" />
+        <path d="m5 16 .8 1.9L8 18.7l-2.2.8L5 22l-.8-2.5L2 18.7l2.2-.8L5 16Z" />
+      </svg>
+    )
+  }
+  if (iconKey === 'star') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="m12 3 2.8 5.6L21 9.4l-4.5 4.4 1.1 6.3L12 17.1l-5.6 3 1.1-6.3L3 9.4l6.2-.8L12 3Z" />
+      </svg>
+    )
+  }
+  if (iconKey === 'crown') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="m3 8 4.5 4L12 6l4.5 6L21 8l-2 10H5L3 8Z" />
+        <path d="M5 18h14" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+      <path d="M12 20.5s-7-4.3-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10.5c0 5.7-7 10-7 10Z" />
+    </svg>
+  )
+}
 
 function buildCounterParts(startDate: string) {
   const parsed = new Date(startDate.includes('T') ? startDate : `${startDate}T00:00:00`)
@@ -34,11 +128,13 @@ export default function ClassicNetflixBuilder() {
   const { loveData, setLoveData } = useAppContext()
   const [stepIndex, setStepIndex] = useState(0)
   const [episodePhotoKeys, setEpisodePhotoKeys] = useState<string[]>([])
+  const [selectedGiftType, setSelectedGiftType] = useState<GiftTypePreset | null>(giftTypePresets.find((item) => item.featured) ?? giftTypePresets[0])
 
   const currentStep = steps[stepIndex]
+  const giftReceiverLabel = useMemo(() => getGiftReceiverLabel(selectedGiftType?.id), [selectedGiftType?.id])
   const inferredTitle = useMemo(() => {
-    if (loveData.classicTitle.trim()) return loveData.classicTitle.trim()
-    if (loveData.nomePessoa.trim()) return loveData.nomePessoa.trim()
+    if (loveData.classicTitle) return loveData.classicTitle
+    if (loveData.nomePessoa) return loveData.nomePessoa
     return ''
   }, [loveData.classicTitle, loveData.nomePessoa])
 
@@ -137,7 +233,7 @@ export default function ClassicNetflixBuilder() {
 
           {currentStep.id === 'title' && (
             <div className="space-y-4">
-              <p className="text-zinc-300">Nome do casal (título principal).</p>
+              <p className="text-zinc-300">Nome do casal para o presente de {giftReceiverLabel} (titulo principal).</p>
               <input
                 value={inferredTitle}
                 onChange={(event) =>
@@ -149,6 +245,32 @@ export default function ClassicNetflixBuilder() {
                 className="w-full rounded-xl border border-zinc-700 bg-[#16161a] px-4 py-3 text-base outline-none focus:border-[#E50914]"
                 placeholder="Ex: Joao & Maria"
               />
+            </div>
+          )}
+
+          {currentStep.id === 'recipient' && (
+            <div className="space-y-4">
+              <p className="text-zinc-300">Selecione para quem sera o presente.</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {giftTypePresets.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSelectedGiftType(item)}
+                    className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
+                      selectedGiftType?.id === item.id
+                        ? 'border-[#E50914] bg-[#E50914]/15 text-zinc-100'
+                        : 'border-zinc-700 bg-[#16161a] text-zinc-200'
+                    }`}
+                  >
+                    <GiftTypeIcon iconKey={item.iconKey} />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold leading-tight">{item.label}</span>
+                      <span className="mt-1 block text-xs text-zinc-400">{item.description}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

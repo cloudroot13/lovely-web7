@@ -10,6 +10,7 @@ import '../styles/classic-stars-meteors-animation.css'
 import '../styles/classic-gallery-animation.css'
 
 const steps = [
+  { id: 'recipient', label: 'Para quem e o presente?' },
   { id: 'title', label: 'Título da página' },
   { id: 'message', label: 'Mensagem' },
   { id: 'counter', label: 'Contador' },
@@ -21,11 +22,104 @@ const steps = [
 
 type BackgroundMode = 'none' | 'hearts' | 'stars_meteors' | 'clouds'
 type PhotoMode = 'coverflow' | 'cube' | 'cards' | 'flip'
+type GiftIconKey = 'heart' | 'users' | 'flower' | 'sparkle' | 'star' | 'crown'
+interface GiftTypePreset {
+  id: string
+  label: string
+  description: string
+  iconKey: GiftIconKey
+  featured?: boolean
+}
 const CLASSIC_MAX_TOTAL_PHOTOS = 6
 const CLASSIC_MAX_EXTRA_PHOTOS = 5
 const CLASSIC_MAX_MEMORIES = 8
 
 type StepId = (typeof steps)[number]['id']
+
+const giftTypePresets: GiftTypePreset[] = [
+  { id: 'amor', label: 'Presente de Amor', description: 'Para namorado(a), noivo(a) ou conjuge.', iconKey: 'heart', featured: true },
+  { id: 'melhor-amiga', label: 'Presente para Amiga', description: 'Surpreenda sua melhor amiga.', iconKey: 'users' },
+  { id: 'dia-da-mulher', label: 'Dia da Mulher', description: 'Homenagem para uma mulher especial.', iconKey: 'flower' },
+  { id: 'mae', label: 'Mae', description: 'Agradecimento cheio de carinho.', iconKey: 'sparkle' },
+  { id: 'avo', label: 'Avo', description: 'Memorias e amor em cada detalhe.', iconKey: 'star' },
+  { id: 'irma', label: 'Irma', description: 'Para quem sempre esteve ao seu lado.', iconKey: 'users' },
+  { id: 'esposa', label: 'Esposa', description: 'Para celebrar o amor todos os dias.', iconKey: 'crown' },
+  { id: 'filha', label: 'Filha', description: 'Uma homenagem afetiva e especial.', iconKey: 'heart' },
+]
+
+function getGiftReceiverLabel(presetId: string | undefined) {
+  switch (presetId) {
+    case 'melhor-amiga':
+      return 'sua amiga'
+    case 'mae':
+      return 'sua mae'
+    case 'avo':
+      return 'sua avo'
+    case 'irma':
+      return 'sua irma'
+    case 'esposa':
+      return 'sua esposa'
+    case 'filha':
+      return 'sua filha'
+    case 'dia-da-mulher':
+      return 'essa mulher especial'
+    default:
+      return 'sua pessoa amada'
+  }
+}
+
+function GiftTypeIcon({ iconKey }: { iconKey: GiftIconKey }) {
+  const base = 'h-5 w-5 text-pink-500'
+  if (iconKey === 'users') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1" />
+        <circle cx="9.5" cy="7" r="3" />
+        <path d="M22 19v-1a4 4 0 0 0-3-3.87" />
+        <path d="M16 4.13a3 3 0 0 1 0 5.75" />
+      </svg>
+    )
+  }
+  if (iconKey === 'flower') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="M12 14.2c-2.3 0-4.2-1.6-4.2-3.7 0-1.7 1.3-3 3-3 0 .7.5 1.2 1.2 1.2.7 0 1.2-.5 1.2-1.2 1.7 0 3 1.3 3 3 0 2.1-1.9 3.7-4.2 3.7Z" />
+        <path d="M12 14.2V21" />
+        <path d="M12 18.2c-1.7 0-2.8-1-3.4-2" />
+        <path d="M12 19.2c1.6 0 2.7-.8 3.3-1.8" />
+        <path d="M10.1 7.9c-.9-1.6-.6-3.2.8-4.4 1.4 1.2 1.7 2.8.8 4.4" />
+      </svg>
+    )
+  }
+  if (iconKey === 'sparkle') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="m12 3 1.6 3.9L18 8.5l-4.4 1.6L12 14l-1.6-3.9L6 8.5l4.4-1.6L12 3Z" />
+        <path d="m5 16 .8 1.9L8 18.7l-2.2.8L5 22l-.8-2.5L2 18.7l2.2-.8L5 16Z" />
+      </svg>
+    )
+  }
+  if (iconKey === 'star') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="m12 3 2.8 5.6L21 9.4l-4.5 4.4 1.1 6.3L12 17.1l-5.6 3 1.1-6.3L3 9.4l6.2-.8L12 3Z" />
+      </svg>
+    )
+  }
+  if (iconKey === 'crown') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+        <path d="m3 8 4.5 4L12 6l4.5 6L21 8l-2 10H5L3 8Z" />
+        <path d="M5 18h14" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={base} aria-hidden>
+      <path d="M12 20.5s-7-4.3-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10.5c0 5.7-7 10-7 10Z" />
+    </svg>
+  )
+}
 
 function seeded(index: number, multiplier: number, offset = 0) {
   const raw = Math.sin((index + 1) * multiplier + offset) * 10000
@@ -257,6 +351,7 @@ export default function ClassicNormalBuilder() {
   const navigate = useNavigate()
   const { loveData, setLoveData } = useAppContext()
   const [stepIndex, setStepIndex] = useState(0)
+  const [selectedGiftType, setSelectedGiftType] = useState<GiftTypePreset | null>(giftTypePresets.find((item) => item.featured) ?? giftTypePresets[0])
   const [photoKeys, setPhotoKeys] = useState<string[]>([])
   const addOnePhotoInputRef = useRef<HTMLInputElement | null>(null)
   const [memoryDate, setMemoryDate] = useState('')
@@ -267,6 +362,7 @@ export default function ClassicNormalBuilder() {
   const [memoryError, setMemoryError] = useState('')
 
   const clock = useMemo(() => buildClock(loveData.startDate, loveData.anos, loveData.meses, loveData.dias), [loveData.startDate, loveData.anos, loveData.meses, loveData.dias])
+  const giftReceiverLabel = useMemo(() => getGiftReceiverLabel(selectedGiftType?.id), [selectedGiftType?.id])
 
   const embedUrl = buildSpotifyTrackEmbedUrl(loveData.musicaSpotifyUrl)
 
@@ -459,9 +555,35 @@ export default function ClassicNormalBuilder() {
             <h1 className="mt-6 text-4xl font-black text-zinc-100">{steps[stepIndex].label}</h1>
           </div>
 
+          {current === 'recipient' && (
+            <div className="space-y-4">
+              <p className="text-zinc-300">Selecione para quem sera o presente.</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {giftTypePresets.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSelectedGiftType(item)}
+                    className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
+                      selectedGiftType?.id === item.id
+                        ? 'border-pink-400 bg-pink-500/15 text-pink-100'
+                        : 'border-zinc-700 bg-[#16161a] text-zinc-200'
+                    }`}
+                  >
+                    <GiftTypeIcon iconKey={item.iconKey} />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold leading-tight">{item.label}</span>
+                      <span className="mt-1 block text-xs text-zinc-400">{item.description}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {current === 'title' && (
             <div className="space-y-4">
-              <p className="text-zinc-300">Escreva o título dedicatório da sua página clássica.</p>
+              <p className="text-zinc-300">Escreva o titulo dedicatorio da sua pagina classica para {giftReceiverLabel}.</p>
               <input
                 value={loveData.classicTitle}
                 onChange={(event) => setLoveData({ classicTitle: event.target.value })}
@@ -473,7 +595,7 @@ export default function ClassicNormalBuilder() {
 
           {current === 'message' && (
             <div className="space-y-4">
-              <p className="text-zinc-300">Mensagem principal da página.</p>
+              <p className="text-zinc-300">Mensagem principal para {giftReceiverLabel}.</p>
               <textarea
                 value={loveData.classicMessage}
                 onChange={(event) => setLoveData({ classicMessage: event.target.value })}
