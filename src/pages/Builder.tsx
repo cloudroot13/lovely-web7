@@ -1,6 +1,8 @@
 import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../context/appStore'
+import { getCurrentUser, isAuthenticated } from '../utils/auth'
+import { hasActiveAccess } from '../utils/access'
 import ClassicNormalBuilder from './ClassicNormalBuilder'
 import ClassicNetflixBuilder from './ClassicNetflixBuilder'
 import type { LoveData, MomentHighlight } from '../types/types'
@@ -321,8 +323,9 @@ export default function Builder() {
     const nextStep = step + 1
     if (nextStep >= activeQuestions.length) {
       const finalDestination = isLovelyflixFlow ? '/lovelyflix-profile' : '/preview'
-      const isLoggedIn = typeof window !== 'undefined' && window.localStorage.getItem('lovely-auth') === '1'
-      const hasPaid = typeof window !== 'undefined' && window.localStorage.getItem('lovely-paid') === '1'
+      const user = getCurrentUser()
+      const isLoggedIn = isAuthenticated()
+      const hasPaid = Boolean(user && hasActiveAccess(user.id))
 
       if (!isLoggedIn) {
         navigate(`/login?returnTo=${encodeURIComponent(`/checkout?returnTo=${encodeURIComponent(finalDestination)}`)}`)

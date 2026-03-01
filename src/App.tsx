@@ -12,6 +12,7 @@ const Preview = lazy(() => import('./pages/Preview'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const Checkout = lazy(() => import('./pages/Checkout'))
+const UserArea = lazy(() => import('./pages/UserArea'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const WrappedLovelyflixDemo = lazy(() => import('./pages/WrappedLovelyflixDemo'))
 const FaqPage = lazy(() => import('./pages/FaqPage'))
@@ -137,6 +138,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/criar-conta" element={<Register />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/minha-conta" element={<UserArea />} />
         <Route path="/preview" element={<Preview />} />
         <Route path="/demo/wrapped-lovelyflix" element={<WrappedLovelyflixDemo />} />
         <Route path="/faq" element={<FaqPage />} />

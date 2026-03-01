@@ -19,6 +19,7 @@ import classicNormalVideo from '../assets/classico-normal/classico-normal.mp4'
 import classicLovelyflixVideo from '../assets/classico-lovelyflix/classico-lovelyflix.mp4'
 import lovelyflixDemoImage1 from '../assets/lovelyflix/demo1.jpeg'
 import lovelyflixDemoImage2 from '../assets/lovelyflix/demo2.jpeg'
+import { isAuthenticated } from '../utils/auth'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -33,6 +34,16 @@ export default function Home() {
     window.localStorage.setItem('lovely-home-theme', theme)
   }, [theme])
 
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark'
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('lovely-home-theme', next)
+      }
+      return next
+    })
+  }
+
   const [typedHighlight, setTypedHighlight] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [activeExperienceIdx, setActiveExperienceIdx] = useState(0)
@@ -44,10 +55,8 @@ export default function Home() {
   const [allowCommentMarquee, setAllowCommentMarquee] = useState(true)
   const [isFeaturesInView, setIsFeaturesInView] = useState(false)
   const [isDemoBannerInView, setIsDemoBannerInView] = useState(false)
-  const [isTestimonialsInView, setIsTestimonialsInView] = useState(false)
   const featuresSectionRef = useRef<HTMLElement | null>(null)
   const demoBannerSectionRef = useRef<HTMLElement | null>(null)
-  const testimonialsSectionRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -322,21 +331,19 @@ export default function Home() {
     const targets = [
       { element: featuresSectionRef.current, key: 'features' as const },
       { element: demoBannerSectionRef.current, key: 'demo' as const },
-      { element: testimonialsSectionRef.current, key: 'testimonials' as const },
-    ].filter((item): item is { element: HTMLElement; key: 'features' | 'demo' | 'testimonials' } => Boolean(item.element))
+    ].filter((item): item is { element: HTMLElement; key: 'features' | 'demo' } => Boolean(item.element))
 
     if (targets.length === 0) return
 
-    const markVisible = (key: 'features' | 'demo' | 'testimonials') => {
+    const markVisible = (key: 'features' | 'demo') => {
       if (key === 'features') setIsFeaturesInView(true)
       if (key === 'demo') setIsDemoBannerInView(true)
-      if (key === 'testimonials') setIsTestimonialsInView(true)
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const key = (entry.target as HTMLElement).dataset.observeKey as 'features' | 'demo' | 'testimonials'
+          const key = (entry.target as HTMLElement).dataset.observeKey as 'features' | 'demo'
           if (entry.isIntersecting || entry.intersectionRatio > 0) {
             markVisible(key)
           }
@@ -384,8 +391,11 @@ export default function Home() {
       <div className="fixed inset-x-0 top-3 z-[80] px-3 sm:px-6">
         <HomeHeader
           isDark={isDark}
-          onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+          onBrandClick={() => navigate('/login')}
+          onToggleTheme={toggleTheme}
           onLogin={() => navigate('/login')}
+          onAccount={() => navigate('/minha-conta')}
+          showAccount={isAuthenticated()}
           onCreate={() => navigate('/choose-mode')}
           onFaq={() => navigate('/faq')}
           onAbout={() => navigate('/sobre')}
@@ -836,7 +846,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={testimonialsSectionRef} className="relative mx-auto mt-4 w-full max-w-6xl pb-14 sm:mt-8">
+      <section className="relative mx-auto mt-4 w-full max-w-6xl pb-14 sm:mt-8">
         <div className="mx-auto max-w-4xl text-center">
           <p className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${isDark ? 'border-pink-500/35 bg-pink-500/10 text-pink-300' : 'border-pink-300 bg-pink-50 text-pink-700'}`}>
             Depoimentos
@@ -863,8 +873,8 @@ export default function Home() {
 
           <motion.div
             className="flex w-max gap-4"
-            animate={isTestimonialsInView && allowCommentMarquee ? { x: ['0%', '-50%'] } : { x: '0%' }}
-            transition={isTestimonialsInView && allowCommentMarquee ? { duration: 30, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
+            animate={allowCommentMarquee ? { x: ['0%', '-50%'] } : { x: '0%' }}
+            transition={allowCommentMarquee ? { duration: 30, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
           >
             {[...testimonialsRowA, ...testimonialsRowA].map((item, index) => (
               <article
@@ -886,8 +896,8 @@ export default function Home() {
 
           <motion.div
             className="flex w-max gap-4"
-            animate={isTestimonialsInView && allowCommentMarquee ? { x: ['-50%', '0%'] } : { x: '-10%' }}
-            transition={isTestimonialsInView && allowCommentMarquee ? { duration: 32, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
+            animate={allowCommentMarquee ? { x: ['-50%', '0%'] } : { x: '-10%' }}
+            transition={allowCommentMarquee ? { duration: 32, repeat: Infinity, ease: 'linear' } : { duration: 0.2 }}
           >
             {[...testimonialsRowB, ...testimonialsRowB].map((item, index) => (
               <article

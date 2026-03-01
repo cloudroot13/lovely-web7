@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/appStore'
 import NetflixBootIntro from '../../components/NetflixBootIntro'
+import { getCurrentUser, isAuthenticated } from '../../utils/auth'
+import { hasActiveAccess } from '../../utils/access'
 
 function getProfileName(nomePessoa: string) {
   return nomePessoa.trim() || 'Perfil Principal'
@@ -33,8 +35,9 @@ export default function LovelyflixProfileSelect() {
       return
     }
 
-    const isLoggedIn = typeof window !== 'undefined' && window.localStorage.getItem('lovely-auth') === '1'
-    const hasPaid = typeof window !== 'undefined' && window.localStorage.getItem('lovely-paid') === '1'
+    const user = getCurrentUser()
+    const isLoggedIn = isAuthenticated()
+    const hasPaid = Boolean(user && hasActiveAccess(user.id))
     if (!isLoggedIn || !hasPaid) {
       navigate(`/login?returnTo=${encodeURIComponent(`/checkout?returnTo=${encodeURIComponent('/lovelyflix-profile')}`)}`, { replace: true })
       return

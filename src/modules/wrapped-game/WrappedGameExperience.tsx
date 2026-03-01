@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/appStore'
 import { WRAPPED_STORY_DURATION_MS } from '../../constants/wrappedTiming'
+import { getCurrentUser, isAuthenticated } from '../../utils/auth'
+import { hasActiveAccess } from '../../utils/access'
 import './wrappedGame.css'
 
 type Step = 'intro' | 'stories'
@@ -178,8 +180,9 @@ export function WrappedGameExperience() {
   const stories: StoryId[] = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12']
   const currentStory = stories[storyIdx]
   const isBuilderPreview = new URLSearchParams(location.search).get('builderPreview') === '1'
-  const isLoggedIn = typeof window !== 'undefined' && window.localStorage.getItem('lovely-auth') === '1'
-  const hasPaid = typeof window !== 'undefined' && window.localStorage.getItem('lovely-paid') === '1'
+  const user = getCurrentUser()
+  const isLoggedIn = isAuthenticated()
+  const hasPaid = Boolean(user && hasActiveAccess(user.id))
   const isAccessLocked = isBuilderPreview || !isLoggedIn || !hasPaid
 
   useEffect(() => {

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 
 const INVIEW_CLASS = 'anim-inview'
 const PAUSABLE_CLASS = 'anim-pausable'
+const NO_PAUSE_ATTR = 'data-no-inview-pause'
 
 function canPauseAnimations() {
   if (typeof window === 'undefined') return false
@@ -28,6 +29,7 @@ export function useInViewAnimations() {
 
     const register = (el: Element) => {
       if (!(el instanceof HTMLElement)) return
+      if (el.closest(`[${NO_PAUSE_ATTR}="1"]`)) return
       if (el.classList.contains(PAUSABLE_CLASS)) return
       const styles = window.getComputedStyle(el)
       if (styles.animationName === 'none' || styles.animationDuration === '0s') return

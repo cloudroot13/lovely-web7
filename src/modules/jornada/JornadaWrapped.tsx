@@ -396,11 +396,17 @@ function StorySlide({
   }
 
   if (story.kind === 'snow') {
-    const snowParticles = Array.from({ length: 14 }).map((_, idx) => ({
-      angle: `${Math.round((idx / 14) * 360)}deg`,
-      radius: `${90 + (idx % 4) * 14}px`,
-      delay: `${(idx % 7) * 0.28}s`,
-      duration: `${(5.2 + (idx % 6) * 0.4).toFixed(2)}s`,
+    // helper matching the one defined in ClassicBackgroundLayer; we could
+    // import it if needed but a local copy avoids an extra dependency.
+    const rand = (min: number, max: number) => min + Math.random() * (max - min)
+
+    const snowParticles = Array.from({ length: 14 }).map(() => ({
+      angle: `${rand(0, 360).toFixed(0)}deg`,
+      // keep the four discrete radius steps from before but choose randomly
+      // between them rather than cycling deterministically.
+      radius: `${90 + Math.floor(rand(0, 4)) * 14}px`,
+      delay: `${rand(0, 1.68).toFixed(2)}s`,
+      duration: `${rand(5.2, 7.6).toFixed(2)}s`,
     }))
 
     return (
@@ -412,10 +418,13 @@ function StorySlide({
               key={`snow-field-${idx}`}
               className="const-star-wrap"
               style={{
-                '--angle': `${Math.round(randomFromSeed(idx + 31.8) * 360)}deg`,
-                '--radius': `${24 + Math.round(randomFromSeed(idx + 41.2) * 150)}px`,
-                '--delay': `${(randomFromSeed(idx + 52.1) * 3).toFixed(2)}s`,
-                '--duration': `${(2.3 + randomFromSeed(idx + 63.4) * 2.7).toFixed(2)}s`,
+                // we no longer need the deterministic seed here; true random
+                // makes the snow field feel livelier. ranges preserved from
+                // original implementation
+                '--angle': `${Math.round(Math.random() * 360)}deg`,
+                '--radius': `${24 + Math.round(Math.random() * 150)}px`,
+                '--delay': `${(Math.random() * 3).toFixed(2)}s`,
+                '--duration': `${(2.3 + Math.random() * 2.7).toFixed(2)}s`,
               } as CSSProperties}
             >
               <span className="winter-particle" />
@@ -475,7 +484,7 @@ function StorySlide({
 
     return (
       <div className="story-card relative h-full w-full rounded-[26px] bg-black">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0c] via-[#060608] to-black" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#0a0a0c] via-[#060608] to-black" />
         <div className="stars-canvas">
           {field.map((star, idx) => (
             <div
@@ -755,9 +764,9 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
           {!showStories && (
             <section className="relative flex-1 overflow-y-auto overscroll-contain px-4 pb-8 pt-8">
               <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 will-change-transform" aria-hidden />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-black/35 to-black/85" />
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/10 via-black/35 to-black/85" />
 
-              <div className="relative z-10 mx-auto max-w-[334px]">
+              <div className="relative z-10 mx-auto max-w-83.5">
                 <h1 className="journey-title-main text-center tracking-[0.06em]">Jornada</h1>
                 <p className="journey-small mt-2 text-center text-zinc-300">Nossa linha do tempo em forma de estrelas.</p>
 
@@ -767,10 +776,10 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
                   {memories.map((item, idx) => {
                     const card = (
                       <article
-                        className="journey-polaroid group relative rounded-[8px] border border-white/20 bg-[#f6f1df] p-3 text-black shadow-[0_12px_28px_rgba(0,0,0,0.38)] transition duration-300 ease-in-out will-change-transform hover:-translate-y-2.5 hover:scale-[1.03] hover:shadow-[0_0_24px_rgba(255,255,255,0.18)]"
+                        className="journey-polaroid group relative rounded-lg border border-white/20 bg-[#f6f1df] p-3 text-black shadow-[0_12px_28px_rgba(0,0,0,0.38)] transition duration-300 ease-in-out will-change-transform hover:-translate-y-2.5 hover:scale-[1.03] hover:shadow-[0_0_24px_rgba(255,255,255,0.18)]"
                         style={{ transform: `rotate(${item.rotation}deg)` }}
                       >
-                        <div className="journey-polaroid-photo overflow-hidden rounded-[6px] bg-zinc-200">
+                        <div className="journey-polaroid-photo overflow-hidden rounded-md bg-zinc-200">
                           {item.image ? (
                             <img src={item.image} alt={item.title} className="h-40 w-full object-cover" loading="lazy" />
                           ) : (
@@ -828,9 +837,9 @@ export function JornadaWrapped({ loveData }: JornadaWrappedProps) {
           {showStories && (
             <section className="relative flex h-full flex-col bg-black">
               <div className="pointer-events-none absolute inset-0 bg-black" />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/80" />
               <div className="relative z-10 flex-1 overflow-hidden px-2 pb-3 pt-2">
-                <div className="flex h-full transition-transform duration-[400ms] ease-in-out" style={{ transform: `translateX(-${storyIndex * 100}%)` }}>
+                <div className="flex h-full transition-transform duration-400 ease-in-out" style={{ transform: `translateX(-${storyIndex * 100}%)` }}>
                   {stories.map((slide) => (
                     <div key={slide.id} className="h-full min-w-full px-1">
                       <StorySlide story={slide} coupleName={coupleName} loveData={loveData} onAdvance={nextStory} isBuilderPreview={isBuilderPreview} />

@@ -7,6 +7,8 @@ import WrappedGameExperience from '../modules/wrapped-game/WrappedGameExperience
 import { LovelyfyWrapped } from '../modules/lovelyfy/LovelyfyWrapped'
 import LovelyflixExperience from '../modules/lovelyflix/LovelyflixExperience'
 import { useAppContext } from '../context/appStore'
+import { getCurrentUser, isAuthenticated } from '../utils/auth'
+import { hasActiveAccess } from '../utils/access'
 
 export default function Preview() {
   const { config, loveData } = useAppContext()
@@ -27,8 +29,9 @@ export default function Preview() {
       ? variantParam
       : config.variant
 
-  const isLoggedIn = typeof window !== 'undefined' && window.localStorage.getItem('lovely-auth') === '1'
-  const hasPaid = typeof window !== 'undefined' && window.localStorage.getItem('lovely-paid') === '1'
+  const user = getCurrentUser()
+  const isLoggedIn = isAuthenticated()
+  const hasPaid = Boolean(user && hasActiveAccess(user.id))
   const hasUnlockedPreview = isLoggedIn && hasPaid
   const shouldLockPreview = !showBuilderPreview && !hasUnlockedPreview
 

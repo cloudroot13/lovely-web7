@@ -121,9 +121,12 @@ function GiftTypeIcon({ iconKey }: { iconKey: GiftIconKey }) {
   )
 }
 
-function seeded(index: number, multiplier: number, offset = 0) {
-  const raw = Math.sin((index + 1) * multiplier + offset) * 10000
-  return raw - Math.floor(raw)
+function randomBetween(min: number, max: number) {
+  return min + Math.random() * (max - min)
+}
+
+function getMeteorRotation(startX: number, startY: number, endX: number, endY: number) {
+  return (Math.atan2(endY - startY, endX - startX) * 180) / Math.PI - 90
 }
 
 function buildClock(startDate: string, yearsFallback: number, monthsFallback: number, daysFallback: number) {
@@ -156,72 +159,127 @@ function buildClock(startDate: string, yearsFallback: number, monthsFallback: nu
 }
 
 function BackgroundLayer({ mode }: { mode: BackgroundMode }) {
+  const heartParticles = useMemo(
+    () =>
+      Array.from({ length: 80 }).map((_, idx) => ({
+        key: `heart-${idx}`,
+        delay: -randomBetween(0, 10),
+        duration: 10 + randomBetween(0, 10),
+        left: randomBetween(0, 100),
+        size: 20 + randomBetween(0, 40),
+        opacity: 0.3 + randomBetween(0, 0.7),
+      })),
+    [],
+  )
+
+  const starParticles = useMemo(
+    () =>
+      Array.from({ length: 240 }).map((_, idx) => ({
+        key: `star-${idx}`,
+        x: randomBetween(0, 100),
+        y: randomBetween(0, 100),
+        size: randomBetween(1, 4),
+        opacity: randomBetween(0.18, 0.9),
+        twinkleDuration: randomBetween(2, 6.2),
+        twinkleDelay: -randomBetween(0, 6),
+        shouldTwinkle: idx % 5 !== 0,
+      })),
+    [],
+  )
+
+  const meteorParticles = useMemo(
+    () =>
+      Array.from({ length: 8 }).map((_, idx) => {
+        const startX = randomBetween(-8, 122)
+        const startY = randomBetween(-34, 24)
+        const endX = startX - randomBetween(52, 146)
+        const endY = startY + randomBetween(72, 152)
+        const duration = randomBetween(4.2, 7.2)
+        return {
+          key: `meteor-${idx}`,
+          startX,
+          endX,
+          startY,
+          endY,
+          trail: randomBetween(64, 104),
+          angle: getMeteorRotation(startX, startY, endX, endY),
+          duration,
+          delay: -randomBetween(0, 24),
+        }
+      }),
+    [],
+  )
+
   if (mode === 'none') {
-    return <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#09090b] via-[#0a0a0d] to-[#060609]" />
+    return <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-[#09090b] via-[#0a0a0d] to-[#060609]" />
   }
 
   if (mode === 'hearts') {
     return (
-      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-gradient-to-b from-[#170d14] via-[#0f0d12] to-[#07070a]">
+      <div data-no-inview-pause="1" className="pointer-events-none absolute inset-0 overflow-hidden bg-linear-to-b from-[#170d14] via-[#0f0d12] to-[#07070a]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_18%,rgba(255,70,152,0.22),transparent_40%),radial-gradient(circle_at_75%_72%,rgba(255,70,152,0.16),transparent_44%)]" />
-        {Array.from({ length: 30 }).map((_, idx) => (
-          <span
-            key={idx}
-            className="absolute text-pink-300/70"
-            style={{
-              left: `${(idx * 7.4) % 100}%`,
-              bottom: '-12%',
-              fontSize: `${10 + (idx % 4) * 6}px`,
-              animation: `classicHeartRise ${4 + (idx % 5) * 0.6}s ease-in-out ${idx * 0.08}s infinite`,
-            }}
-          >
-            ❤
-          </span>
-        ))}
+        <div className="classic-hearts-animation-container">
+          {heartParticles.map((particle) => (
+            <div
+              key={particle.key}
+              className="classic-heart-particle"
+              style={{
+                left: `${particle.left}%`,
+                width: `${particle.size}px`,
+                height: `${particle.size}px`,
+                animationDuration: `${particle.duration}s`,
+                animationDelay: `${particle.delay}s`,
+                ['--heart-opacity' as string]: particle.opacity.toFixed(3),
+              }}
+            />
+          ))}
+        </div>
       </div>
     )
   }
 
   if (mode === 'clouds') {
     const cloudLayers = [
-      { key: 'back', className: 'classic-cloud-layer-back', count: 6, minTop: 12, maxTop: 42, minWidth: 190, maxWidth: 320, minOpacity: 0.24, maxOpacity: 0.4, minDuration: 82, maxDuration: 96 },
-      { key: 'mid', className: 'classic-cloud-layer-mid', count: 7, minTop: 26, maxTop: 68, minWidth: 150, maxWidth: 265, minOpacity: 0.32, maxOpacity: 0.5, minDuration: 56, maxDuration: 74 },
-      { key: 'front', className: 'classic-cloud-layer-front', count: 8, minTop: 44, maxTop: 88, minWidth: 120, maxWidth: 220, minOpacity: 0.4, maxOpacity: 0.58, minDuration: 34, maxDuration: 52 },
+      { key: 'back', className: 'classic-cloud-layer-back', count: 7, minTop: 10, maxTop: 42, minWidth: 190, maxWidth: 320, minOpacity: 0.24, maxOpacity: 0.4, minDuration: 74, maxDuration: 98 },
+      { key: 'mid', className: 'classic-cloud-layer-mid', count: 8, minTop: 22, maxTop: 68, minWidth: 150, maxWidth: 265, minOpacity: 0.32, maxOpacity: 0.52, minDuration: 56, maxDuration: 76 },
+      { key: 'front', className: 'classic-cloud-layer-front', count: 10, minTop: 40, maxTop: 90, minWidth: 120, maxWidth: 220, minOpacity: 0.42, maxOpacity: 0.62, minDuration: 44, maxDuration: 62 },
     ] as const
 
     return (
-      <div className="classic-cloud-scene pointer-events-none absolute inset-0">
-        {cloudLayers.map((layer, layerIdx) => (
+      <div data-no-inview-pause="1" className="classic-cloud-scene pointer-events-none absolute inset-0">
+        {cloudLayers.map((layer) => (
           <div key={layer.key} className={`classic-cloud-layer ${layer.className}`}>
-            {Array.from({ length: layer.count }).map((_, idx) => {
-              const seedIndex = layerIdx * 40 + idx
-              const top = layer.minTop + seeded(seedIndex, 7.1, 0.6) * (layer.maxTop - layer.minTop)
-              const width = layer.minWidth + seeded(seedIndex, 5.3, 1.3) * (layer.maxWidth - layer.minWidth)
-              const opacity = layer.minOpacity + seeded(seedIndex, 8.6, 0.3) * (layer.maxOpacity - layer.minOpacity)
-              const driftDuration = layer.minDuration + seeded(seedIndex, 6.7, 0.2) * (layer.maxDuration - layer.minDuration)
-              const bobDuration = 8 + seeded(seedIndex, 2.8, 1.2) * 7
-              const delay = -seeded(seedIndex, 4.4, 0.1) * driftDuration
+            {Array.from({ length: layer.count }).flatMap((_, idx) => {
+              const width = randomBetween(layer.minWidth, layer.maxWidth)
+              const opacity = randomBetween(layer.minOpacity, layer.maxOpacity)
+              const driftDuration = randomBetween(layer.minDuration, layer.maxDuration)
+              const bobDuration = randomBetween(13, 22)
+              const delayBase = -randomBetween(0, driftDuration * 2.2)
+              const top = randomBetween(layer.minTop, layer.maxTop)
 
-              return (
-                <div
-                  key={`${layer.key}-${idx}`}
-                  className="classic-cloud-item"
-                  style={{
-                    top: `${top}%`,
-                    width: `${width}px`,
-                    opacity,
-                    animationDuration: `${driftDuration}s`,
-                    animationDelay: `${delay}s`,
-                  }}
-                >
-                  <div className="classic-cloud-body" style={{ animation: `classic-cloud-float ${bobDuration}s ease-in-out ${delay * 0.4}s infinite` }}>
-                    <span className="classic-cloud-puff classic-cloud-puff-a" />
-                    <span className="classic-cloud-puff classic-cloud-puff-b" />
-                    <span className="classic-cloud-puff classic-cloud-puff-c" />
-                    <span className="classic-cloud-puff classic-cloud-puff-d" />
+              return [0, 1, 2].map((phase) => {
+                const phaseDelay = delayBase - phase * (driftDuration / 3)
+                return (
+                  <div
+                    key={`${layer.key}-${idx}-${phase}`}
+                    className="classic-cloud-item"
+                    style={{
+                      ['--cloud-width' as string]: `${width}px`,
+                      ['--cloud-opacity' as string]: opacity.toFixed(3),
+                      ['--cloud-top' as string]: `${top}%`,
+                      animationDuration: `${driftDuration}s`,
+                      animationDelay: `${phaseDelay}s`,
+                    }}
+                  >
+                    <div className="classic-cloud-body" style={{ animation: `classic-cloud-float ${bobDuration}s ease-in-out ${phaseDelay * 0.4}s infinite` }}>
+                      <span className="classic-cloud-puff classic-cloud-puff-a" />
+                      <span className="classic-cloud-puff classic-cloud-puff-b" />
+                      <span className="classic-cloud-puff classic-cloud-puff-c" />
+                      <span className="classic-cloud-puff classic-cloud-puff-d" />
+                    </div>
                   </div>
-                </div>
-              )
+                )
+              })
             })}
           </div>
         ))}
@@ -230,54 +288,39 @@ function BackgroundLayer({ mode }: { mode: BackgroundMode }) {
   }
 
   return (
-    <div className="classic-star-scene pointer-events-none absolute inset-0">
+    <div data-no-inview-pause="1" className="classic-star-scene pointer-events-none absolute inset-0">
       <div className="classic-star-haze" />
-      {Array.from({ length: 240 }).map((_, idx) => {
-        const x = seeded(idx, 37.91, 0.33) * 100
-        const y = seeded(idx, 19.73, 0.92) * 100
-        const size = 1 + Math.floor(seeded(idx, 12.77, 0.41) * 3)
-        const opacity = 0.18 + seeded(idx, 8.27, 0.14) * 0.72
-        const twinkleDuration = 2.2 + seeded(idx, 6.13, 0.25) * 3.8
-        const twinkleDelay = seeded(idx, 9.27, 0.73) * 3.2
-        const shouldTwinkle = idx % 3 !== 0
-
-        return (
-          <span
-            key={`star-${idx}`}
-            className={`classic-star-dot ${shouldTwinkle ? 'classic-star-dot-twinkle' : ''}`}
-            style={{
-              left: `${x}%`,
-              top: `${y}%`,
-              width: `${size}px`,
-              height: `${size}px`,
-              opacity,
-              animationDuration: shouldTwinkle ? `${twinkleDuration}s` : undefined,
-              animationDelay: shouldTwinkle ? `${twinkleDelay}s` : undefined,
-            }}
-          />
-        )
-      })}
-      {Array.from({ length: 10 }).map((_, idx) => {
-        const startX = -8 + seeded(idx, 3.83, 0.2) * 128
-        const endX = startX - (10 + seeded(idx, 4.61, 0.4) * 26)
-
-        return (
+      {starParticles.map((particle) => (
         <span
-          key={`meteor-${idx}`}
-          className="classic-star-meteor"
+          key={particle.key}
+          className={`classic-star-dot ${particle.shouldTwinkle ? 'classic-star-dot-twinkle' : ''}`}
           style={{
-            ['--start-x' as string]: `${startX}%`,
-            ['--start-y' as string]: `${-28 + seeded(idx, 5.27, 0.8) * 20}%`,
-            ['--end-x' as string]: `${endX}%`,
-            ['--end-y' as string]: `${102 + seeded(idx, 7.11, 0.3) * 24}%`,
-            ['--trail' as string]: `${84 + seeded(idx, 2.37, 0.7) * 48}px`,
-            ['--angle' as string]: `${108 + seeded(idx, 8.3, 0.2) * 12}deg`,
-            ['--duration' as string]: `${5.4 + seeded(idx, 2.17, 0.9) * 3.6}s`,
-            ['--delay' as string]: `${idx * 0.44 + seeded(idx, 1.71, 0.6) * 1.8}s`,
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            opacity: particle.opacity,
+            animationDuration: particle.shouldTwinkle ? `${particle.twinkleDuration}s` : undefined,
+            animationDelay: particle.shouldTwinkle ? `${particle.twinkleDelay}s` : undefined,
           }}
         />
-        )
-      })}
+      ))}
+      {meteorParticles.map((particle) => (
+        <span
+          key={particle.key}
+          className="classic-star-meteor"
+          style={{
+            ['--start-x' as string]: `${particle.startX}%`,
+            ['--start-y' as string]: `${particle.startY}%`,
+            ['--end-x' as string]: `${particle.endX}%`,
+            ['--end-y' as string]: `${particle.endY}%`,
+            ['--trail' as string]: `${particle.trail}px`,
+            ['--angle' as string]: `${particle.angle}deg`,
+            ['--duration' as string]: `${particle.duration}s`,
+            ['--delay' as string]: `${particle.delay}s`,
+          }}
+        />
+      ))}
     </div>
   )
 }
@@ -366,17 +409,89 @@ export default function ClassicNormalBuilder() {
 
   const embedUrl = buildSpotifyTrackEmbedUrl(loveData.musicaSpotifyUrl)
 
-  const next = () => {
-    if (steps[stepIndex].id === 'photos') {
+  const validateStep = (stepId: StepId) => {
+    if (stepId === 'recipient') {
+      if (!selectedGiftType) {
+        alert('Selecione para quem e o presente para continuar.')
+        return false
+      }
+      return true
+    }
+
+    if (stepId === 'title') {
+      if (!loveData.classicTitle.trim()) {
+        alert('Preencha o titulo da pagina para continuar.')
+        return false
+      }
+      return true
+    }
+
+    if (stepId === 'message') {
+      if (!loveData.classicMessage.trim()) {
+        alert('Preencha a mensagem principal para continuar.')
+        return false
+      }
+      return true
+    }
+
+    if (stepId === 'counter') {
+      if (!loveData.startDate) {
+        alert('Informe a data de inicio para continuar.')
+        return false
+      }
+      return true
+    }
+
+    if (stepId === 'photos') {
       if (!loveData.fotoCasalDataUrl) {
         alert('A foto principal e obrigatoria para continuar.')
-        return
+        return false
       }
       if (loveData.storiesImagesDataUrls.length === 0) {
         alert('Envie pelo menos 1 foto extra para continuar.')
-        return
+        return false
       }
+      return true
     }
+
+    if (stepId === 'music') {
+      if (!loveData.musicaSpotifyUrl.trim()) {
+        alert('Cole um link de musica do Spotify para continuar.')
+        return false
+      }
+      if (!embedUrl) {
+        alert('O link da musica esta invalido. Use um link de track do Spotify.')
+        return false
+      }
+      return true
+    }
+
+    if (stepId === 'memories') {
+      if (!loveData.classicMemoriesTitle.trim()) {
+        alert('Preencha o titulo das memorias para continuar.')
+        return false
+      }
+      if (loveData.momentHighlights.length === 0) {
+        alert('Adicione pelo menos 1 memoria para continuar.')
+        return false
+      }
+      return true
+    }
+
+    if (stepId === 'background') {
+      if (loveData.classicBackgroundAnimation === 'none') {
+        alert('Escolha uma animacao de fundo para continuar.')
+        return false
+      }
+      return true
+    }
+
+    return true
+  }
+
+  const next = () => {
+    const stepId = steps[stepIndex].id as StepId
+    if (!validateStep(stepId)) return
     if (stepIndex >= steps.length - 1) {
       navigate('/preview')
       return
@@ -543,12 +658,12 @@ export default function ClassicNormalBuilder() {
 
   return (
     <main className="min-h-dvh bg-[#050506] text-white">
-      <div className="mx-auto grid w-full max-w-[1320px] gap-8 px-4 py-6 lg:grid-cols-[1fr_430px] lg:px-8">
+      <div className="mx-auto grid w-full max-w-330 gap-8 px-4 py-6 lg:grid-cols-[1fr_430px] lg:px-8">
         <section className="rounded-3xl border border-pink-500/20 bg-[linear-gradient(180deg,rgba(13,13,15,0.96),rgba(7,7,9,0.96))] p-6 shadow-[0_0_30px_rgba(255,77,166,0.08)]">
           <div className="mb-8">
             <div className="flex items-center gap-3">
               <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#2b101d]">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#ff4f9a] to-[#ff7bb4] transition-all duration-300" style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }} />
+                <div className="h-full rounded-full bg-linear-to-r from-[#ff4f9a] to-[#ff7bb4] transition-all duration-300" style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }} />
               </div>
               <span className="text-sm text-zinc-300">{stepIndex + 1}/{steps.length}</span>
             </div>
@@ -846,10 +961,10 @@ export default function ClassicNormalBuilder() {
         </section>
 
         <aside className="sticky top-4 hidden lg:block">
-          <div className="mx-auto w-[392px] rounded-[44px] border border-zinc-700 bg-[#08080b] p-3 shadow-[0_0_50px_rgba(0,0,0,0.6)]">
-            <div className="relative h-[720px] overflow-hidden rounded-[34px] border border-zinc-800 bg-[#101014]">
+          <div className="mx-auto w-98 rounded-[44px] border border-zinc-700 bg-[#08080b] p-3 shadow-[0_0_50px_rgba(0,0,0,0.6)]">
+            <div className="relative h-180 overflow-hidden rounded-[34px] border border-zinc-800 bg-[#101014]">
               <BackgroundLayer mode={stepIndex >= 6 ? loveData.classicBackgroundAnimation : 'none'} />
-              <div className="absolute inset-0 z-[3] bg-gradient-to-b from-black/55 via-black/45 to-black/70" />
+              <div className="absolute inset-0 z-3 bg-linear-to-b from-black/55 via-black/45 to-black/70" />
 
               <div className="relative z-10 flex h-full flex-col px-5 py-8 text-center">
                 {showTitle && <h2 className="text-3xl font-black text-pink-400">{loveData.classicTitle}</h2>}
@@ -894,7 +1009,7 @@ export default function ClassicNormalBuilder() {
                 {showMemoriesButton && (
                   <button
                     type="button"
-                    className="mx-auto mt-5 rounded-full bg-gradient-to-r from-[#ff4e8d] to-[#ff6a5a] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(255,90,150,0.5)]"
+                    className="mx-auto mt-5 rounded-full bg-linear-to-r from-[#ff4e8d] to-[#ff6a5a] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(255,90,150,0.5)]"
                   >
                     ✨ Ver memórias
                   </button>

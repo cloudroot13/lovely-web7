@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom'
 import { StaticPageLayout } from '../components/StaticPageLayout'
 import { ThemedContentCard } from '../components/ThemedContentCard'
+import { PLANS } from '../constants/plans'
 
 export default function PricingPage() {
-  const plans = [
-    { name: 'Só Hoje (24h)', oldPrice: 'R$ 25,00', price: 'R$ 15,00', details: 'Acesso por 24h para surpreender em uma data especial.' },
-    { name: 'Plano Anual', oldPrice: 'R$ 45,00', price: 'R$ 20,00', details: 'Disponível por 12 meses com edições ilimitadas.' },
-    { name: 'Vitalício', oldPrice: 'R$ 67,00', price: 'R$ 27,00', details: 'Acesso para sempre ao presente digital criado.' },
-  ]
+  const oldPrices: Record<string, string> = {
+    '24h': 'R$ 25,00',
+    anual: 'R$ 45,00',
+    vitalicio: 'R$ 67,00',
+  }
 
   return (
     <StaticPageLayout
@@ -24,12 +25,12 @@ export default function PricingPage() {
         </ul>
       </ThemedContentCard>
       <div className="grid gap-4 sm:grid-cols-3">
-        {plans.map((plan) => (
-          <ThemedContentCard key={plan.name}>
+        {PLANS.map((plan) => (
+          <ThemedContentCard key={plan.id}>
             <h2 className="text-xl font-bold">{plan.name}</h2>
-            <p className="mt-2 text-sm text-zinc-400 line-through">{plan.oldPrice}</p>
-            <p className="text-3xl font-black">{plan.price}</p>
-            <p className="mt-2 text-zinc-300">{plan.details}</p>
+            <p className="mt-2 text-sm text-zinc-400 line-through">{oldPrices[plan.id]}</p>
+            <p className="text-3xl font-black">{plan.priceLabel}</p>
+            <p className="mt-2 text-zinc-300">{plan.description}</p>
           </ThemedContentCard>
         ))}
       </div>

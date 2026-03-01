@@ -1,25 +1,17 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { memo, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import type { LoveData } from '../types/types'
 import { buildSpotifyTrackEmbedUrl } from '../utils/spotify'
-import '../styles/classic-hearts-animation.css'
-import '../styles/classic-cloud-animation.css'
-import '../styles/classic-stars-meteors-animation.css'
 import '../styles/classic-gallery-animation.css'
+import { ClassicBackgroundLayer, type BackgroundMode } from './classic-background/ClassicBackgroundLayer'
 
 interface ClassicNormalProps {
   loveData: LoveData
 }
 
-type BackgroundMode = 'none' | 'hearts' | 'stars_meteors' | 'clouds'
 type PhotoMode = 'coverflow' | 'cube' | 'cards' | 'flip'
 const STORY_DURATION_MS = 9000
 const STORY_DURATION_SECONDS = Math.ceil(STORY_DURATION_MS / 1000)
-
-function seeded(index: number, multiplier: number, offset = 0) {
-  const raw = Math.sin((index + 1) * multiplier + offset) * 10000
-  return raw - Math.floor(raw)
-}
 
 function buildClock(data: LoveData) {
   if (data.startDate) {
@@ -50,128 +42,6 @@ function buildClock(data: LoveData) {
   }
 }
 
-const BackgroundLayer = memo(function BackgroundLayer({ mode }: { mode: BackgroundMode }) {
-  if (mode === 'none') {
-    return <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#09090b] via-[#0a0a0d] to-[#060609]" />
-  }
-
-  if (mode === 'hearts') {
-    return (
-      <div className="pointer-events-none absolute inset-0 overflow-hidden bg-gradient-to-b from-[#170d14] via-[#0f0d12] to-[#07070a]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_18%,rgba(255,70,152,0.22),transparent_40%),radial-gradient(circle_at_75%_72%,rgba(255,70,152,0.16),transparent_44%)]" />
-        {Array.from({ length: 30 }).map((_, idx) => (
-          <span
-            key={idx}
-            className="absolute text-pink-300/70"
-            style={{
-              left: `${(idx * 7.4) % 100}%`,
-              bottom: '-12%',
-              fontSize: `${10 + (idx % 4) * 6}px`,
-              animation: `classicHeartRise ${4 + (idx % 5) * 0.6}s ease-in-out ${idx * 0.08}s infinite`,
-            }}
-          >
-            ❤
-          </span>
-        ))}
-      </div>
-    )
-  }
-
-  if (mode === 'clouds') {
-    const cloudLayers = [
-      { key: 'back', className: 'classic-cloud-layer-back', count: 6, minTop: 12, maxTop: 42, minWidth: 190, maxWidth: 320, minOpacity: 0.24, maxOpacity: 0.4, minDuration: 82, maxDuration: 96 },
-      { key: 'mid', className: 'classic-cloud-layer-mid', count: 7, minTop: 26, maxTop: 68, minWidth: 150, maxWidth: 265, minOpacity: 0.32, maxOpacity: 0.5, minDuration: 56, maxDuration: 74 },
-      { key: 'front', className: 'classic-cloud-layer-front', count: 8, minTop: 44, maxTop: 88, minWidth: 120, maxWidth: 220, minOpacity: 0.4, maxOpacity: 0.58, minDuration: 34, maxDuration: 52 },
-    ] as const
-
-    return (
-      <div className="classic-cloud-scene pointer-events-none absolute inset-0">
-        {cloudLayers.map((layer, layerIdx) => (
-          <div key={layer.key} className={`classic-cloud-layer ${layer.className}`}>
-            {Array.from({ length: layer.count }).map((_, idx) => {
-              const seedIndex = layerIdx * 40 + idx
-              const top = layer.minTop + seeded(seedIndex, 7.1, 0.6) * (layer.maxTop - layer.minTop)
-              const width = layer.minWidth + seeded(seedIndex, 5.3, 1.3) * (layer.maxWidth - layer.minWidth)
-              const opacity = layer.minOpacity + seeded(seedIndex, 8.6, 0.3) * (layer.maxOpacity - layer.minOpacity)
-              const driftDuration = layer.minDuration + seeded(seedIndex, 6.7, 0.2) * (layer.maxDuration - layer.minDuration)
-              const bobDuration = 8 + seeded(seedIndex, 2.8, 1.2) * 7
-              const delay = -seeded(seedIndex, 4.4, 0.1) * driftDuration
-
-              return (
-                <div
-                  key={`${layer.key}-${idx}`}
-                  className="classic-cloud-item"
-                  style={{
-                    top: `${top}%`,
-                    width: `${width}px`,
-                    opacity,
-                    animationDuration: `${driftDuration}s`,
-                    animationDelay: `${delay}s`,
-                  }}
-                >
-                  <div className="classic-cloud-body" style={{ animation: `classic-cloud-float ${bobDuration}s ease-in-out ${delay * 0.4}s infinite` }}>
-                    <span className="classic-cloud-puff classic-cloud-puff-a" />
-                    <span className="classic-cloud-puff classic-cloud-puff-b" />
-                    <span className="classic-cloud-puff classic-cloud-puff-c" />
-                    <span className="classic-cloud-puff classic-cloud-puff-d" />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  return (
-    <div className="classic-star-scene pointer-events-none absolute inset-0">
-      <div className="classic-star-haze" />
-      {Array.from({ length: 240 }).map((_, idx) => {
-        const x = seeded(idx, 37.91, 0.33) * 100
-        const y = seeded(idx, 19.73, 0.92) * 100
-        const size = 1 + Math.floor(seeded(idx, 12.77, 0.41) * 3)
-        const opacity = 0.18 + seeded(idx, 8.27, 0.14) * 0.72
-        const twinkleDuration = 2.2 + seeded(idx, 6.13, 0.25) * 3.8
-        const twinkleDelay = seeded(idx, 9.27, 0.73) * 3.2
-        const shouldTwinkle = idx % 3 !== 0
-
-        return (
-          <span
-            key={`star-${idx}`}
-            className={`classic-star-dot ${shouldTwinkle ? 'classic-star-dot-twinkle' : ''}`}
-            style={{
-              left: `${x}%`,
-              top: `${y}%`,
-              width: `${size}px`,
-              height: `${size}px`,
-              opacity,
-              animationDuration: shouldTwinkle ? `${twinkleDuration}s` : undefined,
-              animationDelay: shouldTwinkle ? `${twinkleDelay}s` : undefined,
-            }}
-          />
-        )
-      })}
-
-      {Array.from({ length: 10 }).map((_, idx) => {
-        const startX = -8 + seeded(idx, 3.83, 0.2) * 128
-        const endX = startX - (10 + seeded(idx, 4.61, 0.4) * 26)
-        const style = {
-          ['--start-x' as string]: `${startX}%`,
-          ['--start-y' as string]: `${-28 + seeded(idx, 5.27, 0.8) * 20}%`,
-          ['--end-x' as string]: `${endX}%`,
-          ['--end-y' as string]: `${102 + seeded(idx, 7.11, 0.3) * 24}%`,
-          ['--trail' as string]: `${84 + seeded(idx, 2.37, 0.7) * 48}px`,
-          ['--angle' as string]: `${108 + seeded(idx, 8.3, 0.2) * 12}deg`,
-          ['--duration' as string]: `${5.4 + seeded(idx, 2.17, 0.9) * 3.6}s`,
-          ['--delay' as string]: `${idx * 0.44 + seeded(idx, 1.71, 0.6) * 1.8}s`,
-        } as CSSProperties
-
-        return <span key={`meteor-${idx}`} className="classic-star-meteor" style={style} />
-      })}
-    </div>
-  )
-})
 
 const InteractiveGallery = memo(function InteractiveGallery({ images, mode }: { images: string[]; mode: PhotoMode }) {
   const [active, setActive] = useState(0)
@@ -368,7 +238,7 @@ export function ClassicNormal({ loveData }: ClassicNormalProps) {
 
   return (
     <section className="relative min-h-screen overflow-hidden px-4 py-12 md:px-8">
-      <BackgroundLayer mode={backgroundMode} />
+      <ClassicBackgroundLayer mode={backgroundMode} />
       <div className="absolute inset-0 z-[3] bg-gradient-to-b from-black/55 via-black/45 to-black/70" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
